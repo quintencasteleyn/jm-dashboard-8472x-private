@@ -112,13 +112,11 @@ tbody tr:hover td{background:rgba(0,0,0,.012);}
 
 <!-- DAILY -->
 <div class="sec" id="s-day">
-  <div class="card g1"><div class="ct">Past 10 days — tickets by type (2026, stacked)</div><canvas id="c-d10" height="150"></canvas></div>
-  <div class="card g1"><div class="ct">Daily sales — ALL tickets <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-dall" height="130"></canvas></div>
-  <div class="g3">
-    <div class="card"><div class="ct">Daily — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dsat" height="190"></canvas></div>
-    <div class="card"><div class="ct">Daily — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dsun" height="190"></canvas></div>
-    <div class="card"><div class="ct">Daily — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dmon" height="190"></canvas></div>
-  </div>
+  <div class="card g1"><div class="ct">Past 10 days — tickets by type (2026, stacked)</div><canvas id="c-d10" height="90"></canvas></div>
+  <div class="card g1"><div class="ct">Daily sales — ALL tickets <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-dall" height="120"></canvas></div>
+  <div class="card g1"><div class="ct">Daily — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dsat" height="120"></canvas></div>
+  <div class="card g1"><div class="ct">Daily — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dsun" height="120"></canvas></div>
+  <div class="card g1"><div class="ct">Daily — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dmon" height="120"></canvas></div>
 </div>
 
 <!-- CUMULATIVE -->
@@ -324,10 +322,15 @@ function lDS(lbl,data,col,bg){return{label:lbl,data,borderColor:col,backgroundCo
 
 // ── FRESHNESS ─────────────────────────────────
 function setFresh(){
-  // FIX: use minDTF to find latest date, not string sort
   const minD=minDTF(D26);
-  const lat=D26.find(r=>r.dtf===minD)?.date||'?';
-  document.getElementById('fresh-bar').textContent=`2026 data: ${lat} (D-${minD}) · 2025: full season · ${D26.length}+${D25.length} records`;
+  const rawDate=D26.find(r=>r.dtf===minD)?.date||'?';
+  // Format robustly for both DD/MM/YYYY and ISO formats
+  let displayDate=rawDate;
+  if(rawDate.includes('-')&&rawDate.length>=10){
+    // ISO: 2026-04-03T... -> 03/04/26
+    displayDate=rawDate.substring(8,10)+'/'+rawDate.substring(5,7)+'/'+rawDate.substring(2,4);
+  }
+  document.getElementById('fresh-bar').textContent=`2026 data: ${displayDate} (D-${minD}) · 2025: full season · ${D26.length}+${D25.length} records`;
   document.getElementById('dtf-pill').textContent=`D-${minD} to 23 May`;
 }
 
@@ -514,16 +517,34 @@ function bRev(){
 // ── DAILY ────────────────────────────────────
 function bDay(){
   const dtfs=DTFS(185),lbl=dtfs.map(d=>'D-'+d);
-  const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10);
-  // Build DTF->date lookup from raw data for readable labels
+  // d10: 10 LOWEST DTFs = 10 most recent days. Display left=oldest, right=newest (today).
+  const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10).reverse();
+  // d10 is now [59,58,...,50] — left is 10 days ago, right is today ✓
+
+  // Build DTF->date lookup
   const dtfDateMap={};
   D26.forEach(r=>{if(!dtfDateMap[r.dtf])dtfDateMap[r.dtf]=r.date;});
-  // Format: "25/03 (D-59)" — DD/MM from DD/MM/YYYY + DTF
-  const l10=d10.map(d=>{
-    const raw=dtfDateMap[d]||'';
-    const ddmm=raw.length>=5?raw.substring(0,5):'';  // "25/03" from "25/03/2026"
-    return ddmm+' (D-'+d+')';
-  });
+
+  // Parse date string robustly — handles both:
+  //   DD/MM/YYYY (embedded CSV): "03/04/2026"
+  //   ISO (live Sheets):         "2026-04-03T22:00:00.000Z"
+  function fmtD10Label(raw, dtf){
+    if(!raw) return 'D-'+dtf;
+    let dd,mm,yy;
+    if(raw.includes('-') && raw.length>=10){
+      // ISO format: YYYY-MM-DD...
+      yy=raw.substring(2,4);   // "26"
+      mm=raw.substring(5,7);   // "04"
+      dd=raw.substring(8,10);  // "03"
+    } else {
+      // DD/MM/YYYY
+      dd=raw.substring(0,2);
+      mm=raw.substring(3,5);
+      yy=raw.substring(8,10);
+    }
+    return dd+'/'+mm+'/'+yy+' (D-'+dtf+')';
+  }
+  const l10=d10.map(d=>fmtD10Label(dtfDateMap[d],d));
   const tK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)'];
   const tL=['Saturday','Sunday','Monday','Combi'],tC=['#6b9ef5','#3db870','#e06b42','#f5c842'];
   // Totals on top of stacked bars
@@ -724,7 +745,7 @@ async function liveRefresh(){
       price:parseFloat(String(r['Total price']||r.price||0).replace(',','.'))||0,
       country:r['Country']||r.country||''
     })).filter(r=>r.tickets>0&&r.dtf>=0);
-    loadData(fresh,D25);buildAll();
+    loadData(fresh,D25);setFresh();buildAll();
     btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Live refresh';btn.disabled=false;},2500);
   }catch(e){
     alert('Live refresh failed: '+e.message+'\n\nIf you see "Failed to fetch", the Apps Script deployment needs to be updated — see the instructions in the README.');
