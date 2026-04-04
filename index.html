@@ -190,7 +190,10 @@ const CW={'Saturday':'Regular','Sunday':'Early Bird','Monday (Public holiday)':'
   'Saturday - CERA':'Cera - Regular','Sunday - CERA':'Cera - Early Bird',
   'Monday (Public holiday) - CERA':'Cera - Early Bird'};
 const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular','Kids','B2B'];
-const GUESTS={'Saturday':500,'Sunday':500,'Monday (Public holiday)':500}; // 2026 guests from JM Pricing col N rows 61-63
+let GUESTS={'Saturday':500,'Sunday':500,'Monday (Public holiday)':500}; // updated dynamically from API (JM Pricing col N rows 61-63)
+// Dynamic capacity & guest values — overwritten by live refresh from pricing sheet
+let DCAP={Saturday:4240,Sunday:4240,Monday:4240};
+let DGUESTS25={Saturday:407,Sunday:503,Monday:645};
 const NO_SHOW=0.06;
 const ATT25={'Saturday':2550,'Sunday':2510,'Monday (Public holiday)':2755};
 const F25={'Saturday':1272,'Sunday':1164,'Monday (Public holiday)':1270,
@@ -309,14 +312,20 @@ let CI={};
 function mk(id,type,labels,datasets,opts={}){
   const el=document.getElementById(id);if(!el)return;
   if(CI[id])CI[id].destroy();
-  CI[id]=new Chart(el,{type,data:{labels,datasets},options:{
-    animation:false,responsive:true,maintainAspectRatio:true,
-    plugins:{legend:{labels:{boxWidth:9,padding:8,font:{size:9}}},...(opts.plugins||{})},
-    scales:type==='doughnut'||type==='pie'?undefined:{
-      x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{maxTicksLimit:12,font:{size:9}},...(opts.xS||{})},
-      y:{grid:{color:'rgba(0,0,0,.04)'},beginAtZero:true,...(opts.yS||{})}
-    },...opts
-  }});
+  // extraPlugins are passed at chart level (not inside options) so they persist on redraw
+  const extraPlugins=opts.extraPlugins||[];
+  CI[id]=new Chart(el,{
+    type,data:{labels,datasets},
+    plugins:extraPlugins,
+    options:{
+      animation:false,responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{labels:{boxWidth:9,padding:8,font:{size:9}}},...(opts.plugins||{})},
+      scales:type==='doughnut'||type==='pie'?undefined:{
+        x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{maxTicksLimit:12,font:{size:9}},...(opts.xS||{})},
+        y:{grid:{color:'rgba(0,0,0,.04)'},beginAtZero:true,...(opts.yS||{})}
+      },...opts
+    }
+  });
 }
 function lDS(lbl,data,col,bg){return{label:lbl,data,borderColor:col,backgroundColor:bg,borderWidth:2,pointRadius:0,fill:true,tension:.25,spanGaps:false};}
 
@@ -422,10 +431,10 @@ function bAttTable(id, t25w){
   function dT26(k){return(T26[k]||{t:0}).t+(T26[k+' - CERA']||{t:0}).t+combiT;}
   function dT25(k){return(t25w[k]||0)+(t25w[k+' - CERA']||0);}
   // 2025 guests differ from 2026 — use pricing sheet values
-  // 2025 guests from JM Pricing sheet col G rows 61-63
-  const GUESTS25={Saturday:407,Sunday:503,'Monday (Public holiday)':645};
-  // Capacity per day from JM Pricing sheet H68-H70 (already includes combi contribution)
-  const DAY_CAP={Saturday:4240,Sunday:4240,'Monday (Public holiday)':4240};
+  // 2025 guests — updated dynamically from API (JM Pricing col G rows 61-63)
+  const GUESTS25={Saturday:DGUESTS25.Saturday||407,Sunday:DGUESTS25.Sunday||503,'Monday (Public holiday)':DGUESTS25.Monday||645};
+  // Capacity per day — updated dynamically from API (JM Pricing H68-H70)
+  const DAY_CAP={Saturday:DCAP.Saturday||4240,Sunday:DCAP.Sunday||4240,'Monday (Public holiday)':DCAP.Monday||4240};
   const th=`<thead><tr>
     <th>Day</th>
     <th class="t26">Tickets 2026 (D-${minD})</th>
@@ -598,6 +607,7 @@ function bDay(){
   // Totals on top of stacked bars
   const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0);
   // Use Chart.js afterDraw via a local registration
+  // Inline plugin — persists on tab switch (no register/unregister needed)
   const d10BarPlugin={id:'d10Totals',afterDraw(chart){
     const {ctx}=chart;ctx.save();
     ctx.font='bold 11px Sora,sans-serif';ctx.fillStyle='#1c1917';
@@ -606,9 +616,7 @@ function bDay(){
     lastMeta.data.forEach((bar,i)=>{if(d10totals[i])ctx.fillText(d10totals[i],bar.x,bar.y-4);});
     ctx.restore();
   }};
-  Chart.register(d10BarPlugin);
-  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),{scales:{x:{stacked:true},y:{stacked:true,grace:'15%'}},plugins:{legend:{position:'top'}}});
-  Chart.unregister(d10BarPlugin);
+  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),{scales:{x:{stacked:true},y:{stacked:true,grace:'15%'}},plugins:{legend:{position:'top'}},extraPlugins:[d10BarPlugin]});
   mk('c-dall','line',lbl,[lDS('2026',nE26(tA(DTF26,dtfs),dtfs),Y26,Y26b),lDS('2025',nE(tA(DTF25,dtfs)),Y25,Y25b)],{plugins:{legend:{position:'top'}}});
   [['dsat','Saturday'],['dsun','Sunday'],['dmon','Monday (Public holiday)']].forEach(([s,k])=>{
     mk('c-'+s,'line',lbl,[lDS('2026',nE26(dA(DTF26,k,dtfs),dtfs),Y26,Y26b),lDS('2025',nE(dA(DTF25,k,dtfs)),Y25,Y25b)],{plugins:{legend:{position:'top'}}});
@@ -727,13 +735,11 @@ function bWav(){
     });
     ctx.restore();
   }};
-  Chart.register(wbPctPlugin);
   mk('c-wb','bar',labels,[
     {label:'Past waves sold',   data:pastSolds, backgroundColor:'#86efac', stack:'s'},
     {label:'Current wave sold', data:curSolds,  backgroundColor:'#fed7aa', stack:'s'},
     {label:'Not yet sold',      data:unsolds,   backgroundColor:'#e2ddd8', stack:'s'}
-  ],{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}}}});
-  Chart.unregister(wbPctPlugin);
+  ],{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}}},extraPlugins:[wbPctPlugin]});
 
   // Capacity table
   const cth=`<thead><tr><th>Ticket type</th><th class="t26">Total sold</th><th>Capacity</th><th>Left</th><th>% filled</th></tr></thead>`;
@@ -814,6 +820,16 @@ async function liveRefresh(){
       price:parseFloat(String(r['Total price']||r.price||0).replace(',','.'))||0,
       country:r['Country']||r.country||''
     })).filter(r=>r.tickets>0&&r.dtf>=0);
+    // Update capacity + guests dynamically from JM Pricing sheet
+    if(j.capacity){
+      DCAP={Saturday:j.capacity.Saturday||4240,Sunday:j.capacity.Sunday||4240,Monday:j.capacity.Monday||4240};
+    }
+    if(j.guests25){
+      DGUESTS25={Saturday:j.guests25.Saturday||407,Sunday:j.guests25.Sunday||503,Monday:j.guests25.Monday||645};
+    }
+    if(j.guests26){
+      GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};
+    }
     loadData(fresh,D25);setFresh();buildAll();
     btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Live refresh';btn.disabled=false;},2500);
   }catch(e){
