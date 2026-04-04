@@ -190,7 +190,7 @@ const CW={'Saturday':'Regular','Sunday':'Early Bird','Monday (Public holiday)':'
   'Saturday - CERA':'Cera - Regular','Sunday - CERA':'Cera - Early Bird',
   'Monday (Public holiday) - CERA':'Cera - Early Bird'};
 const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular','Kids','B2B'];
-const GUESTS={'Saturday':502,'Sunday':433,'Monday (Public holiday)':500};
+const GUESTS={'Saturday':500,'Sunday':500,'Monday (Public holiday)':500}; // 2026 guests from JM Pricing col N rows 61-63
 const NO_SHOW=0.06;
 const ATT25={'Saturday':2550,'Sunday':2510,'Monday (Public holiday)':2755};
 const F25={'Saturday':1272,'Sunday':1164,'Monday (Public holiday)':1270,
@@ -417,12 +417,14 @@ function bAttTable(id, t25w){
   const days=[{k:'Saturday',l:'Saturday',c:'#6b9ef5'},{k:'Sunday',l:'Sunday',c:'#3db870'},{k:'Monday (Public holiday)',l:'Monday',c:'#e06b42'}];
   const minD=minDTF(D26);
   if(!t25w){t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});}
-  function dT26(k){return(T26[k]||{t:0}).t+(T26[k+' - CERA']||{t:0}).t;}
+  // Include combi tickets in each day's count (combi = attends all 3 days)
+  const combiT=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
+  function dT26(k){return(T26[k]||{t:0}).t+(T26[k+' - CERA']||{t:0}).t+combiT;}
   function dT25(k){return(t25w[k]||0)+(t25w[k+' - CERA']||0);}
   // 2025 guests differ from 2026 — use pricing sheet values
   // 2025 guests from JM Pricing sheet col G rows 61-63
   const GUESTS25={Saturday:407,Sunday:503,'Monday (Public holiday)':645};
-  // Total capacity per day from JM Pricing sheet M68-M70 ("Per day" column, incl. guests)
+  // Capacity per day from JM Pricing sheet H68-H70 (already includes combi contribution)
   const DAY_CAP={Saturday:4240,Sunday:4240,'Monday (Public holiday)':4240};
   const th=`<thead><tr>
     <th>Day</th>
