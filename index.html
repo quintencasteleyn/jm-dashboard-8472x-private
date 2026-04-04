@@ -419,15 +419,61 @@ function bAttTable(id, t25w){
   if(!t25w){t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});}
   function dT26(k){return(T26[k]||{t:0}).t+(T26[k+' - CERA']||{t:0}).t;}
   function dT25(k){return(t25w[k]||0)+(t25w[k+' - CERA']||0);}
-  const th=`<thead><tr><th>Day</th><th class="t26">Tickets 2026</th><th class="t25">2025 @same DTF</th><th>Δ</th><th>Guests*</th><th>Total</th><th>No-show*</th><th class="t26">2026 Att. est.</th><th class="t25">2025 Actual</th><th>2026/2025</th></tr></thead>`;
-  let tS=0,tG=0,tA26=0,tA25=0;
+  // 2025 guests differ from 2026 — use pricing sheet values
+  // 2025 guests from JM Pricing sheet col G rows 61-63
+  const GUESTS25={Saturday:407,Sunday:503,'Monday (Public holiday)':645};
+  // Total capacity per day from JM Pricing sheet M68-M70 ("Per day" column, incl. guests)
+  const DAY_CAP={Saturday:4240,Sunday:4240,'Monday (Public holiday)':4240};
+  const th=`<thead><tr>
+    <th>Day</th>
+    <th class="t26">Tickets 2026 (D-${minD})</th>
+    <th class="t25">2025 @same DTF</th>
+    <th>Δ</th>
+    <th>Guests 2026*</th>
+    <th>Guests 2025*</th>
+    <th>No-show*</th>
+    <th class="t26">Tickets incl. guests 2026 — D-${minD}</th>
+    <th class="t25">2025 Final</th>
+    <th>2026/2025</th>
+    <th>Day capacity</th>
+    <th class="t26">2026 vs capacity</th>
+  </tr></thead>`;
+  let tS=0,tG26=0,tG25=0,tA26=0,tA25=0,tCap=0;
   const body=days.map(d=>{
-    const s=dT26(d.k);const s25=dT25(d.k);const g=GUESTS[d.k]||0;
-    const tot=s+g;const att=Math.round(tot*(1-NO_SHOW));const a25=ATT25[d.k];
-    tS+=s;tG+=g;tA26+=att;tA25+=a25;
-    return `<tr><td><span class="dot" style="background:${d.c}"></span>${d.l}</td><td class="t26">${N(s)}</td><td class="t25">${N(s25)}</td><td class="${dCl(s,s25)}">${dStr(s,s25)}</td><td>${N(g)}</td><td>${N(tot)}</td><td>${NO_SHOW*100}%</td><td class="t26">${N(att)}</td><td class="t25">${N(a25)}</td><td class="${dCl(att,a25)}">${pO(att,a25)}</td></tr>`;
+    const s=dT26(d.k);const s25=dT25(d.k);
+    const g26=GUESTS[d.k]||0;const g25=GUESTS25[d.k]||0;
+    const cap=DAY_CAP[d.k]||0;
+    const tot26=s+g26;const att=Math.round(tot26*(1-NO_SHOW));
+    const a25=ATT25[d.k];
+    tS+=s;tG26+=g26;tG25+=g25;tA26+=att;tA25+=a25;tCap+=cap;
+    return `<tr>
+      <td><span class="dot" style="background:${d.c}"></span>${d.l}</td>
+      <td class="t26">${N(s)}</td>
+      <td class="t25">${N(s25)}</td>
+      <td class="${dCl(s,s25)}">${dStr(s,s25)}</td>
+      <td>${N(g26)}</td>
+      <td class="t25">${N(g25)}</td>
+      <td>${NO_SHOW*100}%</td>
+      <td class="t26">${N(att)}</td>
+      <td class="t25">${N(a25)}</td>
+      <td class="${dCl(att,a25)}">${pO(att,a25)}</td>
+      <td>${N(cap)}</td>
+      <td class="t26">${cap?pO(s,cap):'—'}</td>
+    </tr>`;
   }).join('');
-  document.getElementById(id).innerHTML=th+`<tbody>${body}<tr><td>Total</td><td class="t26">${N(tS)}</td><td class="t25">—</td><td>—</td><td>${N(tG)}</td><td>${N(tS+tG)}</td><td>${NO_SHOW*100}%</td><td class="t26">${N(tA26)}</td><td class="t25">${N(tA25)}</td><td class="${dCl(tA26,tA25)}">${pO(tA26,tA25)}</td></tr></tbody>`;
+  const totAtt26=Math.round((tS+tG26)*(1-NO_SHOW));
+  const totRow=`<tr>
+    <td>Total</td>
+    <td class="t26">${N(tS)}</td><td class="t25">—</td><td>—</td>
+    <td>${N(tG26)}</td><td class="t25">${N(tG25)}</td>
+    <td>${NO_SHOW*100}%</td>
+    <td class="t26">${N(totAtt26)}</td>
+    <td class="t25">${N(tA25)}</td>
+    <td class="${dCl(totAtt26,tA25)}">${pO(totAtt26,tA25)}</td>
+    <td>${N(tCap)}</td>
+    <td class="t26">${pO(tS,tCap)}</td>
+  </tr>`;
+  document.getElementById(id).innerHTML=th+`<tbody>${body}${totRow}</tbody>`;
 }
 
 // ── REVENUE (NET) ─────────────────────────────
@@ -660,11 +706,32 @@ function bWav(){
   // light green  = past waves sold
   // light orange = current wave sold
   // grey         = not yet sold (up to capacity)
+  // Stacked bar with permanent % labels per segment
+  const wbPctPlugin={id:'wbPcts',afterDraw(chart){
+    const {ctx,data}=chart;ctx.save();
+    ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    chart.data.datasets.forEach((ds,di)=>{
+      const meta=chart.getDatasetMeta(di);
+      meta.data.forEach((bar,i)=>{
+        const val=ds.data[i];
+        if(!val||val<1)return;
+        const cap=caps[i]||1;
+        const pct=Math.round(val/cap*100);
+        if(pct<3)return; // skip if too small to show
+        const y=bar.y+(bar.base-bar.y)/2;
+        ctx.fillStyle=di===2?'#9ca3af':'#374151';
+        ctx.fillText(pct+'%',bar.x,y);
+      });
+    });
+    ctx.restore();
+  }};
+  Chart.register(wbPctPlugin);
   mk('c-wb','bar',labels,[
     {label:'Past waves sold',   data:pastSolds, backgroundColor:'#86efac', stack:'s'},
     {label:'Current wave sold', data:curSolds,  backgroundColor:'#fed7aa', stack:'s'},
     {label:'Not yet sold',      data:unsolds,   backgroundColor:'#e2ddd8', stack:'s'}
   ],{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}}}});
+  Chart.unregister(wbPctPlugin);
 
   // Capacity table
   const cth=`<thead><tr><th>Ticket type</th><th class="t26">Total sold</th><th>Capacity</th><th>Left</th><th>% filled</th></tr></thead>`;
