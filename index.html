@@ -196,10 +196,11 @@ const CAP={'Saturday':2800,'Sunday':2550,'Monday (Public holiday)':2550,
   'Combi (Saturday, Sunday, Monday)':800,'Saturday - CERA':250,
   'Sunday - CERA':500,'Monday (Public holiday) - CERA':500};
 let WAVE_CFG={
-  'Saturday':{Presale:948,'Early Bird':1184,Regular:2811,'Final Wave':2524},
-  'Sunday':{Presale:259,'Early Bird':3061,Regular:2250,'Final Wave':2000},
-  'Monday (Public holiday)':{Presale:0,'Early Bird':758,Regular:863,'Final Wave':610},
-  'Combi (Saturday, Sunday, Monday)':{Presale:350,'Early Bird':1117,Regular:863,'Final Wave':610},
+  // Values from JM Pricing sheet col O (rows 4-28) — updated on live refresh
+  'Saturday':{Presale:242,'Early Bird':491,Regular:1150,'Final Wave':817},
+  'Sunday':{Presale:106,'Early Bird':744,Regular:900,'Final Wave':700},
+  'Monday (Public holiday)':{Presale:92,'Early Bird':758,Regular:900,'Final Wave':700},
+  'Combi (Saturday, Sunday, Monday)':{Presale:193,'Early Bird':247,Regular:150,'Final Wave':100},
   'Saturday - CERA':{'Cera - Regular':100},'Sunday - CERA':{'Cera - Early Bird':100},
   'Monday (Public holiday) - CERA':{'Cera - Early Bird':100}
 };
@@ -636,10 +637,10 @@ async function liveRefresh(){
     if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};}
     if(j.waveQuotas){
       const wq=j.waveQuotas;
-      if(wq.Saturday) WAVE_CFG['Saturday']={Presale:wq.Saturday.Presale||948,'Early Bird':wq.Saturday['Early Bird']||1184,Regular:wq.Saturday.Regular||2811,'Final Wave':wq.Saturday['Final Wave']||2524};
-      if(wq.Sunday)   WAVE_CFG['Sunday']={Presale:wq.Sunday.Presale||259,'Early Bird':wq.Sunday['Early Bird']||3061,Regular:wq.Sunday.Regular||2250,'Final Wave':wq.Sunday['Final Wave']||2000};
-      if(wq.Monday)   WAVE_CFG['Monday (Public holiday)']={Presale:wq.Monday.Presale||0,'Early Bird':wq.Monday['Early Bird']||758,Regular:wq.Monday.Regular||863,'Final Wave':wq.Monday['Final Wave']||610};
-      if(wq.Combi)    WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wq.Combi.Presale||350,'Early Bird':wq.Combi['Early Bird']||1117,Regular:wq.Combi.Regular||863,'Final Wave':wq.Combi['Final Wave']||610};
+      if(wq.Saturday) WAVE_CFG['Saturday']={Presale:wq.Saturday.Presale||242,'Early Bird':wq.Saturday['Early Bird']||491,Regular:wq.Saturday.Regular||1150,'Final Wave':wq.Saturday['Final Wave']||817};
+      if(wq.Sunday)   WAVE_CFG['Sunday']={Presale:wq.Sunday.Presale||106,'Early Bird':wq.Sunday['Early Bird']||744,Regular:wq.Sunday.Regular||900,'Final Wave':wq.Sunday['Final Wave']||700};
+      if(wq.Monday)   WAVE_CFG['Monday (Public holiday)']={Presale:wq.Monday.Presale||92,'Early Bird':wq.Monday['Early Bird']||758,Regular:wq.Monday.Regular||900,'Final Wave':wq.Monday['Final Wave']||700};
+      if(wq.Combi)    WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wq.Combi.Presale||193,'Early Bird':wq.Combi['Early Bird']||247,Regular:wq.Combi.Regular||150,'Final Wave':wq.Combi['Final Wave']||100};
     }
     loadData(fresh,D25);setFresh();buildAll();
     btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Refresh';btn.disabled=false;},2500);
