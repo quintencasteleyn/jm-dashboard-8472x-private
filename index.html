@@ -3,164 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jazz Middelheim 2026 — Ticket Dashboard</title>
+<title>Jazz Middelheim 2026 — Concise Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f7f7f5;--sf:#fff;--sf2:#f0efeb;--bd:#e2ddd8;--tx:#1c1917;--mu:#78716c;
+:root{
+  --bg:#f7f7f5;--sf:#fff;--sf2:#f0efeb;--bd:#e2ddd8;--tx:#1c1917;--mu:#78716c;
   --y26:#d97706;--y26b:rgba(217,119,6,.1);--y25:#2563eb;--y25b:rgba(37,99,235,.09);
-  --pos:#166534;--neg:#991b1b;--r:8px;}
+  --pos:#166534;--neg:#991b1b;--r:8px;
+  /* table section accent colors */
+  --c-tickets:rgba(37,99,235,.06);   --c-tickets-h:rgba(37,99,235,.13);
+  --c-cap:rgba(22,163,74,.06);       --c-cap-h:rgba(22,163,74,.13);
+  --c-wave:rgba(217,119,6,.06);      --c-wave-h:rgba(217,119,6,.13);
+  --c-att:rgba(124,58,237,.06);      --c-att-h:rgba(124,58,237,.13);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--tx);font-family:'Sora',sans-serif;font-size:13px;line-height:1.5;}
+/* HEADER */
 .hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:11px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 1px 3px rgba(0,0,0,.05);}
 .hdr-l{display:flex;align-items:center;gap:10px;}
 .logo{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;font-family:'JetBrains Mono',monospace;}
 .hdr h1{font-size:14px;font-weight:600;}
 .hdr-sub{font-size:10px;color:var(--mu);font-family:'JetBrains Mono',monospace;margin-top:1px;}
-.hdr-r{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.hdr-r{display:flex;align-items:center;gap:7px;}
 .pill{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--sf2);color:var(--mu);}
 .pill.p26{background:rgba(217,119,6,.1);border-color:rgba(217,119,6,.3);color:var(--y26);}
 .pill.p25{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.3);color:var(--y25);}
 .rbtn{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 11px;border-radius:5px;background:var(--y26);color:#fff;border:none;cursor:pointer;}
 .rbtn:hover{opacity:.85;}
-.nav{background:var(--sf);border-bottom:1px solid var(--bd);display:flex;padding:0 22px;overflow-x:auto;}
+/* NAV */
+.nav{background:var(--sf);border-bottom:1px solid var(--bd);display:flex;padding:0 22px;}
 .nt{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:10px 13px;cursor:pointer;color:var(--mu);border-bottom:2px solid transparent;border:none;background:none;white-space:nowrap;}
 .nt:hover{color:var(--tx);}.nt.on{color:var(--y26);border-bottom:2px solid var(--y26);font-weight:600;}
-.main{padding:18px 22px;max-width:1800px;}
+/* LAYOUT */
+.main{padding:18px 22px;max-width:1600px;}
 .sec{display:none;}.sec.on{display:block;}
-.krow{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;flex:1;min-width:130px;position:relative;overflow:hidden;}
+/* KPI STRIP */
+.krow{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:12px 15px;flex:1;min-width:140px;position:relative;overflow:hidden;}
 .kpi:after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--kc,var(--y26));}
 .klbl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
-.kval{font-size:20px;font-weight:700;line-height:1.1;}
-.ksub{font-size:10px;color:var(--mu);margin-top:2px;font-family:'JetBrains Mono',monospace;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
-.g1{margin-bottom:14px;}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;}
-.ct{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:9px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.kval{font-size:21px;font-weight:700;line-height:1.1;}
+.ksub{font-size:10px;color:var(--mu);margin-top:3px;font-family:'JetBrains Mono',monospace;}
+.kdelta{font-size:11px;margin-top:4px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.pos{color:var(--pos);}.neg{color:var(--neg);}
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:16px;}
+.g1{margin-bottom:16px;}
+/* CARD */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:15px;}
+.ct{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .yl{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--mu);}
 .yl-l{width:16px;height:2px;border-radius:1px;display:inline-block;}
-.tw{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
-.th{padding:9px 13px;border-bottom:1px solid var(--bd);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);}
+/* MASTER TABLE */
+.tw{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:16px;}
+.th{padding:10px 14px;border-bottom:1px solid var(--bd);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);}
 table{width:100%;border-collapse:collapse;}
 thead th{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--mu);padding:7px 10px;text-align:right;background:var(--sf2);border-bottom:1px solid var(--bd);white-space:nowrap;}
 thead th:first-child{text-align:left;}
-tbody td{padding:7px 10px;text-align:right;border-bottom:1px solid rgba(226,221,216,.7);font-family:'JetBrains Mono',monospace;font-size:11px;}
+/* section header rows */
+.sec-row td{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:5px 10px;border-bottom:1px solid var(--bd);}
+/* data rows */
+tbody td{padding:7px 10px;text-align:right;border-bottom:1px solid rgba(226,221,216,.6);font-family:'JetBrains Mono',monospace;font-size:11px;}
 tbody td:first-child{text-align:left;font-family:'Sora',sans-serif;font-weight:500;font-size:12px;}
-tbody tr:last-child td{border-bottom:none;background:rgba(217,119,6,.04);font-weight:600;}
-tbody tr:hover td{background:rgba(0,0,0,.012);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{filter:brightness(.97);}
+/* colour blocks */
+.blk-tickets td{background:var(--c-tickets);}
+.blk-tickets-h td{background:var(--c-tickets-h)!important;}
+.blk-cap td{background:var(--c-cap);}
+.blk-cap-h td{background:var(--c-cap-h)!important;}
+.blk-wave td{background:var(--c-wave);}
+.blk-wave-h td{background:var(--c-wave-h)!important;}
+.blk-att td{background:var(--c-att);}
+.blk-att-h td{background:var(--c-att-h)!important;}
+/* totals row */
+.tot-row td{font-weight:700;background:rgba(217,119,6,.06)!important;border-top:2px solid var(--bd);}
+/* misc */
 .bw{display:inline-flex;align-items:center;gap:4px;}
-.bbg{width:42px;height:3px;background:var(--bd);border-radius:2px;display:inline-block;vertical-align:middle;overflow:hidden;}
+.bbg{width:44px;height:3px;background:var(--bd);border-radius:2px;display:inline-block;vertical-align:middle;overflow:hidden;}
 .bf{height:100%;border-radius:2px;display:block;}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;}
 .badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px;border:1px solid;}
 .t26{color:var(--y26);font-weight:600;}.t25{color:var(--y25);}
-.pos{color:var(--pos);}.neg{color:var(--neg);}
 .note{font-size:10px;color:var(--mu);padding:6px 13px;font-style:italic;border-top:1px solid var(--bd);}
+/* section legend pills */
+.leg{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.leg-item{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);}
+.leg-sq{width:10px;height:10px;border-radius:2px;}
 @media(max-width:900px){.g2,.g3{grid-template-columns:1fr;}.kpi{min-width:44%;}}
 </style>
 </head>
 <body>
+
 <div class="hdr">
   <div class="hdr-l">
     <div class="logo">JM</div>
-    <div><h1>Jazz Middelheim 2026 — Ticket Dashboard</h1><div class="hdr-sub" id="fresh-bar">Loading…</div></div>
+    <div>
+      <h1>Jazz Middelheim 2026 — Concise Dashboard</h1>
+      <div class="hdr-sub" id="fresh-bar">Loading…</div>
+    </div>
   </div>
   <div class="hdr-r">
-    <span class="pill p26">■ 2026 = Amber</span><span class="pill p25">■ 2025 = Blue</span>
+    <span class="pill p26">■ 2026</span>
+    <span class="pill p25">■ 2025</span>
     <span class="pill" id="dtf-pill">D-?</span>
-    <button class="rbtn" onclick="liveRefresh()">↻ Live refresh</button>
+    <button class="rbtn" onclick="liveRefresh()">↻ Refresh</button>
   </div>
 </div>
+
 <div class="nav">
   <button class="nt on" onclick="ST('ov',this)">Overview</button>
-  <button class="nt" onclick="ST('rev',this)">Revenue</button>
-  <button class="nt" onclick="ST('day',this)">Daily Sales</button>
-  <button class="nt" onclick="ST('cum',this)">Cumulative</button>
-  <button class="nt" onclick="ST('wav',this)">Waves &amp; Capacity</button>
-  <button class="nt" onclick="ST('att',this)">Attendance</button>
-  <button class="nt" onclick="ST('brk',this)">Breakdown</button>
+  <button class="nt"    onclick="ST('trends',this)">Sales Trends</button>
+  <button class="nt"    onclick="ST('rev',this)">Revenue</button>
+  <button class="nt"    onclick="ST('wav',this)">Waves & Capacity</button>
 </div>
+
 <div class="main">
 
-<!-- OVERVIEW -->
+<!-- ══ OVERVIEW ══ -->
 <div class="sec on" id="s-ov">
   <div class="krow" id="krow-ov"></div>
-  <div class="tw"><div class="th">Status per ticket type — 2026 vs 2025 same period, capacity &amp; wave progress</div><table id="tbl-status"></table></div>
-  <div class="tw"><div class="th">Attendance projection (sales + guests × no-show rate)</div><table id="tbl-att-ov"></table><div class="note">* Guests from pricing sheet: Sat 502, Sun 433, Mon 500. No-show: 6%.</div></div>
+
+  <!-- Legend -->
+  <div class="leg">
+    <span class="leg-item"><span class="leg-sq" style="background:var(--c-tickets-h)"></span>Ticket Sales</span>
+    <span class="leg-item"><span class="leg-sq" style="background:var(--c-cap-h)"></span>Capacity</span>
+    <span class="leg-item"><span class="leg-sq" style="background:var(--c-wave-h)"></span>Wave Progress</span>
+    <span class="leg-item"><span class="leg-sq" style="background:var(--c-att-h)"></span>Attendance</span>
+  </div>
+
+  <div class="tw">
+    <div class="th">Status at a glance — all ticket types vs 2025, capacity &amp; attendance</div>
+    <table id="tbl-master"></table>
+    <div class="note">* Capacity from JM Pricing H68–H70. Guests 2026: 500/500/500 (N61–N63). Guests 2025: 407/503/645 (G61–G63). No-show: 6%.</div>
+  </div>
+
   <div class="g2">
-    <div class="card"><div class="ct">Tickets by type — 2026 YTD (% of total)</div><canvas id="c-pie" height="200"></canvas></div>
-    <div class="card"><div class="ct">CERA SHOP vs General — % per day (2026)</div><table id="tbl-cera-pct" style="margin-top:4px"></table></div>
+    <div class="card"><div class="ct">Past 10 days — tickets by type (2026)</div><canvas id="c-d10" height="170"></canvas></div>
+    <div class="card"><div class="ct">Tickets by type — 2026 YTD</div><canvas id="c-pie" height="170"></canvas></div>
+  </div>
+  <div class="tw">
+    <div class="th">Past 10 days — tickets by type (detail)</div>
+    <table id="tbl-d10"></table>
   </div>
 </div>
 
-<!-- REVENUE -->
+<!-- ══ SALES TRENDS ══ -->
+<div class="sec" id="s-trends">
+  <div class="card g1"><div class="ct">Cumulative tickets — ALL days (incl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-cum-all" height="140"></canvas></div>
+  <div class="g3">
+    <div class="card"><div class="ct">Cumul. tickets — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sat" height="170"></canvas></div>
+    <div class="card"><div class="ct">Cumul. tickets — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sun" height="170"></canvas></div>
+    <div class="card"><div class="ct">Cumul. tickets — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-mon" height="170"></canvas></div>
+  </div>
+  <div class="card g1"><div class="ct">Tickets by country — top 10 (2026, % of total)</div><canvas id="c-country" height="120"></canvas></div>
+</div>
+
+<!-- ══ REVENUE ══ -->
 <div class="sec" id="s-rev">
   <div class="krow" id="krow-rev"></div>
   <div class="g2">
-    <div class="card"><div class="ct">Gross cumulative revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rcum-all" height="210"></canvas></div>
-    <div class="card"><div class="ct">NET cumulative revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-nrcum-all" height="210"></canvas></div>
+    <div class="card"><div class="ct">Cumul. net revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-all" height="200"></canvas></div>
+    <div class="card"><div class="ct">Daily revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-day" height="200"></canvas></div>
   </div>
-  <div class="g3">
-    <div class="card"><div class="ct">Net cumul. revenue — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-nrcum-sat" height="190"></canvas></div>
-    <div class="card"><div class="ct">Net cumul. revenue — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-nrcum-sun" height="190"></canvas></div>
-    <div class="card"><div class="ct">Net cumul. revenue — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-nrcum-mon" height="190"></canvas></div>
-  </div>
-  <div class="tw"><div class="th">Net revenue by ticket type — 2026 vs 2025 (gross → fees → VAT → net)</div><table id="tbl-rev"></table><div class="note">2026 fees: 2% of gross. 2025 fees: 2% of gross + €0.45/ticket. VAT: 6% of gross (both years).</div></div>
+  <div class="tw"><div class="th">Net revenue breakdown — 2026 vs 2025 (gross → fees → VAT → net)</div><table id="tbl-rev"></table><div class="note">2026: 2% fee. 2025: 2% + €0.45/ticket. VAT 6% on gross both years.</div></div>
 </div>
 
-<!-- DAILY -->
-<div class="sec" id="s-day">
-  <div class="card g1"><div class="ct">Past 10 days — tickets by type (2026, stacked)</div><canvas id="c-d10" height="90"></canvas></div>
-  <div class="card g1"><div class="ct">Daily sales — ALL tickets <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-dall" height="120"></canvas></div>
-  <div class="card g1"><div class="ct">Daily — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dsat" height="120"></canvas></div>
-  <div class="card g1"><div class="ct">Daily — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dsun" height="120"></canvas></div>
-  <div class="card g1"><div class="ct">Daily — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-dmon" height="120"></canvas></div>
-</div>
-
-<!-- CUMULATIVE -->
-<div class="sec" id="s-cum">
-  <div class="g2">
-    <div class="card"><div class="ct">Cumul. tickets — ALL <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-ct-all" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. NET revenue — ALL <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cr-all" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. tickets — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-ct-sat" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. NET revenue — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cr-sat" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. tickets — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-ct-sun" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. NET revenue — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cr-sun" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. tickets — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-ct-mon" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. NET revenue — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cr-mon" height="200"></canvas></div>
-  </div>
-</div>
-
-<!-- WAVES -->
+<!-- ══ WAVES & CAPACITY ══ -->
 <div class="sec" id="s-wav">
-  <div class="tw"><div class="th">Wave status — sold in current wave vs quota, total capacity (2026)</div><table id="tbl-wav"></table></div>
+  <div class="tw"><div class="th">Wave status — sold vs quota &amp; total capacity</div><table id="tbl-wav"></table></div>
   <div class="g2">
-    <div class="card"><div class="ct">% of total capacity sold (2026)</div><canvas id="c-wf" height="220"></canvas></div>
-    <div class="card"><div class="ct">Sales vs total capacity — <span style="color:#86efac">■ past waves</span> <span style="color:#fbb26a">■ current wave</span> <span style="color:#bfb8b0">■ unsold</span></div><canvas id="c-wb" height="220"></canvas></div>
-  </div>
-  <div class="tw"><div class="th">Total capacity — all ticket types</div><table id="tbl-cap"></table></div>
-</div>
-
-<!-- ATTENDANCE -->
-<div class="sec" id="s-att">
-  <div class="g2">
-    <div class="card"><div class="ct">Tickets by country — top 10 (2026, % of total)</div><canvas id="c-ctr" height="240"></canvas></div>
-    <div class="card"><div class="ct">Tickets by point of sale (2026)</div><canvas id="c-pos" height="240"></canvas></div>
-  </div>
-</div>
-
-<!-- BREAKDOWN -->
-<div class="sec" id="s-brk">
-  <div class="g3">
-    <div class="card"><div class="ct">Saturday — by wave (2026, %)</div><canvas id="c-bsat" height="210"></canvas></div>
-    <div class="card"><div class="ct">Sunday — by wave (2026, %)</div><canvas id="c-bsun" height="210"></canvas></div>
-    <div class="card"><div class="ct">Monday — by wave (2026, %)</div><canvas id="c-bmon" height="210"></canvas></div>
-  </div>
-  <div class="g2">
-    <div class="card"><div class="ct">Wave split — Presale→ EB→ Regular→ Final Wave (%, 2026 vs 2025)</div><canvas id="c-wsplit" height="210"></canvas></div>
-    <div class="card"><div class="ct">Ticket type — 2026 now vs 2025 same period</div><canvas id="c-tcomp" height="210"></canvas></div>
+    <div class="card"><div class="ct">Sales vs total capacity — <span style="color:#86efac;font-weight:700">■</span> past waves &nbsp;<span style="color:#fed7aa;font-weight:700">■</span> current wave &nbsp;<span style="color:#bfb8b0;font-weight:700">■</span> unsold</div><canvas id="c-wb" height="230"></canvas></div>
+    <div class="card"><div class="ct">% of total capacity sold per ticket type</div><canvas id="c-wf" height="230"></canvas></div>
   </div>
 </div>
 
@@ -172,322 +188,301 @@ const E25=[{"date": "06/06/2025", "dtf": 0, "pos": "TicketSwap", "title": "Satur
 const API='https://script.google.com/macros/s/AKfycby_-Y5w3AC6sV-nPRsOmNgZ-rTQk8RBKlexG5iWnVa6ZjKVu0cUuNPEYyYRP5VXcI6WZA/exec';
 
 // ── CONFIG ──────────────────────────────────
+let DCAP={Saturday:4240,Sunday:4240,Monday:4240};
+let DGUESTS25={Saturday:407,Sunday:503,Monday:645};
+let GUESTS={'Saturday':500,'Sunday':500,'Monday (Public holiday)':500};
+
 const CAP={'Saturday':2800,'Sunday':2550,'Monday (Public holiday)':2550,
   'Combi (Saturday, Sunday, Monday)':800,'Saturday - CERA':250,
   'Sunday - CERA':500,'Monday (Public holiday) - CERA':500};
-const WAVE_CFG={
+let WAVE_CFG={
   'Saturday':{Presale:948,'Early Bird':1184,Regular:2811,'Final Wave':2524},
   'Sunday':{Presale:259,'Early Bird':3061,Regular:2250,'Final Wave':2000},
   'Monday (Public holiday)':{Presale:0,'Early Bird':758,Regular:863,'Final Wave':610},
   'Combi (Saturday, Sunday, Monday)':{Presale:350,'Early Bird':1117,Regular:863,'Final Wave':610},
-  'Saturday - CERA':{'Cera - Regular':100},
-  'Sunday - CERA':{'Cera - Early Bird':100},
+  'Saturday - CERA':{'Cera - Regular':100},'Sunday - CERA':{'Cera - Early Bird':100},
   'Monday (Public holiday) - CERA':{'Cera - Early Bird':100}
 };
-// Current wave per type — wave name matches ACTUAL subtitle string in data
 const CW={'Saturday':'Regular','Sunday':'Early Bird','Monday (Public holiday)':'Early Bird',
-  'Combi (Saturday, Sunday, Monday)':'Regular',
-  'Saturday - CERA':'Cera - Regular','Sunday - CERA':'Cera - Early Bird',
-  'Monday (Public holiday) - CERA':'Cera - Early Bird'};
-const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular','Kids','B2B'];
-let GUESTS={'Saturday':500,'Sunday':500,'Monday (Public holiday)':500}; // updated dynamically from API (JM Pricing col N rows 61-63)
-// Dynamic capacity & guest values — overwritten by live refresh from pricing sheet
-let DCAP={Saturday:4240,Sunday:4240,Monday:4240};
-let DGUESTS25={Saturday:407,Sunday:503,Monday:645};
+  'Combi (Saturday, Sunday, Monday)':'Regular','Saturday - CERA':'Cera - Regular',
+  'Sunday - CERA':'Cera - Early Bird','Monday (Public holiday) - CERA':'Cera - Early Bird'};
+const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular'];
 const NO_SHOW=0.06;
 const ATT25={'Saturday':2550,'Sunday':2510,'Monday (Public holiday)':2755};
 const F25={'Saturday':1272,'Sunday':1164,'Monday (Public holiday)':1270,
-  'Combi (Friday, Saturday, Sunday, Monday)':440,'Friday':476,
-  'Saturday - CERA':356,'Sunday - CERA':253,'Monday (Public holiday) - CERA':200,'Friday - CERA':79};
-// Fee structure: FEE26 = 2% gross, FEE25 = 2% gross + 0.45/ticket, VAT = 6% gross both years
-function netRev(gross, tickets, year){
-  const fee = gross*0.02 + (year===2025 ? tickets*0.45 : 0);
-  const vat = gross*0.06;
-  return gross - fee - vat;
-}
-function feeAmt(gross, tickets, year){ return gross*0.02 + (year===2025 ? tickets*0.45 : 0); }
-function vatAmt(gross){ return gross*0.06; }
+  'Combi (Friday, Saturday, Sunday, Monday)':440,'Saturday - CERA':356,
+  'Sunday - CERA':253,'Monday (Public holiday) - CERA':200};
 
 const Y26='#d97706',Y25='#2563eb',Y26b='rgba(217,119,6,.1)',Y25b='rgba(37,99,235,.09)';
 const DC={'Saturday':'#6b9ef5','Sunday':'#3db870','Monday (Public holiday)':'#e06b42',
-  'Combi (Saturday, Sunday, Monday)':'#f5c842','Combi (Friday, Saturday, Sunday, Monday)':'#f5c842',
-  'Friday':'#64748b','Saturday - CERA':'#93c5fd','Sunday - CERA':'#86efac',
-  'Monday (Public holiday) - CERA':'#fbb26a'};
-const SC={Presale:'#0891b2','Early Bird':'#2563eb',Regular:'#3db870','Final Wave':'#dc2626',
-  Kids:'#f59e0b','Cera - Early Bird':'#be185d','Cera - Regular':'#9d174d',B2B:'#92400e'};
+  'Combi (Saturday, Sunday, Monday)':'#f5c842','Saturday - CERA':'#93c5fd',
+  'Sunday - CERA':'#86efac','Monday (Public holiday) - CERA':'#fbb26a'};
 
 Chart.defaults.color='#78716c';Chart.defaults.borderColor='#e2ddd8';
 Chart.defaults.font.family="'JetBrains Mono',monospace";Chart.defaults.font.size=10;
 
 // ── STATE ───────────────────────────────────
-let D26=[],D25=[],T26={},T25={},DTF26={},DTF25={},POS26={},CTR26={},SUB26={},SR26={},SR25={};
+let D26=[],D25=[],T26={},T25={},DTF26={},DTF25={};
 
 function tKey(r){return r.pos==='CERA SHOP'?r.title+' - CERA':r.title;}
-
-// FIX: subtitle for CERA rows already has 'Cera - ' prefix in data, use as-is
-function subKey(r){return r.subtitle;}
-
 function proc(data){
-  const tot={},dtf={},pos={},ctr={},sub={},sr={};
+  const tot={},dtf={};
   data.forEach(r=>{
     const k=tKey(r);
     if(!tot[k])tot[k]={t:0,r:0};tot[k].t+=r.tickets;tot[k].r+=r.price;
     if(!dtf[r.dtf])dtf[r.dtf]={};
     if(!dtf[r.dtf][k])dtf[r.dtf][k]={t:0,r:0};
     dtf[r.dtf][k].t+=r.tickets;dtf[r.dtf][k].r+=r.price;
-    if(!pos[r.pos])pos[r.pos]=0;pos[r.pos]+=r.tickets;
-    if(!ctr[r.country])ctr[r.country]=0;ctr[r.country]+=r.tickets;
-    // FIX: use raw subtitle as key (no double Cera- prefix)
-    const sk=r.subtitle;
-    if(!sub[k])sub[k]={};if(!sub[k][sk])sub[k][sk]=0;sub[k][sk]+=r.tickets;
-    if(!sr[sk])sr[sk]=0;sr[sk]+=r.tickets;
   });
-  return{tot,dtf,pos,ctr,sub,sr};
+  return{tot,dtf};
 }
 function loadData(d26,d25){
   D26=d26;D25=d25;
   const p26=proc(d26),p25=proc(d25);
-  T26=p26.tot;DTF26=p26.dtf;POS26=p26.pos;CTR26=p26.ctr;SUB26=p26.sub;SR26=p26.sr;
-  T25=p25.tot;DTF25=p25.dtf;SR25=p25.sr;
+  T26=p26.tot;DTF26=p26.dtf;T25=p25.tot;DTF25=p25.dtf;
 }
 
 // ── HELPERS ─────────────────────────────────
 const N=(n,d=0)=>n==null?'—':(+n).toLocaleString('nl-BE',{minimumFractionDigits:d,maximumFractionDigits:d});
 const EU=n=>n==null?'—':'€'+N(Math.round(n));
 function dStr(a,b){if(!b||!a)return'—';const d=(a/b-1)*100;return(d>=0?'+':'')+d.toFixed(1)+'%';}
-function pO(a,b){if(!b)return'—';return((a/b)*100).toFixed(1)+'%';}
 function dCl(a,b){return(+a)>=(+b)?'pos':'neg';}
+function pO(a,b){if(!b)return'—';return((a/b)*100).toFixed(1)+'%';}
 function bar(p,col='#d97706'){const w=Math.min(100,Math.max(0,p||0));return`<span class="bw"><span class="bbg"><span class="bf" style="width:${w.toFixed(0)}%;background:${col}"></span></span>${w.toFixed(0)}%</span>`;}
 function cs(arr){let s=0;return arr.map(v=>{s+=v;return s;});}
-
-// FIX: parse DD/MM/YYYY dates correctly — sort by DTF (lower DTF = more recent)
-function latestDate(data){
-  // Find row with minimum DTF — that's the most recent
-  const minDTF=Math.min(...data.map(r=>r.dtf));
-  return data.find(r=>r.dtf===minDTF)?.date||'?';
-}
 function minDTF(data){return Math.min(...data.map(r=>r.dtf));}
-
 function DTFS(max=185){const a=[];for(let d=max;d>=0;d--)a.push(d);return a;}
 function dA(o,k,dtfs){return dtfs.map(d=>o[d]&&o[d][k]?o[d][k].t:0);}
-function rA(o,k,dtfs){return dtfs.map(d=>o[d]&&o[d][k]?o[d][k].r:0);}
 function tA(o,dtfs){return dtfs.map(d=>o[d]?Object.values(o[d]).reduce((s,v)=>s+v.t,0):0);}
 function trA(o,dtfs){return dtfs.map(d=>o[d]?Object.values(o[d]).reduce((s,v)=>s+v.r,0):0);}
-// Net revenue array: for each DTF, compute net from gross revenue
-function netRA(o,dtfs,year,dtfData){
-  return dtfs.map(d=>{
-    if(!o[d])return 0;
-    const gross=Object.values(o[d]).reduce((s,v)=>s+v.r,0);
-    const tix=Object.values(o[d]).reduce((s,v)=>s+v.t,0);
-    return netRev(gross,tix,year);
-  });
-}
-function netKeyRA(o,k,dtfs,year){
-  return dtfs.map(d=>{
-    if(!o[d]||!o[d][k])return 0;
-    return netRev(o[d][k].r, o[d][k].t, year);
-  });
-}
-
-// FIX: stop line where data ends (no flat line after last datapoint)
-// For 2026: data exists from DTF=109 down to DTF=minDTF (most recent)
-// The DTFS array goes from 185 down to 0
-// We need null for DTFs where there's no data in 2026
-// Since DTFS is descending (185,184,...,1,0) and 2026 data is from DTF 50-109:
-// position 0=D185, position 76=D109(first data), position 135=D50(last data), position 185=D0
-// After D50 (position 135), we should stop
-function nE26(arr, dtfs){
-  // Find range where 2026 has data
-  const hasDTF=new Set(Object.keys(DTF26).map(Number));
-  return arr.map((v,i)=>hasDTF.has(dtfs[i])?v:null);
-}
-function nE(arr){
-  let f=-1,l=-1;
-  arr.forEach((v,i)=>{if(v!=null&&v>0){if(f<0)f=i;l=i;}});
-  if(f<0)return arr.map(()=>null);
-  return arr.map((v,i)=>i>=f&&i<=l?v:null);
-}
+function combArr(dtfObj,baseKey,dtfs){return dtfs.map(d=>{if(!dtfObj[d])return 0;return(dtfObj[d][baseKey]?.t||0)+(dtfObj[d][baseKey+' - CERA']?.t||0);});}
+function netRev(g,t,yr){return g-g*0.02-(yr===2025?t*0.45:0)-g*0.06;}
+function nE(arr){let f=-1,l=-1;arr.forEach((v,i)=>{if(v>0){if(f<0)f=i;l=i;}});if(f<0)return arr.map(()=>null);return arr.map((v,i)=>i>=f&&i<=l?v:null);}
+function nE26(arr,dtfs){const h=new Set(Object.keys(DTF26).map(Number));return arr.map((v,i)=>h.has(dtfs[i])?v:null);}
+function lDS(lbl,data,col,bg){return{label:lbl,data,borderColor:col,backgroundColor:bg,borderWidth:2,pointRadius:0,fill:true,tension:.25,spanGaps:false};}
+function fmtDate(raw){if(!raw)return'?';if(raw.includes('-')&&raw.length>=10)return raw.substring(8,10)+'/'+raw.substring(5,7)+'/'+raw.substring(2,4);return raw.substring(0,8);}
 
 let CI={};
 function mk(id,type,labels,datasets,opts={}){
   const el=document.getElementById(id);if(!el)return;
   if(CI[id])CI[id].destroy();
-  // extraPlugins are passed at chart level (not inside options) so they persist on redraw
-  const extraPlugins=opts.extraPlugins||[];
-  CI[id]=new Chart(el,{
-    type,data:{labels,datasets},
-    plugins:extraPlugins,
-    options:{
-      animation:false,responsive:true,maintainAspectRatio:true,
-      plugins:{legend:{labels:{boxWidth:9,padding:8,font:{size:9}}},...(opts.plugins||{})},
-      scales:type==='doughnut'||type==='pie'?undefined:{
-        x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{maxTicksLimit:12,font:{size:9}},...(opts.xS||{})},
-        y:{grid:{color:'rgba(0,0,0,.04)'},beginAtZero:true,...(opts.yS||{})}
-      },...opts
-    }
-  });
+  const ep=opts.extraPlugins||[];
+  CI[id]=new Chart(el,{type,data:{labels,datasets},plugins:ep,options:{
+    animation:false,responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{boxWidth:9,padding:8,font:{size:9}}},...(opts.plugins||{})},
+    scales:type==='doughnut'||type==='pie'?undefined:{
+      x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{maxTicksLimit:12,font:{size:9}},...(opts.xS||{})},
+      y:{grid:{color:'rgba(0,0,0,.04)'},beginAtZero:true,...(opts.yS||{})}
+    },...opts
+  }});
 }
-function lDS(lbl,data,col,bg){return{label:lbl,data,borderColor:col,backgroundColor:bg,borderWidth:2,pointRadius:0,fill:true,tension:.25,spanGaps:false};}
 
-// ── FRESHNESS ─────────────────────────────────
+// ── FRESHNESS ────────────────────────────────
 function setFresh(){
   const minD=minDTF(D26);
   const rawDate=D26.find(r=>r.dtf===minD)?.date||'?';
-  // Format robustly for both DD/MM/YYYY and ISO formats
-  let displayDate=rawDate;
-  if(rawDate.includes('-')&&rawDate.length>=10){
-    // ISO: 2026-04-03T... -> 03/04/26
-    displayDate=rawDate.substring(8,10)+'/'+rawDate.substring(5,7)+'/'+rawDate.substring(2,4);
-  }
-  document.getElementById('fresh-bar').textContent=`2026 data: ${displayDate} (D-${minD}) · 2025: full season · ${D26.length}+${D25.length} records`;
-  document.getElementById('dtf-pill').textContent=`D-${minD} to 23 May`;
+  document.getElementById('fresh-bar').textContent=`Data: ${fmtDate(rawDate)} · D-${minD} to 23 May · ${D26.length} records (2026)`;
+  document.getElementById('dtf-pill').textContent=`D-${minD}`;
 }
 
 // ── OVERVIEW ─────────────────────────────────
 function bOv(){
   const tt26=Object.values(T26).reduce((s,v)=>s+v.t,0);
-  const tr26=Object.values(T26).reduce((s,v)=>s+v.r,0);
+  const gr26=Object.values(T26).reduce((s,v)=>s+v.r,0);
+  const nt26=netRev(gr26,tt26,2026);
   const minD=minDTF(D26);
   let t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});
   const tt25w=Object.values(t25w).reduce((s,v)=>s+v,0);
   const tt25f=Object.values(F25).reduce((s,v)=>s+v,0);
 
   document.getElementById('krow-ov').innerHTML=[
-    {l:'Total tickets — 2026 (D-'+minD+')',v:N(tt26),s:'all ticket types',c:Y26},
-    {l:'2025 @D-'+minD+' (same period)',v:N(tt25w),s:'same window last year',c:Y25},
-    {l:'2026 vs 2025 @same period',v:dStr(tt26,tt25w),s:'% difference tickets',c:tt26>=tt25w?'#166534':'#991b1b'},
-    {l:'2025 full season total',v:N(tt25f),s:'end of 2025 season',c:Y25},
-    {l:'2026 vs 2025 final',v:pO(tt26,tt25f),s:'% of last year final reached',c:'#78716c'},
+    {l:'Total tickets — 2026',v:N(tt26),s:'all types combined',c:Y26},
+    {l:'2025 same period',v:N(tt25w),s:dStr(tt26,tt25w)+' vs 2026',c:Y25},
+    {l:'2025 full season',v:N(tt25f),s:pO(tt26,tt25f)+' reached',c:Y25},
+    {l:'Net revenue — 2026',v:EU(nt26),s:'after fees & VAT',c:Y26},
   ].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
 
-  // Status table
-  const ROWS=[
-    {l:'Combi',k:'Combi (Saturday, Sunday, Monday)',k25:'Combi (Friday, Saturday, Sunday, Monday)',c:'#f5c842'},
-    {l:'Friday (2025 only)',k:'Friday',na26:true,k25:'Friday',c:'#64748b'},
+  // ── MASTER TABLE ──────────────────────────
+  const DAYS=[
     {l:'Saturday',k:'Saturday',k25:'Saturday',c:'#6b9ef5'},
     {l:'Sunday',k:'Sunday',k25:'Sunday',c:'#3db870'},
-    {l:'Monday (Public)',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
-    {l:'Sat – CERA',k:'Saturday - CERA',k25:'Saturday - CERA',c:'#93c5fd'},
-    {l:'Sun – CERA',k:'Sunday - CERA',k25:'Sunday - CERA',c:'#86efac'},
-    {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',k25:'Monday (Public holiday) - CERA',c:'#fbb26a'},
+    {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
   ];
-  const th=`<thead><tr><th>Ticket type</th><th class="t26">2026 now</th><th class="t25">2025 @same DTF</th><th>Δ</th><th>Capacity</th><th>Left</th><th>% cap</th><th class="t25">2025 Final</th><th>2026 vs F25</th><th class="t25">2025@DTF vs F25</th><th>Wave</th><th class="t26">Sold in wave</th><th>Quota</th><th>% quota</th><th>Left in wave</th></tr></thead>`;
-  let totT26=0,totT25=0,totCap=0,totF25=0;
-  // FIX: waveSold uses raw subtitle (no double Cera- prefix)
-  function waveSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
-  const body=ROWS.map(r=>{
-    const t26=(T26[r.k]||{t:0}).t;const t25wv=t25w[r.k25]||0;
-    const cap=CAP[r.k]||0;const f25=F25[r.k25]||0;
-    if(!r.na26){totT26+=t26;totT25+=t25wv;if(cap)totCap+=cap;totF25+=f25;}
-    if(r.na26)return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td><td style="color:var(--mu)">n/a</td><td class="t25">${N(t25wv)}</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="t25">${N(f25)}</td><td>—</td><td class="t25">${f25&&t25wv?pO(t25wv,f25):'—'}</td><td colspan="5" style="color:var(--mu);text-align:center;font-size:10px">not in JM 2026</td></tr>`;
-    const wave=CW[r.k];const wq=wave&&WAVE_CFG[r.k]?WAVE_CFG[r.k][wave]||0:0;
-    const ws=wave?waveSold(r.k,wave):0;
-    const dc=t25wv&&t26!==t25wv?(t26>t25wv?'pos':'neg'):'';
-    return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
-      <td class="t26">${N(t26)}</td><td class="t25">${t25wv||'—'}</td><td class="${dc}">${dStr(t26,t25wv)}</td>
-      <td>${cap?N(cap):'—'}</td><td>${cap?N(cap-t26):'—'}</td><td>${cap?bar(t26/cap*100):'—'}</td>
-      <td class="t25">${f25?N(f25):'—'}</td><td>${f25?pO(t26,f25):'—'}</td><td class="t25">${f25&&t25wv?pO(t25wv,f25):'—'}</td>
-      <td>${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
-      <td class="t26">${ws?N(ws):'—'}</td><td>${wq?N(wq):'—'}</td>
-      <td>${ws&&wq?bar(ws/wq*100,Y26):'—'}</td><td>${wq?N(wq-ws):'—'}</td></tr>`;
+
+  function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
+  function pastSoldTotal(k){
+    const cur=CW[k];const allW=Object.keys(WAVE_CFG[k]||{});
+    const idx=allW.indexOf(cur);
+    return allW.slice(0,idx).reduce((s,w)=>s+wSold(k,w),0);
+  }
+
+  // Section header row builder
+  function secHdr(label,cols,cls){
+    return `<tr class="sec-row ${cls}"><td colspan="${cols}" style="color:${
+      cls==='blk-tickets-h'?'#1d4ed8':cls==='blk-cap-h'?'#15803d':cls==='blk-wave-h'?'#b45309':'#6d28d9'
+    }">${label}</td></tr>`;
+  }
+
+  const colCount = 13;
+
+  // TICKET SALES block header
+  let rows = `<thead><tr>
+    <th>Day</th>
+    <th class="t26">2026 now</th><th class="t25">2025 @D-${minD}</th><th>Δ</th><th class="t25">2025 Final</th><th>vs Final</th>
+    <th>Capacity</th><th>% filled</th><th>Left</th>
+    <th>Wave</th><th class="t26">Sold</th><th>Quota</th><th>% quota</th>
+    <th>Att. est. 2026</th><th class="t25">Att. 2025</th><th>Att. %</th>
+  </tr></thead><tbody>`;
+
+  let totT26=0,totT25w=0,totF25=0,totCap=0,totAtt26=0,totAtt25=0;
+
+  DAYS.forEach(d=>{
+    const t26=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t;
+    const combi=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
+    const t26day=t26+combi;
+    const t25wv=(t25w[d.k25]||0)+(t25w[d.k25+' - CERA']||0);
+    const f25=(F25[d.k25]||0)+(F25[d.k25+' - CERA']||0);
+    const cap=DCAP[d.l]||4240;
+    const g26=GUESTS[d.k]||500;
+    const g25=DGUESTS25[d.l]||500;
+    const att=Math.round((t26day+g26)*(1-NO_SHOW));
+    const a25=ATT25[d.k];
+    const wave=CW[d.k];
+    const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
+    const ws=wave?wSold(d.k,wave):0;
+    totT26+=t26day;totT25w+=t25wv;totF25+=f25;totCap+=cap;totAtt26+=att;totAtt25+=a25;
+
+    rows+=`<tr class="blk-tickets">
+      <td><span class="dot" style="background:${d.c}"></span><strong>${d.l}</strong></td>
+      <td class="t26">${N(t26day)}</td>
+      <td class="t25">${N(t25wv)}</td>
+      <td class="${dCl(t26day,t25wv)}">${dStr(t26day,t25wv)}</td>
+      <td class="t25">${N(f25)}</td>
+      <td>${pO(t26day,f25)}</td>
+      <td class="blk-cap" style="background:var(--c-cap)">${N(cap)}</td>
+      <td class="blk-cap" style="background:var(--c-cap)">${bar(t26day/cap*100,'#15803d')}</td>
+      <td class="blk-cap" style="background:var(--c-cap)">${N(cap-t26day)}</td>
+      <td class="blk-wave" style="background:var(--c-wave)">${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
+      <td class="blk-wave t26" style="background:var(--c-wave)">${ws?N(ws):'—'}</td>
+      <td class="blk-wave" style="background:var(--c-wave)">${wq?N(wq):'—'}</td>
+      <td class="blk-wave" style="background:var(--c-wave)">${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
+      <td class="blk-att t26" style="background:var(--c-att)">${N(att)}</td>
+      <td class="blk-att t25" style="background:var(--c-att)">${N(a25)}</td>
+      <td class="blk-att" style="background:var(--c-att)">${bar(att/a25*100,'#6d28d9')}</td>
+    </tr>`;
+  });
+
+  // Combi row (span across blocks where N/A)
+  const combiT=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
+  const combiT25=t25w['Combi (Friday, Saturday, Sunday, Monday)']||0;
+  const combiF25=F25['Combi (Friday, Saturday, Sunday, Monday)']||0;
+  const combiCap=CAP['Combi (Saturday, Sunday, Monday)']||800;
+  const combiWave=CW['Combi (Saturday, Sunday, Monday)'];
+  const combiWq=combiWave&&WAVE_CFG['Combi (Saturday, Sunday, Monday)']?WAVE_CFG['Combi (Saturday, Sunday, Monday)'][combiWave]||0:0;
+  const combiWs=combiWave?D26.filter(x=>tKey(x)==='Combi (Saturday, Sunday, Monday)'&&x.subtitle===combiWave).reduce((s,x)=>s+x.tickets,0):0;
+  rows+=`<tr class="blk-tickets" style="opacity:.85">
+    <td><span class="dot" style="background:#f5c842"></span><em>Combi (all days)</em></td>
+    <td class="t26">${N(combiT)}</td><td class="t25">${N(combiT25)}</td>
+    <td class="${dCl(combiT,combiT25)}">${dStr(combiT,combiT25)}</td>
+    <td class="t25">${N(combiF25)}</td><td>${pO(combiT,combiF25)}</td>
+    <td style="background:var(--c-cap)">${N(combiCap)}</td>
+    <td style="background:var(--c-cap)">${bar(combiT/combiCap*100,'#15803d')}</td>
+    <td style="background:var(--c-cap)">${N(combiCap-combiT)}</td>
+    <td style="background:var(--c-wave)">${combiWave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${combiWave}</span>`:'—'}</td>
+    <td class="t26" style="background:var(--c-wave)">${combiWs?N(combiWs):'—'}</td>
+    <td style="background:var(--c-wave)">${combiWq?N(combiWq):'—'}</td>
+    <td style="background:var(--c-wave)">${combiWs&&combiWq?bar(combiWs/combiWq*100,Y26):'—'}</td>
+    <td style="background:var(--c-att)" colspan="3" style="text-align:center;color:var(--mu);font-size:10px">included in day totals above</td>
+  </tr>`;
+
+  // Total row
+  rows+=`<tr class="tot-row">
+    <td>Total</td>
+    <td class="t26">${N(totT26)}</td><td class="t25">${N(totT25w)}</td>
+    <td class="${dCl(totT26,totT25w)}">${dStr(totT26,totT25w)}</td>
+    <td class="t25">${N(totF25)}</td><td>${pO(totT26,totF25)}</td>
+    <td>${N(totCap)}</td><td>${bar(totT26/totCap*100,'#15803d')}</td><td>${N(totCap-totT26)}</td>
+    <td colspan="4"></td>
+    <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${bar(totAtt26/totAtt25*100,'#6d28d9')}</td>
+  </tr></tbody>`;
+
+  document.getElementById('tbl-master').innerHTML=rows;
+
+  // Past 10 days bar
+  const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10).reverse();
+  const dtfDateMap={};D26.forEach(r=>{if(!dtfDateMap[r.dtf])dtfDateMap[r.dtf]=r.date;});
+  function fmtD10(raw,dtf){
+    if(!raw)return'D-'+dtf;
+    let dd,mm;
+    if(raw.includes('-')){dd=raw.substring(8,10);mm=raw.substring(5,7);}
+    else{dd=raw.substring(0,2);mm=raw.substring(3,5);}
+    return dd+'/'+mm+' (D-'+dtf+')';
+  }
+  const l10=d10.map(d=>fmtD10(dtfDateMap[d],d));
+  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0);
+  const tK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)'];
+  const tL=['Saturday','Sunday','Monday','Combi'];
+  const tC=['#6b9ef5','#3db870','#e06b42','#f5c842'];
+  const d10plugin={id:'d10tot',afterDraw(chart){
+    const{ctx}=chart;ctx.save();
+    ctx.font='bold 10px Sora,sans-serif';ctx.fillStyle='#1c1917';
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    const lm=chart.getDatasetMeta(chart.data.datasets.length-1);
+    lm.data.forEach((bar,i)=>{if(d10totals[i])ctx.fillText(d10totals[i],bar.x,bar.y-3);});
+    ctx.restore();
+  }};
+  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),
+    {scales:{x:{stacked:true},y:{stacked:true,grace:'15%'}},plugins:{legend:{position:'top'}},extraPlugins:[d10plugin]});
+
+  // Past 10 days table
+  const d10thead=`<thead><tr><th>Date</th>${tK.map((k,i)=>`<th style="color:${tC[i]}">${tL[i]}</th>`).join('')}<th style="font-weight:700">Total</th></tr></thead>`;
+  const d10tbody=d10.map(d=>{
+    const vals=tK.map(k=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0);
+    const tot=vals.reduce((s,v)=>s+v,0);
+    const lbl=fmtD10(dtfDateMap[d],d);
+    return `<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">${lbl}</td>${vals.map((v,i)=>`<td style="color:${tC[i]};font-weight:${v?'600':'400'}">${v||'—'}</td>`).join('')}<td style="font-weight:700">${tot}</td></tr>`;
   }).join('');
-  const tot=`<tr><td>Total</td><td class="t26">${N(totT26)}</td><td class="t25">${N(totT25)}</td><td class="${dCl(totT26,totT25)}">${dStr(totT26,totT25)}</td><td>${N(totCap)}</td><td>${N(totCap-totT26)}</td><td>${bar(totT26/totCap*100)}</td><td class="t25">${N(totF25)}</td><td>${pO(totT26,totF25)}</td><td class="t25">${pO(totT25,totF25)}</td><td colspan="5"></td></tr>`;
-  document.getElementById('tbl-status').innerHTML=th+'<tbody>'+body+tot+'</tbody>';
+  // Totals row
+  const d10totsByType=tK.map(k=>d10.reduce((s,d)=>s+(DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),0));
+  const d10grandTot=d10totsByType.reduce((s,v)=>s+v,0);
+  const d10tfoot=`<tr style="background:rgba(217,119,6,.06);font-weight:700"><td>10-day total</td>${d10totsByType.map((v,i)=>`<td style="color:${tC[i]}">${v||'—'}</td>`).join('')}<td>${d10grandTot}</td></tr>`;
+  document.getElementById('tbl-d10').innerHTML=d10thead+'<tbody>'+d10tbody+d10tfoot+'</tbody>';
 
-  // Attendance projection table (mirrored in Overview)
-  bAttTable('tbl-att-ov', t25w);
-
-  // Pie chart with % labels
+  // Pie
   const k26=Object.keys(T26).filter(k=>T26[k].t>0);
+  const ptot=k26.reduce((s,k)=>s+T26[k].t,0);
   mk('c-pie','doughnut',k26.map(k=>k.replace(' (Public holiday)','').replace(' (Saturday, Sunday, Monday)','')),
     [{data:k26.map(k=>T26[k].t),backgroundColor:k26.map(k=>DC[k]||'#888'),borderWidth:1,borderColor:'#f7f7f5'}],
-    {plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>{const tot2=k26.reduce((s,k)=>s+T26[k].t,0);return ' '+ctx.label+': '+N(ctx.raw)+' ('+pO(ctx.raw,tot2)+')';}}}},cutout:'60%'});
+    {plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+N(ctx.raw)+' ('+pO(ctx.raw,ptot)+')'}}},cutout:'60%'});
+}
 
-  // CERA % table
-  const days=['Saturday','Sunday','Monday (Public holiday)'];
-  const dL=['Saturday','Sunday','Monday'];
-  let tblHtml=`<thead><tr><th>Channel</th><th>Saturday</th><th>Sunday</th><th>Monday</th></tr></thead><tbody>`;
-  const channels=['General','CERA SHOP'];
-  channels.forEach(ch=>{
-    const row=days.map(d=>{
-      const gen=(T26[d]||{t:0}).t;const cera=(T26[d+' - CERA']||{t:0}).t;const tot=gen+cera;
-      if(!tot)return '—';
-      const val=ch==='General'?gen:cera;
-      return N(val)+' ('+pO(val,tot)+')';
-    });
-    tblHtml+=`<tr><td style="font-weight:600">${ch}</td>${row.map(v=>`<td>${v}</td>`).join('')}</tr>`;
+// ── SALES TRENDS ─────────────────────────────
+function bTrends(){
+  const dtfs=DTFS(185),lbl=dtfs.map(d=>'D-'+d);
+  mk('c-cum-all','line',lbl,[
+    lDS('2026',nE26(cs(tA(DTF26,dtfs)),dtfs),Y26,Y26b),
+    lDS('2025',nE(cs(tA(DTF25,dtfs))),Y25,Y25b)
+  ],{plugins:{legend:{position:'top'}}});
+  ['sat','sun','mon'].forEach((s,i)=>{
+    const k=['Saturday','Sunday','Monday (Public holiday)'][i];
+    mk('c-cum-'+s,'line',lbl,[
+      lDS('2026 (incl.CERA)',nE26(cs(combArr(DTF26,k,dtfs)),dtfs),Y26,Y26b),
+      lDS('2025 (incl.CERA)',nE(cs(combArr(DTF25,k,dtfs))),Y25,Y25b)
+    ],{plugins:{legend:{position:'top'}}});
   });
-  // Total row
-  tblHtml+=`<tr><td>Total</td>${days.map(d=>{const tot=(T26[d]||{t:0}).t+(T26[d+' - CERA']||{t:0}).t;return `<td>${N(tot)}</td>`;}).join('')}</tr></tbody>`;
-  document.getElementById('tbl-cera-pct').innerHTML=tblHtml;
+  // Country chart
+  const ctrMap={};D26.forEach(r=>{if(!ctrMap[r.country])ctrMap[r.country]=0;ctrMap[r.country]+=r.tickets;});
+  const ctrE=Object.entries(ctrMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const totTix=Object.values(ctrMap).reduce((s,v)=>s+v,0);
+  // Palette for countries
+  const ctrColors=['#6b9ef5','#3db870','#e06b42','#f5c842','#93c5fd','#86efac','#fbb26a','#a78bfa','#f472b6','#38bdf8'];
+  mk('c-country','bar',
+    ctrE.map((e,i)=>e[0]+' '+((e[1]/totTix*100).toFixed(1))+'%'),
+    [{data:ctrE.map(e=>e[1]),backgroundColor:ctrColors}],
+    {indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+N(ctx.raw)+' tickets ('+pO(ctx.raw,totTix)+')'}}}});
 }
 
-function bAttTable(id, t25w){
-  const days=[{k:'Saturday',l:'Saturday',c:'#6b9ef5'},{k:'Sunday',l:'Sunday',c:'#3db870'},{k:'Monday (Public holiday)',l:'Monday',c:'#e06b42'}];
-  const minD=minDTF(D26);
-  if(!t25w){t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});}
-  // Include combi tickets in each day's count (combi = attends all 3 days)
-  const combiT=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
-  function dT26(k){return(T26[k]||{t:0}).t+(T26[k+' - CERA']||{t:0}).t+combiT;}
-  function dT25(k){return(t25w[k]||0)+(t25w[k+' - CERA']||0);}
-  // 2025 guests differ from 2026 — use pricing sheet values
-  // 2025 guests — updated dynamically from API (JM Pricing col G rows 61-63)
-  const GUESTS25={Saturday:DGUESTS25.Saturday||407,Sunday:DGUESTS25.Sunday||503,'Monday (Public holiday)':DGUESTS25.Monday||645};
-  // Capacity per day — updated dynamically from API (JM Pricing H68-H70)
-  const DAY_CAP={Saturday:DCAP.Saturday||4240,Sunday:DCAP.Sunday||4240,'Monday (Public holiday)':DCAP.Monday||4240};
-  const th=`<thead><tr>
-    <th>Day</th>
-    <th class="t26">Tickets 2026 (D-${minD})</th>
-    <th class="t25">2025 @same DTF</th>
-    <th>Δ</th>
-    <th>Guests 2026*</th>
-    <th>Guests 2025*</th>
-    <th>No-show*</th>
-    <th class="t26">Tickets incl. guests 2026 — D-${minD}</th>
-    <th class="t25">2025 Final</th>
-    <th>2026/2025</th>
-    <th>Day capacity</th>
-    <th class="t26">2026 vs capacity</th>
-  </tr></thead>`;
-  let tS=0,tG26=0,tG25=0,tA26=0,tA25=0,tCap=0;
-  const body=days.map(d=>{
-    const s=dT26(d.k);const s25=dT25(d.k);
-    const g26=GUESTS[d.k]||0;const g25=GUESTS25[d.k]||0;
-    const cap=DAY_CAP[d.k]||0;
-    const tot26=s+g26;const att=Math.round(tot26*(1-NO_SHOW));
-    const a25=ATT25[d.k];
-    tS+=s;tG26+=g26;tG25+=g25;tA26+=att;tA25+=a25;tCap+=cap;
-    return `<tr>
-      <td><span class="dot" style="background:${d.c}"></span>${d.l}</td>
-      <td class="t26">${N(s)}</td>
-      <td class="t25">${N(s25)}</td>
-      <td class="${dCl(s,s25)}">${dStr(s,s25)}</td>
-      <td>${N(g26)}</td>
-      <td class="t25">${N(g25)}</td>
-      <td>${NO_SHOW*100}%</td>
-      <td class="t26">${N(att)}</td>
-      <td class="t25">${N(a25)}</td>
-      <td class="${dCl(att,a25)}">${pO(att,a25)}</td>
-      <td>${N(cap)}</td>
-      <td class="t26">${cap?pO(s,cap):'—'}</td>
-    </tr>`;
-  }).join('');
-  const totAtt26=Math.round((tS+tG26)*(1-NO_SHOW));
-  const totRow=`<tr>
-    <td>Total</td>
-    <td class="t26">${N(tS)}</td><td class="t25">—</td><td>—</td>
-    <td>${N(tG26)}</td><td class="t25">${N(tG25)}</td>
-    <td>${NO_SHOW*100}%</td>
-    <td class="t26">${N(totAtt26)}</td>
-    <td class="t25">${N(tA25)}</td>
-    <td class="${dCl(totAtt26,tA25)}">${pO(totAtt26,tA25)}</td>
-    <td>${N(tCap)}</td>
-    <td class="t26">${pO(tS,tCap)}</td>
-  </tr>`;
-  document.getElementById(id).innerHTML=th+`<tbody>${body}${totRow}</tbody>`;
-}
-
-// ── REVENUE (NET) ─────────────────────────────
+// ── REVENUE ──────────────────────────────────
 function bRev(){
   const tt26=Object.values(T26).reduce((s,v)=>s+v.t,0);
   const gr26=Object.values(T26).reduce((s,v)=>s+v.r,0);
@@ -496,174 +491,49 @@ function bRev(){
   const gr25f=Object.values(T25).reduce((s,v)=>s+v.r,0);
   const nt25f=netRev(gr25f,tt25f,2025);
   const minD=minDTF(D26);
-  let gr25w=0,tt25w2=0;
-  D25.forEach(r=>{if(r.dtf>=minD){gr25w+=r.price;tt25w2+=r.tickets;}});
-  const nt25w=netRev(gr25w,tt25w2,2025);
+  let gr25w=0,tt25w=0;D25.forEach(r=>{if(r.dtf>=minD){gr25w+=r.price;tt25w+=r.tickets;}});
+  const nt25w=netRev(gr25w,tt25w,2025);
 
   document.getElementById('krow-rev').innerHTML=[
-    {l:'Net revenue 2026 (D-'+minD+')',v:EU(nt26),s:'gross '+EU(gr26),c:Y26},
-    {l:'Net revenue 2025 @same period',v:EU(nt25w),s:'gross '+EU(gr25w),c:Y25},
-    {l:'2026 vs 2025 @same period',v:dStr(nt26,nt25w),s:'net revenue diff',c:nt26>=nt25w?'#166534':'#991b1b'},
-    {l:'Net revenue 2025 full season',v:EU(nt25f),s:'gross '+EU(gr25f),c:Y25},
-    {l:'2026 vs 2025 full season',v:pO(nt26,nt25f),s:'% of 2025 net reached',c:'#78716c'},
+    {l:'Net revenue 2026',v:EU(nt26),s:'gross '+EU(gr26),c:Y26},
+    {l:'Net revenue 2025 @same period',v:EU(nt25w),s:dStr(nt26,nt25w)+' vs 2026',c:Y25},
+    {l:'Net revenue 2025 full season',v:EU(nt25f),s:pO(nt26,nt25f)+' reached',c:Y25},
   ].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
 
   const dtfs=DTFS(185),lbl=dtfs.map(d=>'D-'+d);
-  // Gross cumulative
-  const gc26=cs(trA(DTF26,dtfs)),gc25=cs(trA(DTF25,dtfs));
-  mk('c-rcum-all','line',lbl,[
-    lDS('2026 Gross',nE26(gc26,dtfs),Y26,Y26b),
-    lDS('2025 Gross',nE(gc25),Y25,Y25b)
+  function netCumAll(dtfO,yr){let s=0;return dtfs.map(d=>{if(!dtfO[d])return s;const g=Object.values(dtfO[d]).reduce((a,v)=>a+v.r,0);const t=Object.values(dtfO[d]).reduce((a,v)=>a+v.t,0);s+=netRev(g,t,yr);return s;});}
+  mk('c-rev-all','line',lbl,[
+    lDS('2026 Net',nE26(netCumAll(DTF26,2026),dtfs),Y26,Y26b),
+    lDS('2025 Net',nE(netCumAll(DTF25,2025)),Y25,Y25b)
   ],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
 
-  // Net cumulative — approximate: apply net factor to each day's gross
-  function netCum(dtfObj,dtfs2,year){
-    let s=0;
-    return dtfs2.map(d=>{
-      if(!dtfObj[d])return s;
-      const g=Object.values(dtfObj[d]).reduce((a,v)=>a+v.r,0);
-      const t=Object.values(dtfObj[d]).reduce((a,v)=>a+v.t,0);
-      s+=netRev(g,t,year);return s;
-    });
-  }
-  function netCumKey(dtfObj,key,dtfs2,year){
-    let s=0;
-    return dtfs2.map(d=>{
-      if(!dtfObj[d]||!dtfObj[d][key])return s;
-      s+=netRev(dtfObj[d][key].r,dtfObj[d][key].t,year);return s;
-    });
-  }
-
-  const nc26=netCum(DTF26,dtfs,2026),nc25=netCum(DTF25,dtfs,2025);
-  mk('c-nrcum-all','line',lbl,[
-    lDS('2026 Net',nE26(nc26,dtfs),Y26,Y26b),
-    lDS('2025 Net',nE(nc25),Y25,Y25b)
+  const r26d=dtfs.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.r,0):0);
+  const r25d=dtfs.map(d=>DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+v.r,0):0);
+  mk('c-rev-day','bar',lbl,[
+    {label:'2026',data:nE26(r26d,dtfs),backgroundColor:'rgba(217,119,6,.65)',stack:'a'},
+    {label:'2025',data:nE(r25d),backgroundColor:'rgba(37,99,235,.4)',stack:'b'}
   ],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
 
-  [['nrcum-sat','sat','Saturday'],['nrcum-sun','sun','Sunday'],['nrcum-mon','mon','Monday (Public holiday)']].forEach(([id,,k])=>{
-    mk('c-'+id,'line',lbl,[
-      lDS('2026 Net',nE26(netCumKey(DTF26,k,dtfs,2026),dtfs),Y26,Y26b),
-      lDS('2025 Net',nE(netCumKey(DTF25,k,dtfs,2025)),Y25,Y25b)
-    ],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
-  });
-
-  // Net revenue table
+  // Revenue table
+  let t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]={t:0,r:0};t25w[k].t+=r.tickets;t25w[k].r+=r.price;}});
   const keys=Object.keys(T26).filter(k=>T26[k].t>0).sort((a,b)=>T26[b].r-T26[a].r);
-  let minD2=minD;
-  let t25w3={};D25.forEach(r=>{if(r.dtf>=minD2){const k=tKey(r);if(!t25w3[k])t25w3[k]={t:0,r:0};t25w3[k].t+=r.tickets;t25w3[k].r+=r.price;}});
   const rows=keys.map(k=>{
-    const {t:t26,r:g26}=T26[k];
-    const f26=feeAmt(g26,t26,2026),v26=vatAmt(g26),n26=netRev(g26,t26,2026);
-    const p25=t25w3[k]||t25w3[k.replace('Saturday, Sunday, Monday','Friday, Saturday, Sunday, Monday')]||{t:0,r:0};
+    const{t:t2,r:g2}=T26[k];
+    const f2=g2*0.02,v2=g2*0.06,n2=netRev(g2,t2,2026);
+    const p25=t25w[k]||{t:0,r:0};
     const n25w=netRev(p25.r,p25.t,2025);
     const p25f=T25[k]||T25[k.replace('Saturday, Sunday, Monday','Friday, Saturday, Sunday, Monday')]||{t:0,r:0};
     const n25f=netRev(p25f.r,p25f.t,2025);
     return `<tr><td><span class="dot" style="background:${DC[k]||'#888'}"></span>${k}</td>
-      <td class="t26">${EU(g26)}</td><td>${EU(f26)}</td><td>${EU(v26)}</td><td class="t26">${EU(n26)}</td>
-      <td class="t25">${p25.r?EU(n25w):'—'}</td><td>${p25.r?dStr(n26,n25w):'—'}</td>
-      <td class="t25">${p25f.r?EU(n25f):'—'}</td><td>${p25f.r?pO(n26,n25f):'—'}</td>
-      <td class="t25">${(p25.r&&p25f.r)?pO(n25w,n25f):'—'}</td></tr>`;
+      <td class="t26">${EU(g2)}</td><td>${EU(f2)}</td><td>${EU(v2)}</td><td class="t26">${EU(n2)}</td>
+      <td class="t25">${p25.r?EU(n25w):'—'}</td><td>${p25.r?dStr(n2,n25w):'—'}</td>
+      <td class="t25">${p25f.r?EU(n25f):'—'}</td><td>${p25f.r?pO(n2,n25f):'—'}</td></tr>`;
   }).join('');
-  const tg26=Object.values(T26).reduce((s,v)=>s+v.r,0);const tt262=Object.values(T26).reduce((s,v)=>s+v.t,0);
-  const tf26=feeAmt(tg26,tt262,2026),tv26=vatAmt(tg26),tn26=netRev(tg26,tt262,2026);
-  const tn25w=netRev(gr25w,tt25w2,2025);const tn25f=netRev(gr25f,tt25f,2025);
-  const totR=`<tr><td>Total</td><td class="t26">${EU(tg26)}</td><td>${EU(tf26)}</td><td>${EU(tv26)}</td><td class="t26">${EU(tn26)}</td><td class="t25">${EU(tn25w)}</td><td class="${dCl(tn26,tn25w)}">${dStr(tn26,tn25w)}</td><td class="t25">${EU(tn25f)}</td><td>${pO(tn26,tn25f)}</td><td class="t25">${pO(tn25w,tn25f)}</td></tr>`;
-  document.getElementById('tbl-rev').innerHTML=`<thead><tr><th>Ticket type</th><th>Gross (2026)</th><th>Fees (2026)</th><th>VAT (2026)</th><th>Net (2026)</th><th>Net 2025 @same</th><th>Δ</th><th>Net 2025 full</th><th>2026 vs F25</th><th>2025@DTF vs F25</th></tr></thead><tbody>${rows}${totR}</tbody>`;
+  const totG=gr26,totF=totG*0.02,totV=totG*0.06,totN=netRev(totG,tt26,2026);
+  document.getElementById('tbl-rev').innerHTML=`<thead><tr><th>Ticket type</th><th>Gross (2026)</th><th>Fees</th><th>VAT</th><th>Net (2026)</th><th>Net 2025 @same</th><th>Δ</th><th>Net 2025 Full</th><th>2026 vs Full</th></tr></thead><tbody>${rows}<tr class="tot-row"><td>Total</td><td class="t26">${EU(totG)}</td><td>${EU(totF)}</td><td>${EU(totV)}</td><td class="t26">${EU(totN)}</td><td class="t25">${EU(nt25w)}</td><td class="${dCl(totN,nt25w)}">${dStr(totN,nt25w)}</td><td class="t25">${EU(nt25f)}</td><td>${pO(totN,nt25f)}</td></tr></tbody>`;
 }
 
-// ── DAILY ────────────────────────────────────
-function bDay(){
-  const dtfs=DTFS(185),lbl=dtfs.map(d=>'D-'+d);
-  // d10: 10 LOWEST DTFs = 10 most recent days. Display left=oldest, right=newest (today).
-  const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10).reverse();
-  // d10 is now [59,58,...,50] — left is 10 days ago, right is today ✓
-
-  // Build DTF->date lookup
-  const dtfDateMap={};
-  D26.forEach(r=>{if(!dtfDateMap[r.dtf])dtfDateMap[r.dtf]=r.date;});
-
-  // Parse date string robustly — handles both:
-  //   DD/MM/YYYY (embedded CSV): "03/04/2026"
-  //   ISO (live Sheets):         "2026-04-03T22:00:00.000Z"
-  function fmtD10Label(raw, dtf){
-    if(!raw) return 'D-'+dtf;
-    let dd,mm,yy;
-    if(raw.includes('-') && raw.length>=10){
-      // ISO format: YYYY-MM-DD...
-      yy=raw.substring(2,4);   // "26"
-      mm=raw.substring(5,7);   // "04"
-      dd=raw.substring(8,10);  // "03"
-    } else {
-      // DD/MM/YYYY
-      dd=raw.substring(0,2);
-      mm=raw.substring(3,5);
-      yy=raw.substring(8,10);
-    }
-    return dd+'/'+mm+'/'+yy+' (D-'+dtf+')';
-  }
-  const l10=d10.map(d=>fmtD10Label(dtfDateMap[d],d));
-  const tK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)'];
-  const tL=['Saturday','Sunday','Monday','Combi'],tC=['#6b9ef5','#3db870','#e06b42','#f5c842'];
-  // Totals on top of stacked bars
-  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0);
-  // Use Chart.js afterDraw via a local registration
-  // Inline plugin — persists on tab switch (no register/unregister needed)
-  const d10BarPlugin={id:'d10Totals',afterDraw(chart){
-    const {ctx}=chart;ctx.save();
-    ctx.font='bold 11px Sora,sans-serif';ctx.fillStyle='#1c1917';
-    ctx.textAlign='center';ctx.textBaseline='bottom';
-    const lastMeta=chart.getDatasetMeta(chart.data.datasets.length-1);
-    lastMeta.data.forEach((bar,i)=>{if(d10totals[i])ctx.fillText(d10totals[i],bar.x,bar.y-4);});
-    ctx.restore();
-  }};
-  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),{scales:{x:{stacked:true},y:{stacked:true,grace:'15%'}},plugins:{legend:{position:'top'}},extraPlugins:[d10BarPlugin]});
-  mk('c-dall','line',lbl,[lDS('2026',nE26(tA(DTF26,dtfs),dtfs),Y26,Y26b),lDS('2025',nE(tA(DTF25,dtfs)),Y25,Y25b)],{plugins:{legend:{position:'top'}}});
-  [['dsat','Saturday'],['dsun','Sunday'],['dmon','Monday (Public holiday)']].forEach(([s,k])=>{
-    mk('c-'+s,'line',lbl,[lDS('2026',nE26(dA(DTF26,k,dtfs),dtfs),Y26,Y26b),lDS('2025',nE(dA(DTF25,k,dtfs)),Y25,Y25b)],{plugins:{legend:{position:'top'}}});
-  });
-}
-
-// ── CUMULATIVE ───────────────────────────────
-function bCum(){
-  const dtfs=DTFS(185),lbl=dtfs.map(d=>'D-'+d);
-
-  // Combine general + CERA for a given base day name
-  function combArr(dtfObj,baseKey,dtfs2){
-    return dtfs2.map(d=>{
-      if(!dtfObj[d])return 0;
-      return (dtfObj[d][baseKey]?.t||0)+(dtfObj[d][baseKey+' - CERA']?.t||0);
-    });
-  }
-  function netCumAll(dtfObj,yr){let s=0;return dtfs.map(d=>{if(!dtfObj[d])return s;const g=Object.values(dtfObj[d]).reduce((a,v)=>a+v.r,0);const t=Object.values(dtfObj[d]).reduce((a,v)=>a+v.t,0);s+=netRev(g,t,yr);return s;});}
-  function netCumComb(dtfObj,baseKey,yr){
-    let s=0;
-    return dtfs.map(d=>{
-      if(!dtfObj[d])return s;
-      const gen=dtfObj[d][baseKey]||{t:0,r:0};
-      const cera=dtfObj[d][baseKey+' - CERA']||{t:0,r:0};
-      s+=netRev(gen.r+cera.r, gen.t+cera.t, yr);
-      return s;
-    });
-  }
-
-  // ALL tickets
-  mk('c-ct-all','line',lbl,[lDS('2026',nE26(cs(tA(DTF26,dtfs)),dtfs),Y26,Y26b),lDS('2025',nE(cs(tA(DTF25,dtfs))),Y25,Y25b)],{plugins:{legend:{position:'top'}}});
-  mk('c-cr-all','line',lbl,[lDS('2026 Net',nE26(netCumAll(DTF26,2026),dtfs),Y26,Y26b),lDS('2025 Net',nE(netCumAll(DTF25,2025)),Y25,Y25b)],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'\u20ac'+(v/1000).toFixed(0)+'k'}}});
-
-  // Per day: general + CERA combined
-  [['sat','Saturday'],['sun','Sunday'],['mon','Monday (Public holiday)']].forEach(([s,k])=>{
-    mk('c-ct-'+s,'line',lbl,[
-      lDS('2026 (incl. CERA)',nE26(cs(combArr(DTF26,k,dtfs)),dtfs),Y26,Y26b),
-      lDS('2025 (incl. CERA)',nE(cs(combArr(DTF25,k,dtfs))),Y25,Y25b)
-    ],{plugins:{legend:{position:'top'}}});
-    mk('c-cr-'+s,'line',lbl,[
-      lDS('2026 Net',nE26(netCumComb(DTF26,k,2026),dtfs),Y26,Y26b),
-      lDS('2025 Net',nE(netCumComb(DTF25,k,2025)),Y25,Y25b)
-    ],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:[v=>'\u20ac'+(v/1000).toFixed(0)+'k'][0]}}});
-  });
-}
-
-// ── WAVES ────────────────────────────────────
+// ── WAVES & CAPACITY ─────────────────────────
 function bWav(){
   const ROWS=[
     {l:'Saturday',k:'Saturday',c:'#6b9ef5'},{l:'Sunday',k:'Sunday',c:'#3db870'},
@@ -673,61 +543,39 @@ function bWav(){
     {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
     {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'}
   ];
-  // FIX: use raw subtitle for matching
-  function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
-  function pastSold(k){
-    // All waves before current wave
-    const cur=CW[k];const allWaves=Object.keys(WAVE_CFG[k]||{});
-    const idx=allWaves.indexOf(cur);
-    return allWaves.slice(0,idx).map(w=>({wave:w,sold:wSold(k,w)})).filter(x=>x.sold>0);
-  }
+  function wS(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
+  function pSold(k){const cur=CW[k];const allW=Object.keys(WAVE_CFG[k]||{});const idx=allW.indexOf(cur);return allW.slice(0,idx).reduce((s,w)=>s+wS(k,w),0);}
 
-  const th=`<thead><tr><th>Ticket type</th><th>Current wave</th><th class="t26">Sold (current wave)</th><th>Quota</th><th>% quota</th><th>Left in wave</th><th class="t26">Total sold</th><th>Capacity</th><th>% cap</th><th>Left</th></tr></thead>`;
+  const th=`<thead><tr><th>Ticket type</th><th>Current wave</th><th class="t26">Sold (wave)</th><th>Quota</th><th>% quota</th><th>Past waves sold</th><th class="t26">Total sold</th><th>Capacity</th><th>% cap</th><th>Left</th></tr></thead>`;
   const body=ROWS.map(r=>{
     const t=(T26[r.k]||{t:0}).t;const cap=CAP[r.k]||0;
     const wave=CW[r.k];const wq=wave&&WAVE_CFG[r.k]?WAVE_CFG[r.k][wave]||0:0;
-    const ws=wave?wSold(r.k,wave):0;
-    const past=pastSold(r.k);const pastTotal=past.reduce((s,p)=>s+p.sold,0);
-    const pastStr=past.length?past.map(p=>`${p.wave}: ${N(p.sold)}`).join(', '):'—';
+    const ws=wave?wS(r.k,wave):0;const ps=pSold(r.k);
     return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
       <td>${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
       <td class="t26">${ws?N(ws):'—'}</td><td>${wq?N(wq):'—'}</td>
-      <td>${ws&&wq?bar(ws/wq*100,Y26):'—'}</td><td>${wq?N(wq-ws):'—'}</td>
-      <td class="t26">${N(t)}<br><span style="font-size:9px;color:var(--mu)">prev: ${pastStr}</span></td>
-      <td>${cap?N(cap):'—'}</td><td>${cap?bar(t/cap*100):'—'}</td><td>${cap?N(cap-t):'—'}</td></tr>`;
+      <td>${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
+      <td>${ps?N(ps):'—'}</td>
+      <td class="t26">${N(t)}</td><td>${cap?N(cap):'—'}</td>
+      <td>${cap?bar(t/cap*100,'#15803d'):'—'}</td><td>${cap?N(cap-t):'—'}</td></tr>`;
   }).join('');
   document.getElementById('tbl-wav').innerHTML=th+'<tbody>'+body+'</tbody>';
 
-  // Wave fill % chart (% of total capacity, not wave quota)
-  const wR=ROWS;
-  const labels=wR.map(r=>r.l);
-  const caps=wR.map(r=>CAP[r.k]||0);
-  const pastSolds=wR.map(r=>{const p=pastSold(r.k);return p.reduce((s,x)=>s+x.sold,0);});
-  const curSolds=wR.map(r=>{const wave=CW[r.k];return wave?wSold(r.k,wave):0;});
-  const totalSolds=wR.map(r=>(T26[r.k]||{t:0}).t);
-  const unsolds=wR.map((r,i)=>Math.max(0,caps[i]-totalSolds[i]));
+  const caps=ROWS.map(r=>CAP[r.k]||0);
+  const pastSolds=ROWS.map(r=>pSold(r.k));
+  const curSolds=ROWS.map(r=>CW[r.k]?wS(r.k,CW[r.k]):0);
+  const totalSolds=ROWS.map(r=>(T26[r.k]||{t:0}).t);
+  const unsolds=ROWS.map((r,i)=>Math.max(0,caps[i]-totalSolds[i]));
+  const labels=ROWS.map(r=>r.l);
 
-  // % of capacity fill chart
-  const fillPcts=wR.map((r,i)=>caps[i]?Math.round(totalSolds[i]/caps[i]*100):0);
-  mk('c-wf','bar',labels,[{label:'% of total capacity sold',data:fillPcts,backgroundColor:'#fbb26a'}],
-    {plugins:{legend:{display:false}},yS:{max:100,ticks:{callback:v=>v+'%'}}});
-
-  // Stacked bar vs MAX CAPACITY:
-  // light green  = past waves sold
-  // light orange = current wave sold
-  // grey         = not yet sold (up to capacity)
-  // Stacked bar with permanent % labels per segment
-  const wbPctPlugin={id:'wbPcts',afterDraw(chart){
-    const {ctx,data}=chart;ctx.save();
+  const wbPct={id:'wbPct',afterDraw(chart){
+    const{ctx}=chart;ctx.save();
     ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     chart.data.datasets.forEach((ds,di)=>{
       const meta=chart.getDatasetMeta(di);
       meta.data.forEach((bar,i)=>{
-        const val=ds.data[i];
-        if(!val||val<1)return;
-        const cap=caps[i]||1;
-        const pct=Math.round(val/cap*100);
-        if(pct<3)return; // skip if too small to show
+        const val=ds.data[i];if(!val||val<1)return;
+        const cap=caps[i]||1;const pct=Math.round(val/cap*100);if(pct<4)return;
         const y=bar.y+(bar.base-bar.y)/2;
         ctx.fillStyle=di===2?'#9ca3af':'#374151';
         ctx.fillText(pct+'%',bar.x,y);
@@ -736,64 +584,14 @@ function bWav(){
     ctx.restore();
   }};
   mk('c-wb','bar',labels,[
-    {label:'Past waves sold',   data:pastSolds, backgroundColor:'#86efac', stack:'s'},
-    {label:'Current wave sold', data:curSolds,  backgroundColor:'#fed7aa', stack:'s'},
-    {label:'Not yet sold',      data:unsolds,   backgroundColor:'#e2ddd8', stack:'s'}
-  ],{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}}},extraPlugins:[wbPctPlugin]});
+    {label:'Past waves',data:pastSolds,backgroundColor:'#86efac',stack:'s'},
+    {label:'Current wave',data:curSolds,backgroundColor:'#fed7aa',stack:'s'},
+    {label:'Unsold',data:unsolds,backgroundColor:'#e2ddd8',stack:'s'}
+  ],{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:10,padding:10}}},extraPlugins:[wbPct]});
 
-  // Capacity table
-  const cth=`<thead><tr><th>Ticket type</th><th class="t26">Total sold</th><th>Capacity</th><th>Left</th><th>% filled</th></tr></thead>`;
-  const cr=ROWS.map(r=>{const t=(T26[r.k]||{t:0}).t;const cap=CAP[r.k]||0;return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td><td class="t26">${N(t)}</td><td>${cap?N(cap):'—'}</td><td>${cap?N(cap-t):'—'}</td><td>${cap?bar(t/cap*100):'—'}</td></tr>`;}).join('');
-  const tS=ROWS.reduce((s,r)=>s+(T26[r.k]||{t:0}).t,0);const tC=ROWS.reduce((s,r)=>s+(CAP[r.k]||0),0);
-  document.getElementById('tbl-cap').innerHTML=cth+`<tbody>${cr}<tr><td>Total</td><td class="t26">${N(tS)}</td><td>${N(tC)}</td><td>${N(tC-tS)}</td><td>${bar(tS/tC*100)}</td></tr></tbody>`;
-}
-
-// ── ATTENDANCE ───────────────────────────────
-function bAtt(){
-  const tot26=Object.values(T26).reduce((s,v)=>s+v.t,0);
-  const ctrE=Object.entries(CTR26).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  mk('c-ctr','bar',ctrE.map(e=>e[0]),[{
-    data:ctrE.map(e=>e[1]),
-    backgroundColor:Y26,
-    datalabels:{display:false}
-  }],{
-    indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+N(ctx.raw)+' ('+pO(ctx.raw,tot26)+')'}}}}
-  );
-  // Add % to chart using afterDraw plugin — simpler: use bar labels in tooltip only
-  // Actually rebuild with percentage labels on bars
-  mk('c-ctr','bar',ctrE.map(e=>e[0]+' '+pO(e[1],tot26)),[{data:ctrE.map(e=>e[1]),backgroundColor:Y26}],{indexAxis:'y',plugins:{legend:{display:false}}});
-
-  const posE=Object.entries(POS26).sort((a,b)=>b[1]-a[1]);
-  mk('c-pos','bar',posE.map(e=>e[0]),[{data:posE.map(e=>e[1]),backgroundColor:Y26}],{indexAxis:'y',plugins:{legend:{display:false}}});
-}
-
-// ── BREAKDOWN ────────────────────────────────
-function bBrk(){
-  const totTix=Object.values(T26).reduce((s,v)=>s+v.t,0);
-  function subPie(id,k){
-    const subs=SUB26[k]||{};
-    const sorted=WAVE_ORDER.filter(w=>subs[w]>0).concat(Object.keys(subs).filter(w=>!WAVE_ORDER.includes(w)&&subs[w]>0));
-    const tot=sorted.reduce((s,w)=>s+(subs[w]||0),0);
-    mk(id,'doughnut',sorted.map(w=>w+' '+pO(subs[w],tot)),[{data:sorted.map(w=>subs[w]),backgroundColor:sorted.map(w=>SC[w]||'#888'),borderWidth:1,borderColor:'#f7f7f5'}],
-      {plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:9}}},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+N(ctx.raw)}}},cutout:'55%'});
-  }
-  subPie('c-bsat','Saturday');subPie('c-bsun','Sunday');subPie('c-bmon','Monday (Public holiday)');
-
-  const wCats=['Presale','Early Bird','Regular','Final Wave','Kids'];
-  const tot26=wCats.reduce((s,k)=>s+(SR26[k]||0),0);
-  const tot25=wCats.reduce((s,k)=>s+(SR25[k]||0),0);
-  mk('c-wsplit','bar',wCats,[
-    {label:'2026',data:wCats.map(k=>SR26[k]||0),backgroundColor:Y26},
-    {label:'2025',data:wCats.map(k=>SR25[k]||0),backgroundColor:Y25}
-  ],{plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.label==='2026'?tot26:tot25;return ' '+ctx.label+': '+N(ctx.raw)+' ('+pO(ctx.raw,tot)+')';}}}}}); 
-
-  const minD=minDTF(D26);
-  let t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});
-  const cK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)'];
-  mk('c-tcomp','bar',['Saturday','Sunday','Monday','Combi'],[
-    {label:'2026 now',data:cK.map(k=>(T26[k]||{t:0}).t),backgroundColor:Y26},
-    {label:'2025 @same DTF',data:cK.map(k=>t25w[k]||t25w[k.replace('Saturday, Sunday, Monday','Friday, Saturday, Sunday, Monday')]||0),backgroundColor:Y25}
-  ],{plugins:{legend:{position:'top'}}});
+  const fillPcts=ROWS.map((r,i)=>caps[i]?Math.round(totalSolds[i]/caps[i]*100):0);
+  mk('c-wf','bar',labels,[{label:'% of capacity sold',data:fillPcts,backgroundColor:ROWS.map(r=>r.c)}],
+    {plugins:{legend:{display:false}},yS:{max:100,ticks:{callback:v=>v+'%'}}});
 }
 
 // ── LIVE REFRESH ─────────────────────────────
@@ -801,13 +599,7 @@ async function liveRefresh(){
   if(!API){alert('No live API URL set.');return;}
   const btn=document.querySelector('.rbtn');btn.textContent='↻ Loading…';btn.disabled=true;
   try{
-    // Use no-cors workaround: fetch via iframe-free approach with mode no-cors won't work for JSON
-    // Apps Script requires CORS headers — need to redeploy with correct settings
-    const resp=await fetch(API+'?t='+Date.now(),{
-      method:'GET',
-      headers:{'Accept':'application/json'},
-      mode:'cors'  // Apps Script doGet with ContentService supports CORS
-    });
+    const resp=await fetch(API+'?t='+Date.now(),{method:'GET',mode:'cors'});
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     const j=await resp.json();if(j.error)throw new Error(j.error);
     const fresh=j.data.map(r=>({
@@ -820,21 +612,20 @@ async function liveRefresh(){
       price:parseFloat(String(r['Total price']||r.price||0).replace(',','.'))||0,
       country:r['Country']||r.country||''
     })).filter(r=>r.tickets>0&&r.dtf>=0);
-    // Update capacity + guests dynamically from JM Pricing sheet
-    if(j.capacity){
-      DCAP={Saturday:j.capacity.Saturday||4240,Sunday:j.capacity.Sunday||4240,Monday:j.capacity.Monday||4240};
-    }
-    if(j.guests25){
-      DGUESTS25={Saturday:j.guests25.Saturday||407,Sunday:j.guests25.Sunday||503,Monday:j.guests25.Monday||645};
-    }
-    if(j.guests26){
-      GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};
+    if(j.capacity){DCAP={Saturday:j.capacity.Saturday||4240,Sunday:j.capacity.Sunday||4240,Monday:j.capacity.Monday||4240};}
+    if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||407,Sunday:j.guests25.Sunday||503,Monday:j.guests25.Monday||645};}
+    if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};}
+    if(j.waveQuotas){
+      const wq=j.waveQuotas;
+      if(wq.Saturday) WAVE_CFG['Saturday']={Presale:wq.Saturday.Presale||948,'Early Bird':wq.Saturday['Early Bird']||1184,Regular:wq.Saturday.Regular||2811,'Final Wave':wq.Saturday['Final Wave']||2524};
+      if(wq.Sunday)   WAVE_CFG['Sunday']={Presale:wq.Sunday.Presale||259,'Early Bird':wq.Sunday['Early Bird']||3061,Regular:wq.Sunday.Regular||2250,'Final Wave':wq.Sunday['Final Wave']||2000};
+      if(wq.Monday)   WAVE_CFG['Monday (Public holiday)']={Presale:wq.Monday.Presale||0,'Early Bird':wq.Monday['Early Bird']||758,Regular:wq.Monday.Regular||863,'Final Wave':wq.Monday['Final Wave']||610};
+      if(wq.Combi)    WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wq.Combi.Presale||350,'Early Bird':wq.Combi['Early Bird']||1117,Regular:wq.Combi.Regular||863,'Final Wave':wq.Combi['Final Wave']||610};
     }
     loadData(fresh,D25);setFresh();buildAll();
-    btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Live refresh';btn.disabled=false;},2500);
+    btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Refresh';btn.disabled=false;},2500);
   }catch(e){
-    alert('Live refresh failed: '+e.message+'\n\nIf you see "Failed to fetch", the Apps Script deployment needs to be updated — see the instructions in the README.');
-    btn.textContent='↻ Live refresh';btn.disabled=false;
+    alert('Refresh failed: '+e.message);btn.textContent='↻ Refresh';btn.disabled=false;
   }
 }
 
@@ -843,7 +634,7 @@ function ST(n,el){
   document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
   document.getElementById('s-'+n).classList.add('on');el.classList.add('on');
 }
-function buildAll(){bOv();bRev();bDay();bCum();bWav();bAtt();bBrk();}
+function buildAll(){bOv();bTrends();bRev();bWav();}
 
 loadData(E26,E25);setFresh();buildAll();
 </script>
