@@ -203,9 +203,28 @@ let WAVE_CFG={
   'Saturday - CERA':{'Cera - Regular':100},'Sunday - CERA':{'Cera - Early Bird':100},
   'Monday (Public holiday) - CERA':{'Cera - Early Bird':100}
 };
-const CW={'Saturday':'Regular','Sunday':'Early Bird','Monday (Public holiday)':'Early Bird',
-  'Combi (Saturday, Sunday, Monday)':'Regular','Saturday - CERA':'Cera - Regular',
-  'Sunday - CERA':'Cera - Early Bird','Monday (Public holiday) - CERA':'Cera - Early Bird'};
+// CW is now a function — dynamically determines current wave based on sold vs quota
+// Auto-advances to next wave when sold >= quota
+const WAVE_ORDER_MAP={
+  'Saturday':['Presale','Early Bird','Regular','Final Wave'],
+  'Sunday':['Presale','Early Bird','Regular','Final Wave'],
+  'Monday (Public holiday)':['Presale','Early Bird','Regular','Final Wave'],
+  'Combi (Saturday, Sunday, Monday)':['Presale','Early Bird','Regular','Final Wave'],
+  'Saturday - CERA':['Cera - Early Bird','Cera - Regular'],
+  'Sunday - CERA':['Cera - Early Bird','Cera - Regular'],
+  'Monday (Public holiday) - CERA':['Cera - Early Bird','Cera - Regular']
+};
+function CW(k){
+  const waves=WAVE_ORDER_MAP[k]||[];
+  for(let i=0;i<waves.length;i++){
+    const w=waves[i];
+    const quota=WAVE_CFG[k]?WAVE_CFG[k][w]||0:0;
+    if(!quota)continue;
+    const sold=D26.filter(x=>tKey(x)===k&&x.subtitle===w).reduce((s,x)=>s+x.tickets,0);
+    if(sold<quota)return w;
+  }
+  return waves[waves.length-1]||null;
+}
 const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular'];
 const NO_SHOW=0.06;
 const ATT25={'Saturday':2550,'Sunday':2510,'Monday (Public holiday)':2755};
@@ -311,7 +330,7 @@ function bOv(){
 
   function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
   function pastSoldTotal(k){
-    const cur=CW[k];const allW=Object.keys(WAVE_CFG[k]||{});
+    const cur=CW(k);const allW=Object.keys(WAVE_CFG[k]||{});
     const idx=allW.indexOf(cur);
     return allW.slice(0,idx).reduce((s,w)=>s+wSold(k,w),0);
   }
@@ -347,7 +366,7 @@ function bOv(){
     const g25=DGUESTS25[d.l]||500;
     const att=Math.round((t26day+g26)*(1-NO_SHOW));
     const a25=ATT25[d.k];
-    const wave=CW[d.k];
+    const wave=CW(d.k);
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
     const ws=wave?wSold(d.k,wave):0;
     totT26+=t26day;totT25w+=t25wv;totF25+=f25;totCap+=cap;totAtt26+=att;totAtt25+=a25;
@@ -377,7 +396,7 @@ function bOv(){
   const combiT25=t25w['Combi (Friday, Saturday, Sunday, Monday)']||0;
   const combiF25=F25['Combi (Friday, Saturday, Sunday, Monday)']||0;
   const combiCap=CAP['Combi (Saturday, Sunday, Monday)']||800;
-  const combiWave=CW['Combi (Saturday, Sunday, Monday)'];
+  const combiWave=CW('Combi (Saturday, Sunday, Monday)');
   const combiWq=combiWave&&WAVE_CFG['Combi (Saturday, Sunday, Monday)']?WAVE_CFG['Combi (Saturday, Sunday, Monday)'][combiWave]||0:0;
   const combiWs=combiWave?D26.filter(x=>tKey(x)==='Combi (Saturday, Sunday, Monday)'&&x.subtitle===combiWave).reduce((s,x)=>s+x.tickets,0):0;
   rows+=`<tr class="blk-tickets" style="opacity:.85">
@@ -544,12 +563,12 @@ function bWav(){
     {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'}
   ];
   function wS(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
-  function pSold(k){const cur=CW[k];const allW=Object.keys(WAVE_CFG[k]||{});const idx=allW.indexOf(cur);return allW.slice(0,idx).reduce((s,w)=>s+wS(k,w),0);}
+  function pSold(k){const cur=CW(k);const allW=Object.keys(WAVE_CFG[k]||{});const idx=allW.indexOf(cur);return allW.slice(0,idx).reduce((s,w)=>s+wS(k,w),0);}
 
   const th=`<thead><tr><th>Ticket type</th><th>Current wave</th><th class="t26">Sold (wave)</th><th>Quota</th><th>% quota</th><th>Past waves sold</th><th class="t26">Total sold</th><th>Capacity</th><th>% cap</th><th>Left</th></tr></thead>`;
   const body=ROWS.map(r=>{
     const t=(T26[r.k]||{t:0}).t;const cap=CAP[r.k]||0;
-    const wave=CW[r.k];const wq=wave&&WAVE_CFG[r.k]?WAVE_CFG[r.k][wave]||0:0;
+    const wave=CW(r.k);const wq=wave&&WAVE_CFG[r.k]?WAVE_CFG[r.k][wave]||0:0;
     const ws=wave?wS(r.k,wave):0;const ps=pSold(r.k);
     return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
       <td>${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
@@ -563,7 +582,7 @@ function bWav(){
 
   const caps=ROWS.map(r=>CAP[r.k]||0);
   const pastSolds=ROWS.map(r=>pSold(r.k));
-  const curSolds=ROWS.map(r=>CW[r.k]?wS(r.k,CW[r.k]):0);
+  const curSolds=ROWS.map(r=>CW(r.k)?wS(r.k,CW(r.k)):0);
   const totalSolds=ROWS.map(r=>(T26[r.k]||{t:0}).t);
   const unsolds=ROWS.map((r,i)=>Math.max(0,caps[i]-totalSolds[i]));
   const labels=ROWS.map(r=>r.l);
