@@ -656,7 +656,53 @@ function ST(n,el){
 }
 function buildAll(){bOv();bTrends();bRev();bWav();}
 
-loadData(E26,E25);setFresh();buildAll();
+// On load: fetch live quotas/capacity from API first, then build
+// Falls back to embedded data immediately if API is unavailable
+async function init(){
+  loadData(E26,E25); // load embedded data immediately so page isn't blank
+  setFresh();
+  if(API){
+    try{
+      const resp=await fetch(API+'?t='+Date.now(),{method:'GET',mode:'cors'});
+      if(resp.ok){
+        const j=await resp.json();
+        if(!j.error){
+          // Update capacity & guests from pricing sheet
+          if(j.capacity){DCAP={Saturday:j.capacity.Saturday||4240,Sunday:j.capacity.Sunday||4240,Monday:j.capacity.Monday||4240};}
+          if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||407,Sunday:j.guests25.Sunday||503,Monday:j.guests25.Monday||645};}
+          if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};}
+          // Update wave quotas from JM Pricing col O (rows 4-28)
+          if(j.waveQuotas){
+            const wq=j.waveQuotas;
+            if(wq.Saturday) WAVE_CFG['Saturday']={Presale:wq.Saturday.Presale||242,'Early Bird':wq.Saturday['Early Bird']||491,Regular:wq.Saturday.Regular||1150,'Final Wave':wq.Saturday['Final Wave']||817};
+            if(wq.Sunday)   WAVE_CFG['Sunday']={Presale:wq.Sunday.Presale||106,'Early Bird':wq.Sunday['Early Bird']||744,Regular:wq.Sunday.Regular||900,'Final Wave':wq.Sunday['Final Wave']||700};
+            if(wq.Monday)   WAVE_CFG['Monday (Public holiday)']={Presale:wq.Monday.Presale||92,'Early Bird':wq.Monday['Early Bird']||758,Regular:wq.Monday.Regular||900,'Final Wave':wq.Monday['Final Wave']||700};
+            if(wq.Combi)    WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wq.Combi.Presale||193,'Early Bird':wq.Combi['Early Bird']||247,Regular:wq.Combi.Regular||150,'Final Wave':wq.Combi['Final Wave']||100};
+          }
+          // Also update ticket data if available
+          if(j.data&&j.data.length){
+            const fresh=j.data.map(r=>({
+              date:r['Date of order']||r.date||'',
+              dtf:parseInt(r['Days to festival']||r.dtf)||0,
+              pos:r['Point of Sale Title']||r.pos||'',
+              title:r['Product Title']||r.title||'',
+              subtitle:r['Product Subtitle']||r.subtitle||'',
+              tickets:parseInt(r['Number of tickets sold']||r.tickets)||0,
+              price:parseFloat(String(r['Total price']||r.price||0).replace(',','.'))||0,
+              country:r['Country']||r.country||''
+            })).filter(r=>r.tickets>0&&r.dtf>=0);
+            loadData(fresh,D25);
+            setFresh();
+          }
+        }
+      }
+    }catch(e){
+      console.log('Auto-refresh on load failed, using embedded data:',e.message);
+    }
+  }
+  buildAll();
+}
+init();
 </script>
 </body>
 </html>
