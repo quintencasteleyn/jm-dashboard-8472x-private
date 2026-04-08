@@ -282,9 +282,9 @@ let WAVE_CFG={
   'Sunday':{Presale:106,'Early Bird':529,Regular:1115,'Final Wave':700},
   'Monday (Public holiday)':{Presale:92,'Early Bird':791,Regular:867,'Final Wave':700},
   'Combi (Saturday, Sunday, Monday)':{Presale:193,'Early Bird':247,Regular:150,'Final Wave':100},
-  'Saturday - CERA':{'Cera - EB':0,'Cera - Regular':100,'Cera - Final Wave':150},
-  'Sunday - CERA':{'Cera - EB':100,'Cera - Regular':200,'Cera - Final Wave':200},
-  'Monday (Public holiday) - CERA':{'Cera - EB':100,'Cera - Regular':200,'Cera - Final Wave':200}
+    'Saturday - CERA':{'Cera - Early Bird':0,'Cera - Regular':100},
+  'Sunday - CERA':{'Cera - Early Bird':100,'Cera - Regular':0},
+  'Monday (Public holiday) - CERA':{'Cera - Early Bird':100,'Cera - Regular':0},
 };
 // CW is now a function — dynamically determines current wave based on sold vs quota
 // Auto-advances to next wave when sold >= quota
@@ -293,9 +293,9 @@ const WAVE_ORDER_MAP={
   'Sunday':['Presale','Early Bird','Regular','Final Wave'],
   'Monday (Public holiday)':['Presale','Early Bird','Regular','Final Wave'],
   'Combi (Saturday, Sunday, Monday)':['Presale','Early Bird','Regular','Final Wave'],
-  'Saturday - CERA':['Cera - EB','Cera - Regular','Cera - Final Wave'],
-  'Sunday - CERA':['Cera - EB','Cera - Regular','Cera - Final Wave'],
-  'Monday (Public holiday) - CERA':['Cera - EB','Cera - Regular','Cera - Final Wave']
+  'Saturday - CERA':['Cera - Early Bird','Cera - Regular'],
+  'Sunday - CERA':['Cera - Early Bird','Cera - Regular'],
+  'Monday (Public holiday) - CERA':['Cera - Early Bird','Cera - Regular']
 };
 function CW(k){
   // Current wave = wave of the most recently purchased ticket for this type
@@ -437,11 +437,10 @@ function bOv(){
   let totT26=0,totT25w=0,totF25=0,totCap=0,totAtt26=0,totAtt25=0;
 
   DAYS.forEach(d=>{
-    // Day tickets = ONLY this day's tickets (excl. combi to avoid double-count)
-    // Combi is shown separately in its own row below
-    const t26day=(T26[d.k]||{t:0}).t; // single-day only, no CERA, no combi
-    const t25wv=(t25w[d.k25]||0);
-    const f25=(F25[d.k25]||0);
+    // Day tickets = day + CERA for that day (combi excluded - has own row)
+    const t26day=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t;
+    const t25wv=(t25w[d.k25]||0)+(t25w[d.k25+' - CERA']||0);
+    const f25=(F25[d.k25]||0)+(F25[d.k25+' - CERA']||0);
     const cap=DCAP[d.l]||4240;
     const g26=GUESTS[d.k]||500;
     const g25=DGUESTS25[d.l]||500;
@@ -530,12 +529,16 @@ function bOv(){
   </tr>`;
 
   // Total row
+  // Grand total includes combi to match banner KPI
+  const grandT26=totT26+combiT;
+  const grandT25w=totT25w+(t25w['Combi (Friday, Saturday, Sunday, Monday)']||0);
+  const grandF25=totF25+(F25['Combi (Friday, Saturday, Sunday, Monday)']||0);
   rows+=`<tr class="tot-row">
-    <td>Total</td>
-    <td class="t26">${N(totT26)}</td><td class="t25">${N(totT25w)}</td>
-    <td class="${dCl(totT26,totT25w)}">${dStr(totT26,totT25w)}</td>
-    <td class="t25">${N(totF25)}</td><td>${pO(totT26,totF25)}</td>
-    <td>${N(totCap)}</td><td>${bar(totT26/totCap*100,'#15803d')}</td><td>${N(totCap-totT26)}</td>
+    <td>Total (all incl. combi)</td>
+    <td class="t26">${N(grandT26)}</td><td class="t25">${N(grandT25w)}</td>
+    <td class="${dCl(grandT26,grandT25w)}">${dStr(grandT26,grandT25w)}</td>
+    <td class="t25">${N(grandF25)}</td><td>${pO(grandT26,grandF25)}</td>
+    <td>${N(totCap)}</td><td>${bar(grandT26/totCap*100,'#15803d')}</td><td>${N(totCap-grandT26)}</td>
     <td colspan="4"></td>
     <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${bar(totAtt26/totAtt25*100,'#6d28d9')}</td>
   </tr></tbody>`;
@@ -820,9 +823,9 @@ async function liveRefresh(){
       WAVE_CFG['Sunday']={Presale:wv('Sunday','Presale',106),'Early Bird':wv('Sunday','Early Bird',529),Regular:wv('Sunday','Regular',1115),'Final Wave':wv('Sunday','Final Wave',700)};
       WAVE_CFG['Monday (Public holiday)']={Presale:wv('Monday','Presale',92),'Early Bird':wv('Monday','Early Bird',791),Regular:wv('Monday','Regular',867),'Final Wave':wv('Monday','Final Wave',700)};
       WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wv('Combi','Presale',193),'Early Bird':wv('Combi','Early Bird',247),Regular:wv('Combi','Regular',150),'Final Wave':wv('Combi','Final Wave',100)};
-      WAVE_CFG['Saturday - CERA']={'Cera - EB':wv('Saturday','CERA - EB',0),'Cera - Regular':wv('Saturday','CERA - Regular',100),'Cera - Final Wave':wv('Saturday','CERA - Final Wave',150)};
-      WAVE_CFG['Sunday - CERA']={'Cera - EB':wv('Sunday','CERA - EB',100),'Cera - Regular':wv('Sunday','CERA - Regular',200),'Cera - Final Wave':wv('Sunday','CERA - Final Wave',200)};
-      WAVE_CFG['Monday (Public holiday) - CERA']={'Cera - EB':wv('Monday','CERA - EB',100),'Cera - Regular':wv('Monday','CERA - Regular',200),'Cera - Final Wave':wv('Monday','CERA - Final Wave',200)};
+      WAVE_CFG['Saturday - CERA']={'Cera - Early Bird':wv('Saturday - CERA','Cera - Early Bird',0),'Cera - Regular':wv('Saturday - CERA','Cera - Regular',100)};
+      WAVE_CFG['Sunday - CERA']={'Cera - Early Bird':wv('Sunday - CERA','Cera - Early Bird',100),'Cera - Regular':wv('Sunday - CERA','Cera - Regular',0)};
+      WAVE_CFG['Monday (Public holiday) - CERA']={'Cera - Early Bird':wv('Monday - CERA','Cera - Early Bird',100),'Cera - Regular':wv('Monday - CERA','Cera - Regular',0)};
     }
     loadData(fresh,D25);setFresh();buildAll();
     btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Refresh';btn.disabled=false;},2500);
