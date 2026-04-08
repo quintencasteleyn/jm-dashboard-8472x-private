@@ -298,15 +298,13 @@ const WAVE_ORDER_MAP={
   'Monday (Public holiday) - CERA':['Cera - EB','Cera - Regular','Cera - Final Wave']
 };
 function CW(k){
-  const waves=WAVE_ORDER_MAP[k]||[];
-  for(let i=0;i<waves.length;i++){
-    const w=waves[i];
-    const quota=WAVE_CFG[k]?WAVE_CFG[k][w]||0:0;
-    if(!quota)continue;
-    const sold=D26.filter(x=>tKey(x)===k&&x.subtitle===w).reduce((s,x)=>s+x.tickets,0);
-    if(sold<quota)return w;
-  }
-  return waves[waves.length-1]||null;
+  // Current wave = wave of the most recently purchased ticket for this type
+  // "Most recent" = lowest DTF (days to festival) = closest purchase to event date
+  const recs=D26.filter(x=>tKey(x)===k&&x.tickets>0&&x.subtitle);
+  if(!recs.length) return WAVE_ORDER_MAP[k]?WAVE_ORDER_MAP[k][0]:null;
+  const minDTF=Math.min(...recs.map(x=>x.dtf));
+  const mostRecent=recs.filter(x=>x.dtf===minDTF);
+  return mostRecent[0]?.subtitle||null;
 }
 const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular'];
 const NO_SHOW=0.06;
@@ -439,15 +437,17 @@ function bOv(){
   let totT26=0,totT25w=0,totF25=0,totCap=0,totAtt26=0,totAtt25=0;
 
   DAYS.forEach(d=>{
-    const t26=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t;
-    const combi=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
-    const t26day=t26+combi;
-    const t25wv=(t25w[d.k25]||0)+(t25w[d.k25+' - CERA']||0);
-    const f25=(F25[d.k25]||0)+(F25[d.k25+' - CERA']||0);
+    // Day tickets = ONLY this day's tickets (excl. combi to avoid double-count)
+    // Combi is shown separately in its own row below
+    const t26day=(T26[d.k]||{t:0}).t; // single-day only, no CERA, no combi
+    const t25wv=(t25w[d.k25]||0);
+    const f25=(F25[d.k25]||0);
     const cap=DCAP[d.l]||4240;
     const g26=GUESTS[d.k]||500;
     const g25=DGUESTS25[d.l]||500;
-    const att=Math.round((t26day+g26)*(1-NO_SHOW));
+    // Attendance = day tickets + combi (combi holders attend all days) + guests
+    const combi=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
+    const att=Math.round((t26day+combi+g26)*(1-NO_SHOW));
     const a25=ATT25[d.k];
     const wave=CW(d.k);
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
@@ -843,10 +843,13 @@ function bDetail(){
   const minD=minDTF(D26);
   let t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});
   const ALL_ROWS=[
-    {l:'Saturday',k:'Saturday',c:'#6b9ef5'},{l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
-    {l:'Sunday',k:'Sunday',c:'#3db870'},{l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
-    {l:'Monday',k:'Monday (Public holiday)',c:'#e06b42'},{l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
-    {l:'Combi',k:'Combi (Saturday, Sunday, Monday)',c:'#f5c842'},
+    {l:'Combi (all days)',k:'Combi (Saturday, Sunday, Monday)',c:'#f5c842'},
+    {l:'Saturday',k:'Saturday',c:'#6b9ef5'},
+    {l:'Sunday',k:'Sunday',c:'#3db870'},
+    {l:'Monday',k:'Monday (Public holiday)',c:'#e06b42'},
+    {l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
+    {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
+    {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
   ];
   function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
 
