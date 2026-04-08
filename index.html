@@ -93,9 +93,52 @@ tbody tr:hover td{filter:brightness(.97);}
 .leg-item{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);}
 .leg-sq{width:10px;height:10px;border-radius:2px;}
 @media(max-width:900px){.g2,.g3{grid-template-columns:1fr;}.kpi{min-width:44%;}}
+
+/* PASSWORD SCREEN */
+#pwd-overlay{position:fixed;inset:0;background:#1c1917;z-index:9999;display:flex;align-items:center;justify-content:center;}
+#pwd-box{background:#292524;border:1px solid #44403c;border-radius:12px;padding:36px 40px;width:340px;text-align:center;}
+#pwd-box .logo-big{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;margin:0 auto 16px;font-family:'JetBrains Mono',monospace;}
+#pwd-box h2{color:#fafaf9;font-size:18px;font-weight:600;margin-bottom:4px;}
+#pwd-box p{color:#a8a29e;font-size:12px;margin-bottom:20px;}
+#pwd-box input{width:100%;padding:10px 13px;border-radius:7px;border:1px solid #57534e;background:#1c1917;color:#fafaf9;font-family:'Sora',sans-serif;font-size:14px;outline:none;margin-bottom:10px;}
+#pwd-box input:focus{border-color:#d97706;}
+#pwd-box button{width:100%;padding:10px;border-radius:7px;background:#d97706;color:#fff;border:none;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+#pwd-box button:hover{background:#b45309;}
+#pwd-err{color:#ef4444;font-size:11px;margin-top:6px;height:16px;}
 </style>
 </head>
 <body>
+
+<!-- PASSWORD OVERLAY -->
+<div id="pwd-overlay">
+  <div id="pwd-box">
+    <div class="logo-big">JM</div>
+    <h2>Jazz Middelheim 2026</h2>
+    <p>Enter the access password to view the dashboard</p>
+    <input type="password" id="pwd-input" placeholder="Password" onkeydown="if(event.key==='Enter')chkPwd()">
+    <button onclick="chkPwd()">Access Dashboard</button>
+    <div id="pwd-err"></div>
+  </div>
+</div>
+<script>
+(function(){
+  // Check if already authenticated in this session
+  if(sessionStorage.getItem('jm_auth')==='1'){
+    document.getElementById('pwd-overlay').style.display='none';
+  }
+  window.chkPwd=function(){
+    const v=document.getElementById('pwd-input').value;
+    if(v==='paradise26!'){
+      sessionStorage.setItem('jm_auth','1');
+      document.getElementById('pwd-overlay').style.display='none';
+    } else {
+      document.getElementById('pwd-err').textContent='Incorrect password. Please try again.';
+      document.getElementById('pwd-input').value='';
+      document.getElementById('pwd-input').focus();
+    }
+  };
+})();
+</script>
 
 <div class="hdr">
   <div class="hdr-l">
@@ -109,7 +152,10 @@ tbody tr:hover td{filter:brightness(.97);}
     <span class="pill p26">■ 2026</span>
     <span class="pill p25">■ 2025</span>
     <span class="pill" id="dtf-pill">D-?</span>
-    <button class="rbtn" onclick="liveRefresh()">↻ Refresh</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+      <button class="rbtn" onclick="liveRefresh()">↻ Refresh</button>
+      <span style="font-size:9px;color:var(--mu);font-family:'JetBrains Mono',monospace">Data max. 2h old</span>
+    </div>
   </div>
 </div>
 
@@ -118,6 +164,7 @@ tbody tr:hover td{filter:brightness(.97);}
   <button class="nt"    onclick="ST('trends',this)">Sales Trends</button>
   <button class="nt"    onclick="ST('rev',this)">Revenue</button>
   <button class="nt"    onclick="ST('wav',this)">Waves & Capacity</button>
+  <button class="nt"    onclick="ST('detail',this)">Detail</button>
 </div>
 
 <div class="main">
@@ -148,6 +195,14 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="th">Past 10 days — tickets by type (detail)</div>
     <table id="tbl-d10"></table>
   </div>
+  <div class="card g1" style="margin-top:13px">
+    <div class="ct">Rolling average — all tickets sold per day
+      <span class="yl"><span class="yl-l" style="background:#6b9ef5"></span>7-day
+      <span class="yl-l" style="background:#3db870"></span>30-day
+      <span class="yl-l" style="background:#e06b42"></span>60-day</span>
+    </div>
+    <canvas id="c-roll" height="130"></canvas>
+  </div>
 </div>
 
 <!-- ══ SALES TRENDS ══ -->
@@ -168,6 +223,12 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="card"><div class="ct">Cumul. net revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-all" height="200"></canvas></div>
     <div class="card"><div class="ct">Daily revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-day" height="200"></canvas></div>
   </div>
+  <div class="g3">
+    <div class="card"><div class="ct">Cumul. net revenue — Saturday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sat" height="200"></canvas></div>
+    <div class="card"><div class="ct">Cumul. net revenue — Sunday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sun" height="200"></canvas></div>
+    <div class="card"><div class="ct">Cumul. net revenue — Monday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-mon" height="200"></canvas></div>
+    <div class="card"><div class="ct">Cumul. revenue — Monday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-mon" height="200"></canvas></div>
+  </div>
   <div class="tw"><div class="th">Net revenue breakdown — 2026 vs 2025 (gross → fees → VAT → net)</div><table id="tbl-rev"></table><div class="note">2026: 2% fee. 2025: 2% + €0.45/ticket. VAT 6% on gross both years.</div></div>
 </div>
 
@@ -177,6 +238,26 @@ tbody tr:hover td{filter:brightness(.97);}
   <div class="g2">
     <div class="card"><div class="ct">Sales vs total capacity — <span style="color:#86efac;font-weight:700">■</span> past waves &nbsp;<span style="color:#fed7aa;font-weight:700">■</span> current wave &nbsp;<span style="color:#bfb8b0;font-weight:700">■</span> unsold</div><canvas id="c-wb" height="230"></canvas></div>
     <div class="card"><div class="ct">% of total capacity sold per ticket type</div><canvas id="c-wf" height="230"></canvas></div>
+  </div>
+</div>
+
+<!-- ══ DETAIL TAB ══ -->
+<div class="sec" id="s-detail">
+  <div class="tw" id="det-tickets">
+    <div class="th" style="background:var(--c-tickets-h);color:#1d4ed8">🎟 Ticket Sales — per day &amp; CERA</div>
+    <table id="tbl-det-tickets"></table>
+  </div>
+  <div class="tw" id="det-cap" style="margin-top:13px">
+    <div class="th" style="background:var(--c-cap-h);color:#15803d">📊 Capacity</div>
+    <table id="tbl-det-cap"></table>
+  </div>
+  <div class="tw" id="det-wave" style="margin-top:13px">
+    <div class="th" style="background:var(--c-wave-h);color:#b45309">🌊 Wave Progress</div>
+    <table id="tbl-det-wave"></table>
+  </div>
+  <div class="tw" id="det-att" style="margin-top:13px">
+    <div class="th" style="background:var(--c-att-h);color:#6d28d9">👥 Attendance</div>
+    <table id="tbl-det-att"></table>
   </div>
 </div>
 
@@ -196,13 +277,14 @@ const CAP={'Saturday':2800,'Sunday':2550,'Monday (Public holiday)':2550,
   'Combi (Saturday, Sunday, Monday)':800,'Saturday - CERA':250,
   'Sunday - CERA':500,'Monday (Public holiday) - CERA':500};
 let WAVE_CFG={
-  // Values from JM Pricing sheet col O (rows 4-28) — updated on live refresh
+  // Values from JM26 Capacities sheet — updated automatically on refresh
   'Saturday':{Presale:242,'Early Bird':491,Regular:1150,'Final Wave':817},
-  'Sunday':{Presale:106,'Early Bird':744,Regular:900,'Final Wave':700},
-  'Monday (Public holiday)':{Presale:92,'Early Bird':758,Regular:900,'Final Wave':700},
+  'Sunday':{Presale:106,'Early Bird':529,Regular:1115,'Final Wave':700},
+  'Monday (Public holiday)':{Presale:92,'Early Bird':791,Regular:867,'Final Wave':700},
   'Combi (Saturday, Sunday, Monday)':{Presale:193,'Early Bird':247,Regular:150,'Final Wave':100},
-  'Saturday - CERA':{'Cera - Regular':100},'Sunday - CERA':{'Cera - Early Bird':100},
-  'Monday (Public holiday) - CERA':{'Cera - Early Bird':100}
+  'Saturday - CERA':{'Cera - EB':0,'Cera - Regular':100,'Cera - Final Wave':150},
+  'Sunday - CERA':{'Cera - EB':100,'Cera - Regular':200,'Cera - Final Wave':200},
+  'Monday (Public holiday) - CERA':{'Cera - EB':100,'Cera - Regular':200,'Cera - Final Wave':200}
 };
 // CW is now a function — dynamically determines current wave based on sold vs quota
 // Auto-advances to next wave when sold >= quota
@@ -211,9 +293,9 @@ const WAVE_ORDER_MAP={
   'Sunday':['Presale','Early Bird','Regular','Final Wave'],
   'Monday (Public holiday)':['Presale','Early Bird','Regular','Final Wave'],
   'Combi (Saturday, Sunday, Monday)':['Presale','Early Bird','Regular','Final Wave'],
-  'Saturday - CERA':['Cera - Early Bird','Cera - Regular'],
-  'Sunday - CERA':['Cera - Early Bird','Cera - Regular'],
-  'Monday (Public holiday) - CERA':['Cera - Early Bird','Cera - Regular']
+  'Saturday - CERA':['Cera - EB','Cera - Regular','Cera - Final Wave'],
+  'Sunday - CERA':['Cera - EB','Cera - Regular','Cera - Final Wave'],
+  'Monday (Public holiday) - CERA':['Cera - EB','Cera - Regular','Cera - Final Wave']
 };
 function CW(k){
   const waves=WAVE_ORDER_MAP[k]||[];
@@ -392,6 +474,38 @@ function bOv(){
     </tr>`;
   });
 
+  // CERA rows
+  const CERA_ROWS=[
+    {l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
+    {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
+    {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
+  ];
+  CERA_ROWS.forEach(d=>{
+    const t26c=(T26[d.k]||{t:0}).t;
+    const t25wc=t25w[d.k]||0;
+    const f25c=F25[d.k]||0;
+    const capC=CAP[d.k]||0;
+    const wavC=CW(d.k);
+    const wqC=wavC&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wavC]||0:0;
+    const wsC=wavC?wSold(d.k,wavC):0;
+    rows+=`<tr class="blk-tickets" style="opacity:.8;font-size:11px">
+      <td><span class="dot" style="background:${d.c}"></span><em>${d.l}</em></td>
+      <td class="t26">${N(t26c)}</td>
+      <td class="t25">${N(t25wc)}</td>
+      <td class="${dCl(t26c,t25wc)}">${dStr(t26c,t25wc)}</td>
+      <td class="t25">${f25c?N(f25c):'—'}</td>
+      <td>${f25c?pO(t26c,f25c):'—'}</td>
+      <td style="background:var(--c-cap)">${capC?N(capC):'—'}</td>
+      <td style="background:var(--c-cap)">${capC?bar(t26c/capC*100,'#15803d'):'—'}</td>
+      <td style="background:var(--c-cap)">${capC?N(capC-t26c):'—'}</td>
+      <td style="background:var(--c-wave)">${wavC?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wavC}</span>`:'—'}</td>
+      <td class="t26" style="background:var(--c-wave)">${wsC?N(wsC):'—'}</td>
+      <td style="background:var(--c-wave)">${wqC?N(wqC):'—'}</td>
+      <td style="background:var(--c-wave)">${wsC&&wqC?bar(wsC/wqC*100,Y26):'—'}</td>
+      <td style="background:var(--c-att)" colspan="3" class="mu" style="font-size:10px">—</td>
+    </tr>`;
+  });
+
   // Combi row (span across blocks where N/A)
   const combiT=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
   const combiT25=t25w['Combi (Friday, Saturday, Sunday, Monday)']||0;
@@ -474,6 +588,32 @@ function bOv(){
   mk('c-pie','doughnut',k26.map(k=>k.replace(' (Public holiday)','').replace(' (Saturday, Sunday, Monday)','')),
     [{data:k26.map(k=>T26[k].t),backgroundColor:k26.map(k=>DC[k]||'#888'),borderWidth:1,borderColor:'#f7f7f5'}],
     {plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+N(ctx.raw)+' ('+pO(ctx.raw,ptot)+')'}}},cutout:'60%'});
+
+  // Rolling averages — 7 / 30 / 60 day
+  {
+    // Build daily totals map (DTF -> tickets) for all existing DTFs
+    const allDTFs=DTFS(185);
+    const dailyTots=allDTFs.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0);
+    // Rolling avg helper: for each position, average the N days ending at that position (left=oldest)
+    function rollAvg(arr, n){
+      return arr.map((v,i)=>{
+        const slice=arr.slice(Math.max(0,i-n+1),i+1).filter(x=>x>0);
+        return slice.length>0?+(slice.reduce((s,v)=>s+v,0)/slice.length).toFixed(1):null;
+      });
+    }
+    const lbl185=allDTFs.map(d=>'D-'+d);
+    const ra7 =rollAvg(dailyTots,7);
+    const ra30=rollAvg(dailyTots,30);
+    const ra60=rollAvg(dailyTots,60);
+    // Null out future (no data)
+    const hasDTF=new Set(Object.keys(DTF26).map(Number));
+    function maskFuture(arr){return arr.map((v,i)=>hasDTF.has(allDTFs[i])?v:null);}
+    mk('c-roll','line',lbl185,[
+      {label:'7-day avg', data:maskFuture(ra7), borderColor:'#6b9ef5',backgroundColor:'rgba(107,158,245,.08)',borderWidth:2,pointRadius:0,fill:true,tension:.3,spanGaps:false},
+      {label:'30-day avg',data:maskFuture(ra30),borderColor:'#3db870',backgroundColor:'rgba(61,184,112,.08)',borderWidth:2,pointRadius:0,fill:true,tension:.3,spanGaps:false},
+      {label:'60-day avg',data:maskFuture(ra60),borderColor:'#e06b42',backgroundColor:'rgba(224,107,66,.08)',borderWidth:2,pointRadius:0,fill:true,tension:.3,spanGaps:false},
+    ],{plugins:{legend:{position:'top'}},scales:{x:{ticks:{maxTicksLimit:16,font:{size:9}}},y:{beginAtZero:true}}});
+  }
 }
 
 // ── SALES TRENDS ─────────────────────────────
@@ -551,6 +691,23 @@ function bRev(){
   }).join('');
   const totG=gr26,totF=totG*0.02,totV=totG*0.06,totN=netRev(totG,tt26,2026);
   document.getElementById('tbl-rev').innerHTML=`<thead><tr><th>Ticket type</th><th>Gross (2026)</th><th>Fees</th><th>VAT</th><th>Net (2026)</th><th>Net 2025 @same</th><th>Δ</th><th>Net 2025 Full</th><th>2026 vs Full</th></tr></thead><tbody>${rows}<tr class="tot-row"><td>Total</td><td class="t26">${EU(totG)}</td><td>${EU(totF)}</td><td>${EU(totV)}</td><td class="t26">${EU(totN)}</td><td class="t25">${EU(nt25w)}</td><td class="${dCl(totN,nt25w)}">${dStr(totN,nt25w)}</td><td class="t25">${EU(nt25f)}</td><td>${pO(totN,nt25f)}</td></tr></tbody>`;
+
+  // Cumulative revenue per day — Sat, Sun, Mon (general, excl. CERA)
+  // Cumulative NET revenue per day (Sat/Sun/Mon, excl. CERA)
+  function netCumKey(dtfObj,key,yr){
+    let s=0;
+    return dtfs.map(d=>{
+      if(!dtfObj[d]||!dtfObj[d][key])return s;
+      s+=netRev(dtfObj[d][key].r,dtfObj[d][key].t,yr);
+      return s;
+    });
+  }
+  [['sat','Saturday'],['sun','Sunday'],['mon','Monday (Public holiday)']].forEach(([s,k])=>{
+    mk('c-rev-'+s,'line',lbl,[
+      lDS('2026 Net',nE26(netCumKey(DTF26,k,2026),dtfs),Y26,Y26b),
+      lDS('2025 Net',nE(netCumKey(DTF25,k,2025)),Y25,Y25b)
+    ],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
+  });
 }
 
 // ── WAVES & CAPACITY ─────────────────────────
@@ -588,6 +745,25 @@ function bWav(){
   const unsolds=ROWS.map((r,i)=>Math.max(0,caps[i]-totalSolds[i]));
   const labels=ROWS.map(r=>r.l);
 
+  // Build per-wave sold arrays for each ticket type
+  const waveColors={'Presale':'#bfdbfe','Early Bird':'#bbf7d0','Regular':'#fed7aa','Final Wave':'#fecaca',
+    'Cera - Early Bird':'#e0f2fe','Cera - Regular':'#dcfce7'};
+  const allWaveNames=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular'];
+  // For each wave, build sold array across ticket types
+  const waveDatasets=allWaveNames.map(wn=>({
+    label:wn,
+    data:ROWS.map(r=>{
+      const waves=WAVE_ORDER_MAP[r.k]||[];const curWave=CW(r.k);
+      const curIdx=waves.indexOf(curWave);const wIdx=waves.indexOf(wn);
+      if(wIdx<0)return 0; // this wave doesn't apply to this ticket type
+      if(wIdx<curIdx)return wS(r.k,wn); // past wave — show actual sold
+      if(wIdx===curIdx)return 0; // current wave handled separately
+      return 0;
+    }),
+    backgroundColor:waveColors[wn]||'#e5e7eb',
+    stack:'s'
+  })).filter(ds=>ds.data.some(v=>v>0)); // only include waves with data
+
   const wbPct={id:'wbPct',afterDraw(chart){
     const{ctx}=chart;ctx.save();
     ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
@@ -597,17 +773,18 @@ function bWav(){
         const val=ds.data[i];if(!val||val<1)return;
         const cap=caps[i]||1;const pct=Math.round(val/cap*100);if(pct<4)return;
         const y=bar.y+(bar.base-bar.y)/2;
-        ctx.fillStyle=di===2?'#9ca3af':'#374151';
+        ctx.fillStyle='#374151';
         ctx.fillText(pct+'%',bar.x,y);
       });
     });
     ctx.restore();
   }};
-  mk('c-wb','bar',labels,[
-    {label:'Past waves',data:pastSolds,backgroundColor:'#86efac',stack:'s'},
+  const allDatasets=[
+    ...waveDatasets,
     {label:'Current wave',data:curSolds,backgroundColor:'#fed7aa',stack:'s'},
     {label:'Unsold',data:unsolds,backgroundColor:'#e2ddd8',stack:'s'}
-  ],{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:10,padding:10}}},extraPlugins:[wbPct]});
+  ];
+  mk('c-wb','bar',labels,allDatasets,{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:10,padding:10}}},extraPlugins:[wbPct]});
 
   const fillPcts=ROWS.map((r,i)=>caps[i]?Math.round(totalSolds[i]/caps[i]*100):0);
   mk('c-wf','bar',labels,[{label:'% of capacity sold',data:fillPcts,backgroundColor:ROWS.map(r=>r.c)}],
@@ -636,11 +813,16 @@ async function liveRefresh(){
     if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||407,Sunday:j.guests25.Sunday||503,Monday:j.guests25.Monday||645};}
     if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};}
     if(j.waveQuotas){
+      // JM26 Capacities tab: keys are "Saturday","Sunday","Monday","Combi" with exact wave names
       const wq=j.waveQuotas;
-      if(wq.Saturday) WAVE_CFG['Saturday']={Presale:wq.Saturday.Presale||242,'Early Bird':wq.Saturday['Early Bird']||491,Regular:wq.Saturday.Regular||1150,'Final Wave':wq.Saturday['Final Wave']||817};
-      if(wq.Sunday)   WAVE_CFG['Sunday']={Presale:wq.Sunday.Presale||106,'Early Bird':wq.Sunday['Early Bird']||744,Regular:wq.Sunday.Regular||900,'Final Wave':wq.Sunday['Final Wave']||700};
-      if(wq.Monday)   WAVE_CFG['Monday (Public holiday)']={Presale:wq.Monday.Presale||92,'Early Bird':wq.Monday['Early Bird']||758,Regular:wq.Monday.Regular||900,'Final Wave':wq.Monday['Final Wave']||700};
-      if(wq.Combi)    WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wq.Combi.Presale||193,'Early Bird':wq.Combi['Early Bird']||247,Regular:wq.Combi.Regular||150,'Final Wave':wq.Combi['Final Wave']||100};
+      function wv(day,wave,fb){return(wq[day]&&wq[day][wave])||fb;}
+      WAVE_CFG['Saturday']={Presale:wv('Saturday','Presale',242),'Early Bird':wv('Saturday','Early Bird',491),Regular:wv('Saturday','Regular',1150),'Final Wave':wv('Saturday','Final Wave',817)};
+      WAVE_CFG['Sunday']={Presale:wv('Sunday','Presale',106),'Early Bird':wv('Sunday','Early Bird',529),Regular:wv('Sunday','Regular',1115),'Final Wave':wv('Sunday','Final Wave',700)};
+      WAVE_CFG['Monday (Public holiday)']={Presale:wv('Monday','Presale',92),'Early Bird':wv('Monday','Early Bird',791),Regular:wv('Monday','Regular',867),'Final Wave':wv('Monday','Final Wave',700)};
+      WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wv('Combi','Presale',193),'Early Bird':wv('Combi','Early Bird',247),Regular:wv('Combi','Regular',150),'Final Wave':wv('Combi','Final Wave',100)};
+      WAVE_CFG['Saturday - CERA']={'Cera - EB':wv('Saturday','CERA - EB',0),'Cera - Regular':wv('Saturday','CERA - Regular',100),'Cera - Final Wave':wv('Saturday','CERA - Final Wave',150)};
+      WAVE_CFG['Sunday - CERA']={'Cera - EB':wv('Sunday','CERA - EB',100),'Cera - Regular':wv('Sunday','CERA - Regular',200),'Cera - Final Wave':wv('Sunday','CERA - Final Wave',200)};
+      WAVE_CFG['Monday (Public holiday) - CERA']={'Cera - EB':wv('Monday','CERA - EB',100),'Cera - Regular':wv('Monday','CERA - Regular',200),'Cera - Final Wave':wv('Monday','CERA - Final Wave',200)};
     }
     loadData(fresh,D25);setFresh();buildAll();
     btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Refresh';btn.disabled=false;},2500);
@@ -654,7 +836,76 @@ function ST(n,el){
   document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
   document.getElementById('s-'+n).classList.add('on');el.classList.add('on');
 }
-function buildAll(){bOv();bTrends();bRev();bWav();}
+function buildAll(){bOv();bDetail();bTrends();bRev();bWav();}
+
+// ── DETAIL TAB ───────────────────────────────
+function bDetail(){
+  const minD=minDTF(D26);
+  let t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});
+  const ALL_ROWS=[
+    {l:'Saturday',k:'Saturday',c:'#6b9ef5'},{l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
+    {l:'Sunday',k:'Sunday',c:'#3db870'},{l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
+    {l:'Monday',k:'Monday (Public holiday)',c:'#e06b42'},{l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
+    {l:'Combi',k:'Combi (Saturday, Sunday, Monday)',c:'#f5c842'},
+  ];
+  function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
+
+  // TICKETS table
+  const thT=`<thead><tr><th>Ticket type</th><th class="t26">2026 now</th><th class="t25">2025 @D-${minD}</th><th>Δ</th><th class="t25">2025 Final</th><th>vs Final</th></tr></thead>`;
+  const bdT=ALL_ROWS.map(r=>{
+    const t26=(T26[r.k]||{t:0}).t;const t25wv=t25w[r.k]||0;const f25=F25[r.k]||0;
+    return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
+      <td class="t26">${N(t26)}</td><td class="t25">${N(t25wv)}</td>
+      <td class="${dCl(t26,t25wv)}">${dStr(t26,t25wv)}</td>
+      <td class="t25">${f25?N(f25):'—'}</td><td>${f25?pO(t26,f25):'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('tbl-det-tickets').innerHTML=thT+'<tbody>'+bdT+'</tbody>';
+
+  // CAPACITY table
+  const thC=`<thead><tr><th>Ticket type</th><th>Capacity</th><th class="t26">Sold</th><th>% filled</th><th>Left</th></tr></thead>`;
+  const bdC=ALL_ROWS.map(r=>{
+    const t26=(T26[r.k]||{t:0}).t;const cap=CAP[r.k]||0;
+    return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
+      <td>${cap?N(cap):'—'}</td><td class="t26">${N(t26)}</td>
+      <td>${cap?bar(t26/cap*100,'#15803d'):'—'}</td><td>${cap?N(cap-t26):'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('tbl-det-cap').innerHTML=thC+'<tbody>'+bdC+'</tbody>';
+
+  // WAVE table
+  const thW=`<thead><tr><th>Ticket type</th><th>Current wave</th><th class="t26">Sold (wave)</th><th>Quota</th><th>% quota</th><th>Past waves</th><th class="t26">Total sold</th></tr></thead>`;
+  const bdW=ALL_ROWS.map(r=>{
+    const t26=(T26[r.k]||{t:0}).t;const wave=CW(r.k);
+    const wq=wave&&WAVE_CFG[r.k]?WAVE_CFG[r.k][wave]||0:0;
+    const ws=wave?wSold(r.k,wave):0;
+    const wOrder=WAVE_ORDER_MAP[r.k]||[];const wIdx=wOrder.indexOf(wave);
+    const past=wOrder.slice(0,wIdx).reduce((s,w)=>s+wSold(r.k,w),0);
+    return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
+      <td>${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
+      <td class="t26">${ws?N(ws):'—'}</td><td>${wq?N(wq):'—'}</td>
+      <td>${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
+      <td>${past?N(past):'—'}</td><td class="t26">${N(t26)}</td></tr>`;
+  }).join('');
+  document.getElementById('tbl-det-wave').innerHTML=thW+'<tbody>'+bdW+'</tbody>';
+
+  // ATTENDANCE table
+  const attRows=[
+    {l:'Saturday',k:'Saturday',k25:'Saturday',c:'#6b9ef5'},
+    {l:'Sunday',k:'Sunday',k25:'Sunday',c:'#3db870'},
+    {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
+  ];
+  const thA=`<thead><tr><th>Day</th><th>Guests 2026</th><th>Guests 2025</th><th class="t26">Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Att. %</th></tr></thead>`;
+  const combiA=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
+  const bdA=attRows.map(d=>{
+    const t26=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t+combiA;
+    const g26=GUESTS[d.k]||500;const g25=DGUESTS25[d.l]||500;
+    const att=Math.round((t26+g26)*(1-NO_SHOW));const a25=ATT25[d.k];
+    return `<tr><td><span class="dot" style="background:${d.c}"></span>${d.l}</td>
+      <td>${N(g26)}</td><td class="t25">${N(g25)}</td>
+      <td class="t26">${N(att)}</td><td class="t25">${N(a25)}</td>
+      <td>${bar(att/a25*100,'#6d28d9')}</td></tr>`;
+  }).join('');
+  document.getElementById('tbl-det-att').innerHTML=thA+'<tbody>'+bdA+'</tbody>';
+}
 
 // On load: fetch live quotas/capacity from API first, then build
 // Falls back to embedded data immediately if API is unavailable
@@ -674,10 +925,14 @@ async function init(){
           // Update wave quotas from JM Pricing col O (rows 4-28)
           if(j.waveQuotas){
             const wq=j.waveQuotas;
-            if(wq.Saturday) WAVE_CFG['Saturday']={Presale:wq.Saturday.Presale||242,'Early Bird':wq.Saturday['Early Bird']||491,Regular:wq.Saturday.Regular||1150,'Final Wave':wq.Saturday['Final Wave']||817};
-            if(wq.Sunday)   WAVE_CFG['Sunday']={Presale:wq.Sunday.Presale||106,'Early Bird':wq.Sunday['Early Bird']||744,Regular:wq.Sunday.Regular||900,'Final Wave':wq.Sunday['Final Wave']||700};
-            if(wq.Monday)   WAVE_CFG['Monday (Public holiday)']={Presale:wq.Monday.Presale||92,'Early Bird':wq.Monday['Early Bird']||758,Regular:wq.Monday.Regular||900,'Final Wave':wq.Monday['Final Wave']||700};
-            if(wq.Combi)    WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wq.Combi.Presale||193,'Early Bird':wq.Combi['Early Bird']||247,Regular:wq.Combi.Regular||150,'Final Wave':wq.Combi['Final Wave']||100};
+            function wv2(day,wave,fb){return(wq[day]&&wq[day][wave])||fb;}
+            WAVE_CFG['Saturday']={Presale:wv2('Saturday','Presale',242),'Early Bird':wv2('Saturday','Early Bird',491),Regular:wv2('Saturday','Regular',1150),'Final Wave':wv2('Saturday','Final Wave',817)};
+            WAVE_CFG['Sunday']={Presale:wv2('Sunday','Presale',106),'Early Bird':wv2('Sunday','Early Bird',529),Regular:wv2('Sunday','Regular',1115),'Final Wave':wv2('Sunday','Final Wave',700)};
+            WAVE_CFG['Monday (Public holiday)']={Presale:wv2('Monday','Presale',92),'Early Bird':wv2('Monday','Early Bird',791),Regular:wv2('Monday','Regular',867),'Final Wave':wv2('Monday','Final Wave',700)};
+            WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wv2('Combi','Presale',193),'Early Bird':wv2('Combi','Early Bird',247),Regular:wv2('Combi','Regular',150),'Final Wave':wv2('Combi','Final Wave',100)};
+            WAVE_CFG['Saturday - CERA']={'Cera - EB':wv2('Saturday','CERA - EB',0),'Cera - Regular':wv2('Saturday','CERA - Regular',100),'Cera - Final Wave':wv2('Saturday','CERA - Final Wave',150)};
+            WAVE_CFG['Sunday - CERA']={'Cera - EB':wv2('Sunday','CERA - EB',100),'Cera - Regular':wv2('Sunday','CERA - Regular',200),'Cera - Final Wave':wv2('Sunday','CERA - Final Wave',200)};
+            WAVE_CFG['Monday (Public holiday) - CERA']={'Cera - EB':wv2('Monday','CERA - EB',100),'Cera - Regular':wv2('Monday','CERA - Regular',200),'Cera - Final Wave':wv2('Monday','CERA - Final Wave',200)};
           }
           // Also update ticket data if available
           if(j.data&&j.data.length){
