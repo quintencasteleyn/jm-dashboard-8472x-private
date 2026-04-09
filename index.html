@@ -223,10 +223,10 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="card"><div class="ct">Cumul. net revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-all" height="200"></canvas></div>
     <div class="card"><div class="ct">Daily revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-day" height="200"></canvas></div>
   </div>
-  <div class="g3">
+  <div class2"g3">
     <div class="card"><div class="ct">Cumul. net revenue — Saturday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sat" height="200"></canvas></div>
     <div class="card"><div class="ct">Cumul. net revenue — Sunday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sun" height="200"></canvas></div>
-    <div class="card"><div class="ct">Cumul. net revenue — Monday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-mon" height="200"></canvas></div>
+    
     <div class="card"><div class="ct">Cumul. revenue — Monday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-mon" height="200"></canvas></div>
   </div>
   <div class="tw"><div class="th">Net revenue breakdown — 2026 vs 2025 (gross → fees → VAT → net)</div><table id="tbl-rev"></table><div class="note">2026: 2% fee. 2025: 2% + €0.45/ticket. VAT 6% on gross both years.</div></div>
@@ -408,6 +408,9 @@ function bOv(){
     {l:'Sunday',k:'Sunday',k25:'Sunday',c:'#3db870'},
     {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
   ];
+  // Friday 2025 only row (no 2026 sales)
+  const FRI25_TOTAL=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday')s+=r.tickets;});return s;})();
+  const FRI25_SAME=(()=>{const minD=minDTF(D26);let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.dtf>=minD)s+=r.tickets;});return s;})();
 
   function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
   function pastSoldTotal(k){
@@ -431,7 +434,7 @@ function bOv(){
     <th class="t26">2026 now</th><th class="t25">2025 @D-${minD}</th><th>Δ</th><th class="t25">2025 Final</th><th>vs Final</th>
     <th>Capacity</th><th>% filled</th><th>Left</th>
     <th>Wave</th><th class="t26">Sold</th><th>Quota</th><th>% quota</th>
-    <th>Att. est. 2026</th><th class="t25">Att. 2025</th><th>Att. %</th>
+    <th>Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Δ 2026 vs 2025 Final</th>
   </tr></thead><tbody>`;
 
   let totT26=0,totT25w=0,totF25=0,totCap=0,totAtt26=0,totAtt25=0;
@@ -504,6 +507,19 @@ function bOv(){
       <td style="background:var(--c-att)" colspan="3" class="mu" style="font-size:10px">—</td>
     </tr>`;
   });
+
+  // Friday 2025-only row
+  rows+=`<tr class="blk-tickets" style="opacity:.75;font-style:italic">
+    <td><span class="dot" style="background:#a78bfa"></span>Friday (2025 only)</td>
+    <td class="t26" style="color:var(--mu)">—</td>
+    <td class="t25">${N(FRI25_SAME)}</td>
+    <td style="color:var(--mu)">—</td>
+    <td class="t25">${N(FRI25_TOTAL)}</td>
+    <td style="color:var(--mu)">—</td>
+    <td style="background:var(--c-cap)" colspan="3" style="color:var(--mu);text-align:center">—</td>
+    <td style="background:var(--c-wave)" colspan="4" style="color:var(--mu);text-align:center">—</td>
+    <td style="background:var(--c-att)" colspan="3" style="color:var(--mu);text-align:center">—</td>
+  </tr>`;
 
   // Combi row (span across blocks where N/A)
   const combiT=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
@@ -626,8 +642,8 @@ function bTrends(){
     lDS('2026',nE26(cs(tA(DTF26,dtfs)),dtfs),Y26,Y26b),
     lDS('2025',nE(cs(tA(DTF25,dtfs))),Y25,Y25b)
   ],{plugins:{legend:{position:'top'}}});
-  ['sat','sun','mon'].forEach((s,i)=>{
-    const k=['Saturday','Sunday','Monday (Public holiday)'][i];
+  ['sat','sun'].forEach((s,i)=>{
+    const k=['Saturday','Sunday'][i];
     mk('c-cum-'+s,'line',lbl,[
       lDS('2026 (incl.CERA)',nE26(cs(combArr(DTF26,k,dtfs)),dtfs),Y26,Y26b),
       lDS('2025 (incl.CERA)',nE(cs(combArr(DTF25,k,dtfs))),Y25,Y25b)
@@ -693,7 +709,7 @@ function bRev(){
       <td class="t25">${p25f.r?EU(n25f):'—'}</td><td>${p25f.r?pO(n2,n25f):'—'}</td></tr>`;
   }).join('');
   const totG=gr26,totF=totG*0.02,totV=totG*0.06,totN=netRev(totG,tt26,2026);
-  document.getElementById('tbl-rev').innerHTML=`<thead><tr><th>Ticket type</th><th>Gross (2026)</th><th>Fees</th><th>VAT</th><th>Net (2026)</th><th>Net 2025 @same</th><th>Δ</th><th>Net 2025 Full</th><th>2026 vs Full</th></tr></thead><tbody>${rows}<tr class="tot-row"><td>Total</td><td class="t26">${EU(totG)}</td><td>${EU(totF)}</td><td>${EU(totV)}</td><td class="t26">${EU(totN)}</td><td class="t25">${EU(nt25w)}</td><td class="${dCl(totN,nt25w)}">${dStr(totN,nt25w)}</td><td class="t25">${EU(nt25f)}</td><td>${pO(totN,nt25f)}</td></tr></tbody>`;
+  document.getElementById('tbl-rev').innerHTML=`<thead><tr><th>Ticket type</th><th>Gross (2026)</th><th>Fees</th><th>VAT</th><th>Net (2026)</th><th>Net 2025 @same</th><th>Δ</th><th>Net 2025 Full</th><th>2026 vs 2025 Final</th></tr></thead><tbody>${rows}<tr class="tot-row"><td>Total</td><td class="t26">${EU(totG)}</td><td>${EU(totF)}</td><td>${EU(totV)}</td><td class="t26">${EU(totN)}</td><td class="t25">${EU(nt25w)}</td><td class="${dCl(totN,nt25w)}">${dStr(totN,nt25w)}</td><td class="t25">${EU(nt25f)}</td><td>${pO(totN,nt25f)}</td></tr></tbody>`;
 
   // Cumulative revenue per day — Sat, Sun, Mon (general, excl. CERA)
   // Cumulative NET revenue per day (Sat/Sun/Mon, excl. CERA)
@@ -899,7 +915,7 @@ function bDetail(){
     {l:'Sunday',k:'Sunday',k25:'Sunday',c:'#3db870'},
     {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
   ];
-  const thA=`<thead><tr><th>Day</th><th>Guests 2026</th><th>Guests 2025</th><th class="t26">Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Att. %</th></tr></thead>`;
+  const thA=`<thead><tr><th>Day</th><th>Guests 2026</th><th>Guests 2025</th><th class="t26">Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Δ 2026 vs 2025 Final</th></tr></thead>`;
   const combiA=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
   const bdA=attRows.map(d=>{
     const t26=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t+combiA;
