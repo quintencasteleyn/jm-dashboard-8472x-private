@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,6 +105,15 @@ tbody tr:hover td{filter:brightness(.97);}
 #pwd-box button{width:100%;padding:10px;border-radius:7px;background:#d97706;color:#fff;border:none;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
 #pwd-box button:hover{background:#b45309;}
 #pwd-err{color:#ef4444;font-size:11px;margin-top:6px;height:16px;}
+
+/* ASSUMPTIONS FOOTER */
+.tab-footer{background:#fafaf9;border:1px solid #e2ddd8;border-radius:8px;margin-top:20px;padding:16px 20px;}
+.tab-footer .footer-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#78716c;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.tab-footer .footer-title::before{content:'';display:inline-block;width:3px;height:12px;background:#d97706;border-radius:2px;}
+.tab-footer .assumption-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:6px 24px;}
+.tab-footer .a-item{font-size:11px;color:#57534e;line-height:1.6;padding:5px 0;border-bottom:1px solid #f0efeb;}
+.tab-footer .a-item:last-child{border-bottom:none;}
+.tab-footer .a-label{font-weight:700;color:#292524;font-family:'JetBrains Mono',monospace;font-size:10px;margin-right:4px;}
 </style>
 </head>
 <body>
@@ -204,15 +212,18 @@ tbody tr:hover td{filter:brightness(.97);}
     </div>
     <canvas id="c-roll" height="130"></canvas>
   </div>
+
+<div class="tab-footer"><div class="footer-title">Definitions &amp; assumptions</div><div class="assumption-grid"><div class="a-item"><span class="a-label">2026 NOW</span>Total tickets sold to date for that specific ticket type only. Saturday row = Saturday single-day tickets only. CERA and Combi are shown in separate rows — not included here to avoid double-counting.</div><div class="a-item"><span class="a-label">2025 @D-XX</span>Number of 2025 tickets sold at the equivalent point in the sales cycle — the same number of days before the festival as today. Allows a fair like-for-like comparison with 2026.</div><div class="a-item"><span class="a-label">2025 Final</span>Total 2025 tickets sold across the entire season, all waves combined. Used as the benchmark for how far along 2026 sales are.</div><div class="a-item"><span class="a-label">Δ vs Final</span>How far 2026 current sales are relative to the 2025 final total. A figure above 100% means 2026 has already surpassed 2025's full-season sales.</div><div class="a-item"><span class="a-label">Capacity</span>Maximum tickets available per day. Source: JM Pricing sheet, cells H68–H70. This figure already accounts for Combi ticket allocations within the total.</div><div class="a-item"><span class="a-label">% Filled</span>2026 NOW tickets ÷ Capacity × 100. Based on single-day tickets only (Combi not re-added here as it is already included in the capacity figure).</div><div class="a-item"><span class="a-label">Current Wave</span>The active sales wave for each ticket type, determined by the subtitle of the most recently purchased ticket in the raw Paylogic data.</div><div class="a-item"><span class="a-label">Sold (wave)</span>Number of tickets sold specifically within the current active wave. Does not include previous waves.</div><div class="a-item"><span class="a-label">Quota</span>The maximum number of tickets allocated to the current wave. Sourced live from the JM26 Capacities tab in the pricing spreadsheet. Updates when you press ↻ Refresh.</div><div class="a-item"><span class="a-label">Att. Est. 2026</span>Estimated attendance per day = day tickets + CERA tickets for that day + Combi tickets (Combi holders attend all three days). This is a raw ticket count — no no-show deduction is applied.</div><div class="a-item"><span class="a-label">Att. 2025 Final</span>Actual attendance recorded at Jazz Middelheim 2025 per day. Source: historical records.</div><div class="a-item"><span class="a-label">CERA tickets</span>Tickets sold through the CERA partner channel (cultural vouchers). Shown as separate rows (Sat–CERA, Sun–CERA, Mon–CERA) beneath the main day rows.</div><div class="a-item"><span class="a-label">Combi (all days)</span>A Combi ticket grants access to all three festival days. Combi holders are counted in the attendance estimate for every day they attend. Shown in its own row in the ticket column.</div><div class="a-item"><span class="a-label">Friday (2025 only)</span>Jazz Middelheim 2025 included a Friday. There is no Friday in the 2026 edition — this row is purely for reference when comparing 2025 figures.</div></div></div>
 </div>
 
 <!-- ══ SALES TRENDS ══ -->
 <div class="sec" id="s-trends">
   <div class="card g1"><div class="ct">Cumulative tickets — ALL days (incl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-cum-all" height="140"></canvas></div>
-  <div class="g3">
-    <div class="card"><div class="ct">Cumul. tickets — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sat" height="170"></canvas></div>
-    <div class="card"><div class="ct">Cumul. tickets — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sun" height="170"></canvas></div>
-    <div class="card"><div class="ct">Cumul. tickets — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-mon" height="170"></canvas></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Cumul. tickets — Saturday (incl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sat" height="170"></canvas></div>
+    <div class="card"><div class="ct">Cumul. tickets — Sunday (incl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sun" height="170"></canvas></div>
+    <div class="card"><div class="ct">Cumul. tickets — Monday (incl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-mon" height="170"></canvas></div>
+    <div class="card"><div class="ct">Cumul. tickets — Combi <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-combi" height="170"></canvas></div>
   </div>
   <div class="card g1"><div class="ct">Tickets by country — top 10 (2026, % of total)</div><canvas id="c-country" height="120"></canvas></div>
 </div>
@@ -224,13 +235,17 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="card"><div class="ct">Cumul. net revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-all" height="200"></canvas></div>
     <div class="card"><div class="ct">Daily revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-day" height="200"></canvas></div>
   </div>
-  <div class="g3">
+  <div class="g2">
     <div class="card"><div class="ct">Cumul. net revenue — Saturday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sat" height="200"></canvas></div>
     <div class="card"><div class="ct">Cumul. net revenue — Sunday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sun" height="200"></canvas></div>
-    
-    <div class="card"><div class="ct">Cumul. revenue — Monday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-mon" height="200"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Cumul. net revenue — Monday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-mon" height="200"></canvas></div>
+    <div class="card"><div class="ct">Cumul. net revenue — Combi <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-combi" height="200"></canvas></div>
   </div>
   <div class="tw"><div class="th">Net revenue breakdown — 2026 vs 2025 (gross → fees → VAT → net)</div><table id="tbl-rev"></table><div class="note">2026: 2% fee. 2025: 2% + €0.45/ticket. VAT 6% on gross both years.</div></div>
+
+<div class="tab-footer"><div class="footer-title">Definitions &amp; assumptions</div><div class="assumption-grid"><div class="a-item"><span class="a-label">Gross revenue</span>The total face value of tickets sold, before any deductions. This is the price the customer paid.</div><div class="a-item"><span class="a-label">Fees (2%)</span>Paylogic platform fee charged at 2% of gross revenue. Applied to both 2026 and 2025 figures for consistency.</div><div class="a-item"><span class="a-label">VAT (6%)</span>Belgian VAT on event tickets, calculated at 6% of gross revenue.</div><div class="a-item"><span class="a-label">Net revenue</span>What Jazz Middelheim receives after fees and VAT. Formula: Gross − 2% fee − (2025 only: €0.45/ticket) − 6% VAT.</div><div class="a-item"><span class="a-label">2025 fee difference</span>In 2025, Paylogic charged an additional fixed fee of €0.45 per ticket on top of the 2% platform fee. This extra charge does not apply in 2026.</div><div class="a-item"><span class="a-label">Net 2025 @same period</span>Net revenue 2025 calculated using only tickets sold up to the same DTF point as today's 2026 data. Allows a fair year-on-year comparison.</div><div class="a-item"><span class="a-label">Net 2025 Full</span>Net revenue for the entire 2025 season — all tickets, all waves.</div><div class="a-item"><span class="a-label">2026 vs 2025 Final</span>How much of the 2025 full-season net revenue has already been reached in 2026. A figure above 100% means 2026 net revenue has already surpassed the entire 2025 season.</div><div class="a-item"><span class="a-label">Cumul. net revenue — all</span>Cumulative net revenue chart showing day-by-day running total for all ticket types combined. A flat line means no tickets were sold on those days.</div><div class="a-item"><span class="a-label">Cumul. net revenue — per type</span>Separate cumulative net revenue for each ticket type (Saturday, Sunday, Monday, Combi). Excl. CERA, which is shown in the revenue table but not charted separately.</div><div class="a-item"><span class="a-label">Daily revenue bar chart</span>Gross revenue per individual day. Each bar represents one calendar day. 2026 and 2025 are shown as separate stacked groups (not stacked on top of each other).</div></div></div>
 </div>
 
 <!-- ══ WAVES & CAPACITY ══ -->
@@ -240,6 +255,7 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="card"><div class="ct">Sales vs total capacity — <span style="color:#86efac;font-weight:700">■</span> past waves &nbsp;<span style="color:#fed7aa;font-weight:700">■</span> current wave &nbsp;<span style="color:#bfb8b0;font-weight:700">■</span> unsold</div><canvas id="c-wb" height="230"></canvas></div>
     <div class="card"><div class="ct">% of total capacity sold per ticket type</div><canvas id="c-wf" height="230"></canvas></div>
   </div>
+<div class="tab-footer"><div class="footer-title">Definitions &amp; assumptions</div><div class="assumption-grid"><div class="a-item"><span class="a-label">Current Wave</span>The active sales wave for each ticket type. Determined by looking at the most recently purchased ticket in the raw Paylogic data — specifically the wave name (subtitle) on the ticket with the lowest DTF value. This matches what is shown in the live ticket shop.</div><div class="a-item"><span class="a-label">Sold (wave)</span>Number of tickets sold specifically within the current active wave only. Does not include tickets from previous waves.</div><div class="a-item"><span class="a-label">Quota</span>The maximum number of tickets allocated to the current wave. Sourced live from the JM26 Capacities sheet. If you update a quota in that sheet and press ↻ Refresh, the dashboard updates automatically.</div><div class="a-item"><span class="a-label">% Quota</span>Sold in current wave ÷ Wave quota × 100. Indicates how full the current wave is.</div><div class="a-item"><span class="a-label">Past waves sold</span>Total tickets sold in all previous waves (before the current active wave). Shown as the green segment in the capacity bar chart.</div><div class="a-item"><span class="a-label">Total sold</span>All tickets sold for this type across all waves combined, up to today.</div><div class="a-item"><span class="a-label">Capacity</span>Maximum tickets available per ticket type across all waves. For single-day tickets, sourced from JM Pricing H68–H70. For individual wave types, sourced from the JM26 Capacities tab.</div><div class="a-item"><span class="a-label">Sales vs capacity chart</span>Stacked bar showing the breakdown of total capacity: green = past waves (sold), orange = current wave (sold), grey = not yet sold (remaining capacity).</div><div class="a-item"><span class="a-label">% labels on bars</span>Each coloured segment shows its share of total capacity as a percentage. Segments smaller than 4% do not show a label to avoid clutter.</div><div class="a-item"><span class="a-label">% of capacity sold</span>The bar chart on the right shows overall fill rate per ticket type: total tickets sold ÷ total capacity.</div></div></div>
 </div>
 
 <!-- ══ DETAIL TAB ══ -->
@@ -260,6 +276,7 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="th" style="background:var(--c-att-h);color:#6d28d9">👥 Attendance</div>
     <table id="tbl-det-att"></table>
   </div>
+<div class="tab-footer"><div class="footer-title">Definitions &amp; assumptions</div><div class="assumption-grid"><div class="a-item"><span class="a-label">Ticket Sales table</span>Shows 2026 sales, 2025 same-period comparison, and 2025 final totals per individual ticket type. Each row is a separate product — no aggregation is done between rows.</div><div class="a-item"><span class="a-label">Capacity table</span>Shows the total ticket capacity per type and how much has been sold. Capacity is sourced from the JM26 Capacities sheet and updates on ↻ Refresh.</div><div class="a-item"><span class="a-label">Wave Progress table</span>Breaks down the current wave status: which wave is active, how many sold in that wave, the quota, and cumulative past-wave sales. Useful for understanding where each ticket type sits in its sales lifecycle.</div><div class="a-item"><span class="a-label">Attendance table</span>Estimated attendance per festival day. Calculated as: day tickets + CERA tickets for that day + Combi tickets (since Combi holders attend all days). Raw count — no no-show deduction.</div><div class="a-item"><span class="a-label">2025 Final</span>Full-season 2025 figures used as the reference benchmark. These are fixed historical values and do not change.</div><div class="a-item"><span class="a-label">Δ 2026 vs 2025 Final</span>Compares the 2026 attendance estimate against the 2025 actual attendance. A bar at 100% means 2026 is on track to match 2025; above 100% means exceeding it.</div><div class="a-item"><span class="a-label">Row order</span>Tables are ordered as: Combi → Saturday → Sunday → Monday → Sat-CERA → Sun-CERA → Mon-CERA. This matches the order in the Status at a Glance table on the Overview tab.</div></div></div>
 </div>
 
 </div><!-- /main -->
@@ -451,7 +468,8 @@ function bOv(){
     const f25=(F25[d.k25]||0);
     const cap=DCAP[d.l]||4240;
     const cera=(T26[d.k+' - CERA']||{t:0}).t;
-    const att=Math.round((t26day+cera+combi)*(1-NO_SHOW));
+    // ATT EST = day + CERA + combi tickets (raw count, same as 2026 NOW column sum)
+    const att=t26day+cera+combi;
     const a25=ATT25[d.k]||0;
     const wave=CW(d.k);
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
@@ -591,13 +609,20 @@ function bTrends(){
     lDS('2026',nE26(cs(tA(DTF26,dtfs)),dtfs),Y26,Y26b),
     lDS('2025',nE(cs(tA(DTF25,dtfs))),Y25,Y25b)
   ],{plugins:{legend:{position:'top'}}});
-  ['sat','sun'].forEach((s,i)=>{
-    const k=['Saturday','Sunday'][i];
+  ['sat','sun','mon'].forEach((s,i)=>{
+    const k=['Saturday','Sunday','Monday (Public holiday)'][i];
     mk('c-cum-'+s,'line',lbl,[
       lDS('2026 (incl.CERA)',nE26(cs(combArr(DTF26,k,dtfs)),dtfs),Y26,Y26b),
       lDS('2025 (incl.CERA)',nE(cs(combArr(DTF25,k,dtfs))),Y25,Y25b)
     ],{plugins:{legend:{position:'top'}}});
   });
+  // Combi cumulative tickets
+  const combiKey26='Combi (Saturday, Sunday, Monday)';
+  const combiKey25='Combi (Friday, Saturday, Sunday, Monday)';
+  mk('c-cum-combi','line',lbl,[
+    lDS('2026',nE26(cs(dA(DTF26,combiKey26,dtfs)),dtfs),Y26,Y26b),
+    lDS('2025',nE(cs(dA(DTF25,combiKey25,dtfs))),Y25,Y25b)
+  ],{plugins:{legend:{position:'top'}}});
   // Country chart
   const ctrMap={};D26.forEach(r=>{if(!ctrMap[r.country])ctrMap[r.country]=0;ctrMap[r.country]+=r.tickets;});
   const ctrE=Object.entries(ctrMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -644,7 +669,11 @@ function bRev(){
 
   // Revenue table
   let t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]={t:0,r:0};t25w[k].t+=r.tickets;t25w[k].r+=r.price;}});
-  const keys=Object.keys(T26).filter(k=>T26[k].t>0).sort((a,b)=>T26[b].r-T26[a].r);
+  // Order matches status at a glance table
+  const revOrder=['Saturday','Sunday','Monday (Public holiday)',
+    'Combi (Saturday, Sunday, Monday)','Saturday - CERA','Sunday - CERA','Monday (Public holiday) - CERA'];
+  const keys=[...revOrder.filter(k=>T26[k]&&T26[k].t>0),
+    ...Object.keys(T26).filter(k=>T26[k].t>0&&!revOrder.includes(k))];
   const rows=keys.map(k=>{
     const{t:t2,r:g2}=T26[k];
     const f2=g2*0.02,v2=g2*0.06,n2=netRev(g2,t2,2026);
@@ -670,7 +699,7 @@ function bRev(){
       return s;
     });
   }
-  [['sat','Saturday'],['sun','Sunday'],['mon','Monday (Public holiday)']].forEach(([s,k])=>{
+  [['sat','Saturday'],['sun','Sunday'],['mon','Monday (Public holiday)'],['combi','Combi (Saturday, Sunday, Monday)']].forEach(([s,k])=>{
     mk('c-rev-'+s,'line',lbl,[
       lDS('2026 Net',nE26(netCumKey(DTF26,k,2026),dtfs),Y26,Y26b),
       lDS('2025 Net',nE(netCumKey(DTF25,k,2025)),Y25,Y25b)
@@ -829,7 +858,8 @@ function bDetail(){
   const combiA=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
   const bdA=attRows.map(d=>{
     const t26=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t+combiA;
-    const att=Math.round(t26*(1-NO_SHOW));const a25=ATT25[d.k]||0;
+    const att=t26; // raw ticket count (day+CERA+combi)
+    const a25=ATT25[d.k]||0;
     return `<tr><td><span class="dot" style="background:${d.c}"></span>${d.l}</td>
       <td class="t26">${N(att)}</td><td class="t25">${N(a25)}</td>
       <td>${a25?bar(att/a25*100,'#6d28d9'):'—'}</td></tr>`;
