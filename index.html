@@ -140,6 +140,8 @@ tbody tr:hover td{filter:brightness(.97);}
     if(v==='paradise26!'){
       sessionStorage.setItem('jm_auth','1');
       document.getElementById('pwd-overlay').style.display='none';
+      // Auto-refresh data immediately after login
+      liveRefresh();
     } else {
       document.getElementById('pwd-err').textContent='Incorrect password. Please try again.';
       document.getElementById('pwd-input').value='';
