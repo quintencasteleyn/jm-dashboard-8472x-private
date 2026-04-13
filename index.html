@@ -480,7 +480,10 @@ function bOv(){
     <th>Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Δ 2026 vs 2025 Final</th>
   </tr></thead><tbody>`;
 
-  let totCap=0,totAtt26=0,totAtt25=0;
+  // Subtotal accumulators
+  let subT26=0,subT25w=0,subF25=0,subCap=0,subAtt26=0,subAtt25=0; // regular tickets
+  let ceraT26=0,ceraT25w=0,ceraF25=0,ceraCap=0; // CERA tickets
+  let totCap=0,totAtt26=0,totAtt25=0; // kept for compatibility
   const combi=(T26[combiKey]||{t:0}).t;
 
   DAYS.forEach(d=>{
@@ -498,6 +501,7 @@ function bOv(){
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
     const ws=wave?waveSoldFor(d.k,wave):0;
     totCap+=cap;totAtt26+=att;totAtt25+=a25;
+    subT26+=t26day;subT25w+=t25wv;subF25+=f25;subCap+=cap;subAtt26+=att;subAtt25+=a25;
     rows+=`<tr class="blk-tickets">
       <td><span class="dot" style="background:${d.c}"></span><strong>${d.l}</strong></td>
       <td class="t26">${N(t26day)}</td>
@@ -517,6 +521,61 @@ function bOv(){
       <td style="background:var(--c-att)">${a25?attBar(att,a25):'—'}</td>
     </tr>`;
   });
+
+  const combiT=(T26[combiKey]||{t:0}).t;
+  const combiT25=t25w[combi25Key]||0;
+  const combiF25=F25[combi25Key]||0;
+  const combiCap=capFor(combiKey)||690;
+  const combiWave=CW(combiKey);
+  const combiWq=combiWave&&WAVE_CFG[combiKey]?WAVE_CFG[combiKey][combiWave]||0:0;
+  const combiWs=combiWave?waveSoldFor(combiKey,combiWave):0;
+  rows+=`<tr class="blk-tickets" style="opacity:.85">
+    <td><span class="dot" style="background:#f5c842"></span><em>Combi (all days)</em></td>
+    <td class="t26">${N(combiT)}</td><td class="t25">${N(combiT25)}</td>
+    <td class="${dCl(combiT,combiT25)}">${dStr(combiT,combiT25)}</td>
+    <td class="t25">${N(combiF25)}</td><td>${pO(combiT,combiF25)}</td>
+    <td style="background:var(--c-cap)">${N(combiCap)}</td>
+    <td style="background:var(--c-cap)">${bar(combiT/combiCap*100,'#15803d')}</td>
+    <td style="background:var(--c-cap)">${N(combiCap-combiT)}</td>
+    <td style="background:var(--c-wave)">${combiWave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${combiWave}</span>`:'—'}</td>
+    <td class="t26" style="background:var(--c-wave)">${combiWs?N(combiWs):'—'}</td>
+    <td style="background:var(--c-wave)">${combiWq?N(combiWq):'—'}</td>
+    <td style="background:var(--c-wave)">${combiWs&&combiWq?bar(combiWs/combiWq*100,Y26):'—'}</td>
+    <td style="background:var(--c-att)" colspan="3">included in day totals above</td>
+  </tr>`;
+  // Add combi + friday to subtotal 1
+  subT26+=combiT; subT25w+=(t25w[combi25Key]||0)+FRI25_SAME;
+  subF25+=(F25[combi25Key]||0)+FRI25_TOTAL;
+  // Att estimate already includes combi in day rows — no double add
+  // Subtotal 1: Regular tickets (Sat+Sun+Mon+Combi+Friday)
+  const sub1AttPct=subAtt25?attBar(subAtt26,subAtt25):'—';
+  rows+=`<tr style="background:rgba(37,99,235,.07);font-weight:700;border-top:2px solid #93c5fd">
+    <td style="color:#1d4ed8">↳ Subtotal — regular tickets</td>
+    <td class="t26">${N(subT26)}</td>
+    <td class="t25">${N(subT25w)}</td>
+    <td class="${dCl(subT26,subT25w)}">${dStr(subT26,subT25w)}</td>
+    <td class="t25">${N(subF25)}</td>
+    <td>${pO(subT26,subF25)}</td>
+    <td>${N(subCap)}</td>
+    <td>${bar(subT26/subCap*100,'#15803d')}</td>
+    <td>${N(subCap-subT26)}</td>
+    <td colspan="4">—</td>
+    <td class="t26">${N(subAtt26)}</td>
+    <td class="t25">${N(subAtt25)}</td>
+    <td>${sub1AttPct}</td>
+  </tr>`;
+
+  rows+=`<tr class="blk-tickets" style="opacity:.75;font-style:italic">
+    <td><span class="dot" style="background:#a78bfa"></span>Friday (2025 only)</td>
+    <td class="t26" style="color:var(--mu)">—</td>
+    <td class="t25">${N(FRI25_SAME)}</td>
+    <td style="color:var(--mu)">—</td>
+    <td class="t25">${N(FRI25_TOTAL)}</td>
+    <td style="color:var(--mu)">—</td>
+    <td style="background:var(--c-cap)" colspan="3">—</td>
+    <td style="background:var(--c-wave)" colspan="4">—</td>
+    <td style="background:var(--c-att)" colspan="3">—</td>
+  </tr>`;
 
   CERA_ROWS.forEach(d=>{
     const t26c=(T26[d.k]||{t:0}).t;
@@ -544,38 +603,19 @@ function bOv(){
     </tr>`;
   });
 
-  rows+=`<tr class="blk-tickets" style="opacity:.75;font-style:italic">
-    <td><span class="dot" style="background:#a78bfa"></span>Friday (2025 only)</td>
-    <td class="t26" style="color:var(--mu)">—</td>
-    <td class="t25">${N(FRI25_SAME)}</td>
-    <td style="color:var(--mu)">—</td>
-    <td class="t25">${N(FRI25_TOTAL)}</td>
-    <td style="color:var(--mu)">—</td>
-    <td style="background:var(--c-cap)" colspan="3">—</td>
-    <td style="background:var(--c-wave)" colspan="4">—</td>
-    <td style="background:var(--c-att)" colspan="3">—</td>
-  </tr>`;
-
-  const combiT=(T26[combiKey]||{t:0}).t;
-  const combiT25=t25w[combi25Key]||0;
-  const combiF25=F25[combi25Key]||0;
-  const combiCap=capFor(combiKey)||690;
-  const combiWave=CW(combiKey);
-  const combiWq=combiWave&&WAVE_CFG[combiKey]?WAVE_CFG[combiKey][combiWave]||0:0;
-  const combiWs=combiWave?waveSoldFor(combiKey,combiWave):0;
-  rows+=`<tr class="blk-tickets" style="opacity:.85">
-    <td><span class="dot" style="background:#f5c842"></span><em>Combi (all days)</em></td>
-    <td class="t26">${N(combiT)}</td><td class="t25">${N(combiT25)}</td>
-    <td class="${dCl(combiT,combiT25)}">${dStr(combiT,combiT25)}</td>
-    <td class="t25">${N(combiF25)}</td><td>${pO(combiT,combiF25)}</td>
-    <td style="background:var(--c-cap)">${N(combiCap)}</td>
-    <td style="background:var(--c-cap)">${bar(combiT/combiCap*100,'#15803d')}</td>
-    <td style="background:var(--c-cap)">${N(combiCap-combiT)}</td>
-    <td style="background:var(--c-wave)">${combiWave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${combiWave}</span>`:'—'}</td>
-    <td class="t26" style="background:var(--c-wave)">${combiWs?N(combiWs):'—'}</td>
-    <td style="background:var(--c-wave)">${combiWq?N(combiWq):'—'}</td>
-    <td style="background:var(--c-wave)">${combiWs&&combiWq?bar(combiWs/combiWq*100,Y26):'—'}</td>
-    <td style="background:var(--c-att)" colspan="3">included in day totals above</td>
+  // Subtotal 2: CERA tickets
+  rows+=`<tr style="background:rgba(147,197,253,.12);font-weight:700;border-top:2px solid #93c5fd">
+    <td style="color:#0369a1">↳ Subtotal — CERA tickets</td>
+    <td class="t26">${N(ceraT26)}</td>
+    <td class="t25">${N(ceraT25w)}</td>
+    <td class="${dCl(ceraT26,ceraT25w)}">${dStr(ceraT26,ceraT25w)}</td>
+    <td class="t25">${N(ceraF25)}</td>
+    <td>${pO(ceraT26,ceraF25)}</td>
+    <td>${ceraCap?N(ceraCap):'—'}</td>
+    <td>${ceraCap?bar(ceraT26/ceraCap*100,'#15803d'):'—'}</td>
+    <td>${ceraCap?N(ceraCap-ceraT26):'—'}</td>
+    <td colspan="4">—</td>
+    <td colspan="3">—</td>
   </tr>`;
 
   rows+=`<tr class="tot-row">
