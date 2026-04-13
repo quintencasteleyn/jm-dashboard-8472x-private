@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jazz Middelheim 2026 — Concise Dashboard</title>
+<title>Jazz Middelheim - Ticketing Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -153,7 +153,7 @@ tbody tr:hover td{filter:brightness(.97);}
   <div class="hdr-l">
     <div class="logo">JM</div>
     <div>
-      <h1>Jazz Middelheim 2026 — Concise Dashboard</h1>
+      <h1>Jazz Middelheim - Ticketing Dashboard</h1>
       <div class="hdr-sub" id="fresh-bar">Loading…</div>
     </div>
   </div>
@@ -373,6 +373,15 @@ function dStr(a,b){if(!b||!a)return'—';const d=(a/b-1)*100;return(d>=0?'+':'')
 function dCl(a,b){return(+a)>=(+b)?'pos':'neg';}
 function pO(a,b){if(!b)return'—';return((a/b)*100).toFixed(1)+'%';}
 function bar(p,col='#d97706'){const w=Math.min(100,Math.max(0,p||0));return`<span class="bw"><span class="bbg"><span class="bf" style="width:${w.toFixed(0)}%;background:${col}"></span></span>${w.toFixed(0)}%</span>`;}
+// attBar: same visual but shows real % even if >100 (bar capped at 100 visually)
+function attBar(att,ref,col='#6d28d9'){
+  if(!ref)return'—';
+  const pct=(att/ref*100);
+  const w=Math.min(100,pct); // bar visual capped at full
+  const label=pct.toFixed(1)+'%';
+  const c=pct>=100?'#15803d':col; // green if over 100%
+  return`<span class="bw"><span class="bbg"><span class="bf" style="width:${w.toFixed(0)}%;background:${c}"></span></span><span style="color:${c};font-weight:600">${label}</span></span>`;
+}
 function cs(arr){let s=0;return arr.map(v=>{s+=v;return s;});}
 function minDTF(data){return Math.min(...data.map(r=>r.dtf));}
 function DTFS(max=185){const a=[];for(let d=max;d>=0;d--)a.push(d);return a;}
@@ -505,7 +514,7 @@ function bOv(){
       <td style="background:var(--c-wave)">${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
       <td class="t26" style="background:var(--c-att)">${N(att)}</td>
       <td class="t25" style="background:var(--c-att)">${N(a25)}</td>
-      <td style="background:var(--c-att)">${a25?bar(att/a25*100,'#6d28d9'):'—'}</td>
+      <td style="background:var(--c-att)">${a25?attBar(att,a25):'—'}</td>
     </tr>`;
   });
 
@@ -576,7 +585,7 @@ function bOv(){
     <td class="t25">${N(tt25f)}</td><td>${pO(tt26,tt25f)}</td>
     <td>${N(totCap)}</td><td>${bar(tt26/totCap*100,'#15803d')}</td><td>${N(totCap-tt26)}</td>
     <td>—</td><td>—</td><td>—</td><td>—</td>
-    <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${totAtt25?bar(totAtt26/totAtt25*100,'#6d28d9'):'—'}</td>
+    <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${totAtt25?attBar(totAtt26,totAtt25):'—'}</td>
   </tr>`;
 
   rows+='</tbody>';
@@ -882,7 +891,7 @@ function bDetail(){
     const a25=ATT25[d.k]||0;
     return `<tr><td><span class="dot" style="background:${d.c}"></span>${d.l}</td>
       <td class="t26">${N(att)}</td><td class="t25">${N(a25)}</td>
-      <td>${a25?bar(att/a25*100,'#6d28d9'):'—'}</td></tr>`;
+      <td>${a25?attBar(att,a25):'—'}</td></tr>`;
   }).join('');
   document.getElementById('tbl-det-att').innerHTML=thA+'<tbody>'+bdA+'</tbody>';
 }
