@@ -543,28 +543,6 @@ function bOv(){
     <td style="background:var(--c-wave)">${combiWs&&combiWq?bar(combiWs/combiWq*100,Y26):'—'}</td>
     <td style="background:var(--c-att)" colspan="3">included in day totals above</td>
   </tr>`;
-  // Add combi + friday to subtotal 1
-  subT26+=combiT; subT25w+=(t25w[combi25Key]||0)+FRI25_SAME;
-  subF25+=(F25[combi25Key]||0)+FRI25_TOTAL;
-  // Att estimate already includes combi in day rows — no double add
-  // Subtotal 1: Regular tickets (Sat+Sun+Mon+Combi+Friday)
-  const sub1AttPct=subAtt25?attBar(subAtt26,subAtt25):'—';
-  rows+=`<tr style="background:rgba(37,99,235,.07);font-weight:700;border-top:2px solid #93c5fd">
-    <td style="color:#1d4ed8">↳ Subtotal — regular tickets</td>
-    <td class="t26">${N(subT26)}</td>
-    <td class="t25">${N(subT25w)}</td>
-    <td class="${dCl(subT26,subT25w)}">${dStr(subT26,subT25w)}</td>
-    <td class="t25">${N(subF25)}</td>
-    <td>${pO(subT26,subF25)}</td>
-    <td>${N(subCap)}</td>
-    <td>${bar(subT26/subCap*100,'#15803d')}</td>
-    <td>${N(subCap-subT26)}</td>
-    <td colspan="4">—</td>
-    <td class="t26">${N(subAtt26)}</td>
-    <td class="t25">${N(subAtt25)}</td>
-    <td>${sub1AttPct}</td>
-  </tr>`;
-
   rows+=`<tr class="blk-tickets" style="opacity:.75;font-style:italic">
     <td><span class="dot" style="background:#a78bfa"></span>Friday (2025 only)</td>
     <td class="t26" style="color:var(--mu)">—</td>
@@ -575,6 +553,28 @@ function bOv(){
     <td style="background:var(--c-cap)" colspan="3">—</td>
     <td style="background:var(--c-wave)" colspan="4">—</td>
     <td style="background:var(--c-att)" colspan="3">—</td>
+  </tr>`;
+
+  // Add combi + friday to subtotal 1
+  subT26+=combiT; subT25w+=(t25w[combi25Key]||0)+FRI25_SAME;
+  subF25+=(F25[combi25Key]||0)+FRI25_TOTAL;
+  // Att estimate already includes combi in day rows — no double add
+  // Subtotal 1: Regular tickets (Sat+Sun+Mon+Combi+Friday)
+  const sub1AttPct=subAtt25?attBar(subAtt26,subAtt25):'—';
+  rows+=`<tr style="font-weight:700;border-top:2px solid #c7d2fe">
+    <td style="background:var(--c-tickets-h)">General sales</td>
+    <td class="t26" style="background:var(--c-tickets-h)">${N(subT26)}</td>
+    <td class="t25" style="background:var(--c-tickets-h)">${N(subT25w)}</td>
+    <td class="${dCl(subT26,subT25w)}" style="background:var(--c-tickets-h)">${dStr(subT26,subT25w)}</td>
+    <td class="t25" style="background:var(--c-tickets-h)">${N(subF25)}</td>
+    <td style="background:var(--c-tickets-h)">${pO(subT26,subF25)}</td>
+    <td style="background:var(--c-cap-h)">${N(subCap)}</td>
+    <td style="background:var(--c-cap-h)">${bar(subT26/subCap*100,'#15803d')}</td>
+    <td style="background:var(--c-cap-h)">${N(subCap-subT26)}</td>
+    <td colspan="4" style="background:var(--c-wave-h)">—</td>
+    <td class="t26" style="background:var(--c-att-h)">${N(subAtt26)}</td>
+    <td class="t25" style="background:var(--c-att-h)">${N(subAtt25)}</td>
+    <td style="background:var(--c-att-h)">${sub1AttPct}</td>
   </tr>`;
 
   CERA_ROWS.forEach(d=>{
@@ -601,21 +601,22 @@ function bOv(){
       <td style="background:var(--c-wave)">${wsC&&wqC?bar(wsC/wqC*100,Y26):'—'}</td>
       <td style="background:var(--c-att)" colspan="3">—</td>
     </tr>`;
+    ceraT26+=t26c; ceraT25w+=t25wc; ceraF25+=f25c; ceraCap+=capC;
   });
 
   // Subtotal 2: CERA tickets
-  rows+=`<tr style="background:rgba(147,197,253,.12);font-weight:700;border-top:2px solid #93c5fd">
-    <td style="color:#0369a1">↳ Subtotal — CERA tickets</td>
-    <td class="t26">${N(ceraT26)}</td>
-    <td class="t25">${N(ceraT25w)}</td>
-    <td class="${dCl(ceraT26,ceraT25w)}">${dStr(ceraT26,ceraT25w)}</td>
-    <td class="t25">${N(ceraF25)}</td>
-    <td>${pO(ceraT26,ceraF25)}</td>
-    <td>${ceraCap?N(ceraCap):'—'}</td>
-    <td>${ceraCap?bar(ceraT26/ceraCap*100,'#15803d'):'—'}</td>
-    <td>${ceraCap?N(ceraCap-ceraT26):'—'}</td>
-    <td colspan="4">—</td>
-    <td colspan="3">—</td>
+  rows+=`<tr style="font-weight:700;border-top:2px solid #c7d2fe">
+    <td style="background:var(--c-tickets-h)">CERA sales</td>
+    <td class="t26" style="background:var(--c-tickets-h)">${N(ceraT26)}</td>
+    <td class="t25" style="background:var(--c-tickets-h)">${N(ceraT25w)}</td>
+    <td class="${dCl(ceraT26,ceraT25w)}" style="background:var(--c-tickets-h)">${dStr(ceraT26,ceraT25w)}</td>
+    <td class="t25" style="background:var(--c-tickets-h)">${N(ceraF25)}</td>
+    <td style="background:var(--c-tickets-h)">${pO(ceraT26,ceraF25)}</td>
+    <td style="background:var(--c-cap-h)">${ceraCap?N(ceraCap):'—'}</td>
+    <td style="background:var(--c-cap-h)">${ceraCap?bar(ceraT26/ceraCap*100,'#15803d'):'—'}</td>
+    <td style="background:var(--c-cap-h)">${ceraCap?N(ceraCap-ceraT26):'—'}</td>
+    <td colspan="4" style="background:var(--c-wave-h)">—</td>
+    <td colspan="3" style="background:var(--c-att-h)">—</td>
   </tr>`;
 
   rows+=`<tr class="tot-row">
