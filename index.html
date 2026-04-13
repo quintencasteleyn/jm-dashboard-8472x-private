@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -184,7 +185,7 @@ tbody tr:hover td{filter:brightness(.97);}
   <div class="tw">
     <div class="th">Status at a glance — all ticket types vs 2025, capacity &amp; attendance</div>
     <table id="tbl-master"></table>
-    <div class="note">* Capacity from JM Pricing H68–H70. Guests 2026: 500/500/500 (N61–N63). Guests 2025: 407/503/645 (G61–G63). No-show: 6%.</div>
+    <div class="note">* Day capacity from JM Pricing H68–H70. Wave quotas and ticket-type capacities from JM26 capacities. Attendance excludes guests and applies a 6% no-show.</div>
   </div>
 
   <div class="g2">
@@ -223,7 +224,7 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="card"><div class="ct">Cumul. net revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-all" height="200"></canvas></div>
     <div class="card"><div class="ct">Daily revenue — all <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025</span></div><canvas id="c-rev-day" height="200"></canvas></div>
   </div>
-  <div class2"g3">
+  <div class="g3">
     <div class="card"><div class="ct">Cumul. net revenue — Saturday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sat" height="200"></canvas></div>
     <div class="card"><div class="ct">Cumul. net revenue — Sunday (excl. CERA) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-rev-sun" height="200"></canvas></div>
     
@@ -270,43 +271,40 @@ const API='https://script.google.com/macros/s/AKfycby_-Y5w3AC6sV-nPRsOmNgZ-rTQk8
 
 // ── CONFIG ──────────────────────────────────
 let DCAP={Saturday:4240,Sunday:4240,Monday:4240};
-let DGUESTS25={Saturday:407,Sunday:503,Monday:645};
-let GUESTS={'Saturday':500,'Sunday':500,'Monday (Public holiday)':500};
-
-const CAP={'Saturday':2800,'Sunday':2550,'Monday (Public holiday)':2550,
-  'Combi (Saturday, Sunday, Monday)':800,'Saturday - CERA':250,
-  'Sunday - CERA':500,'Monday (Public holiday) - CERA':500};
+let DGUESTS25={Saturday:407,Sunday:503,Monday:645,Combi:200};
+let GUESTS={'Saturday':500,'Sunday':500,'Monday (Public holiday)':500,'Combi (Saturday, Sunday, Monday)':200};
+let TYPE_CAP={
+  'Saturday':3050,'Sunday':3050,'Monday (Public holiday)':3050,
+  'Combi (Saturday, Sunday, Monday)':690
+};
 let WAVE_CFG={
-  // Values from JM26 Capacities sheet — updated automatically on refresh
   'Saturday':{Presale:242,'Early Bird':491,Regular:1150,'Final Wave':817},
   'Sunday':{Presale:106,'Early Bird':529,Regular:1115,'Final Wave':700},
   'Monday (Public holiday)':{Presale:92,'Early Bird':791,Regular:867,'Final Wave':700},
-  'Combi (Saturday, Sunday, Monday)':{Presale:193,'Early Bird':247,Regular:150,'Final Wave':100},
-    'Saturday - CERA':{'Cera - Early Bird':0,'Cera - Regular':100},
-  'Sunday - CERA':{'Cera - Early Bird':100,'Cera - Regular':0},
-  'Monday (Public holiday) - CERA':{'Cera - Early Bird':100,'Cera - Regular':0},
+  'Combi (Saturday, Sunday, Monday)':{Presale:193,'Early Bird':247,Regular:2345,'Final Wave':100},
+  'Saturday - CERA':{'Cera - Early Bird':0,'Cera - Regular':100,'Cera - Final Wave':150},
+  'Sunday - CERA':{'Cera - Early Bird':999,'Cera - Regular':200,'Cera - Final Wave':200},
+  'Monday (Public holiday) - CERA':{'Cera - Early Bird':100,'Cera - Regular':200,'Cera - Final Wave':200},
 };
-// CW is now a function — dynamically determines current wave based on sold vs quota
-// Auto-advances to next wave when sold >= quota
 const WAVE_ORDER_MAP={
   'Saturday':['Presale','Early Bird','Regular','Final Wave'],
   'Sunday':['Presale','Early Bird','Regular','Final Wave'],
   'Monday (Public holiday)':['Presale','Early Bird','Regular','Final Wave'],
   'Combi (Saturday, Sunday, Monday)':['Presale','Early Bird','Regular','Final Wave'],
-  'Saturday - CERA':['Cera - Early Bird','Cera - Regular'],
-  'Sunday - CERA':['Cera - Early Bird','Cera - Regular'],
-  'Monday (Public holiday) - CERA':['Cera - Early Bird','Cera - Regular']
+  'Saturday - CERA':['Cera - Early Bird','Cera - Regular','Cera - Final Wave'],
+  'Sunday - CERA':['Cera - Early Bird','Cera - Regular','Cera - Final Wave'],
+  'Monday (Public holiday) - CERA':['Cera - Early Bird','Cera - Regular','Cera - Final Wave']
 };
 function CW(k){
-  // Current wave = wave of the most recently purchased ticket for this type
-  // "Most recent" = lowest DTF (days to festival) = closest purchase to event date
-  const recs=D26.filter(x=>tKey(x)===k&&x.tickets>0&&x.subtitle);
-  if(!recs.length) return WAVE_ORDER_MAP[k]?WAVE_ORDER_MAP[k][0]:null;
+  const valid=new Set(Object.keys(WAVE_CFG[k]||{}));
+  if(!valid.size) return null;
+  const recs=D26.filter(x=>tKey(x)===k&&x.tickets>0&&valid.has(x.subtitle));
+  if(!recs.length) return Object.keys(WAVE_CFG[k])[0]||null;
   const minDTF=Math.min(...recs.map(x=>x.dtf));
   const mostRecent=recs.filter(x=>x.dtf===minDTF);
-  return mostRecent[0]?.subtitle||null;
+  return mostRecent[mostRecent.length-1]?.subtitle||Object.keys(WAVE_CFG[k])[0]||null;
 }
-const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular'];
+const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular','Cera - Final Wave'];
 const NO_SHOW=0.06;
 const ATT25={'Saturday':2550,'Sunday':2510,'Monday (Public holiday)':2755};
 const F25={'Saturday':1272,'Sunday':1164,'Monday (Public holiday)':1270,
@@ -357,6 +355,25 @@ function tA(o,dtfs){return dtfs.map(d=>o[d]?Object.values(o[d]).reduce((s,v)=>s+
 function trA(o,dtfs){return dtfs.map(d=>o[d]?Object.values(o[d]).reduce((s,v)=>s+v.r,0):0);}
 function combArr(dtfObj,baseKey,dtfs){return dtfs.map(d=>{if(!dtfObj[d])return 0;return(dtfObj[d][baseKey]?.t||0)+(dtfObj[d][baseKey+' - CERA']?.t||0);});}
 function netRev(g,t,yr){return g-g*0.02-(yr===2025?t*0.45:0)-g*0.06;}
+function capFor(k){if(TYPE_CAP[k]!=null)return TYPE_CAP[k];const cfg=WAVE_CFG[k]||{};return Object.values(cfg).reduce((s,v)=>s+(+v||0),0);}
+function waveSoldFor(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
+function applyApiConfig(j){
+  if(j.capacity){DCAP={Saturday:j.capacity.Saturday||DCAP.Saturday,Sunday:j.capacity.Sunday||DCAP.Sunday,Monday:j.capacity.Monday||DCAP.Monday};}
+  if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||DGUESTS25.Saturday,Sunday:j.guests25.Sunday||DGUESTS25.Sunday,Monday:j.guests25.Monday||DGUESTS25.Monday,Combi:j.guests25.Combi||DGUESTS25.Combi};}
+  if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||GUESTS['Saturday'],'Sunday':j.guests26.Sunday||GUESTS['Sunday'],'Monday (Public holiday)':j.guests26.Monday||GUESTS['Monday (Public holiday)'],'Combi (Saturday, Sunday, Monday)':j.guests26.Combi||GUESTS['Combi (Saturday, Sunday, Monday)']};}
+  if(j.typeCaps){TYPE_CAP={...TYPE_CAP,...j.typeCaps};}
+  if(j.waveQuotas){
+    const wq=j.waveQuotas;
+    const wv=(day,wave,fb)=> (wq[day]&&wq[day][wave]!=null&&wq[day][wave]!=='' ? +wq[day][wave] : fb);
+    WAVE_CFG['Saturday']={Presale:wv('Saturday','Presale',242),'Early Bird':wv('Saturday','Early Bird',491),Regular:wv('Saturday','Regular',1150),'Final Wave':wv('Saturday','Final Wave',817)};
+    WAVE_CFG['Sunday']={Presale:wv('Sunday','Presale',106),'Early Bird':wv('Sunday','Early Bird',529),Regular:wv('Sunday','Regular',1115),'Final Wave':wv('Sunday','Final Wave',700)};
+    WAVE_CFG['Monday (Public holiday)']={Presale:wv('Monday','Presale',92),'Early Bird':wv('Monday','Early Bird',791),Regular:wv('Monday','Regular',867),'Final Wave':wv('Monday','Final Wave',700)};
+    WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wv('Combi','Presale',193),'Early Bird':wv('Combi','Early Bird',247),Regular:wv('Combi','Regular',2345),'Final Wave':wv('Combi','Final Wave',100)};
+    WAVE_CFG['Saturday - CERA']={'Cera - Early Bird':wv('Saturday - CERA','Cera - Early Bird',0),'Cera - Regular':wv('Saturday - CERA','Cera - Regular',100),'Cera - Final Wave':wv('Saturday - CERA','Cera - Final Wave',150)};
+    WAVE_CFG['Sunday - CERA']={'Cera - Early Bird':wv('Sunday - CERA','Cera - Early Bird',999),'Cera - Regular':wv('Sunday - CERA','Cera - Regular',200),'Cera - Final Wave':wv('Sunday - CERA','Cera - Final Wave',200)};
+    WAVE_CFG['Monday (Public holiday) - CERA']={'Cera - Early Bird':wv('Monday - CERA','Cera - Early Bird',100),'Cera - Regular':wv('Monday - CERA','Cera - Regular',200),'Cera - Final Wave':wv('Monday - CERA','Cera - Final Wave',200)};
+  }
+}
 function nE(arr){let f=-1,l=-1;arr.forEach((v,i)=>{if(v>0){if(f<0)f=i;l=i;}});if(f<0)return arr.map(()=>null);return arr.map((v,i)=>i>=f&&i<=l?v:null);}
 function nE26(arr,dtfs){const h=new Set(Object.keys(DTF26).map(Number));return arr.map((v,i)=>h.has(dtfs[i])?v:null);}
 function lDS(lbl,data,col,bg){return{label:lbl,data,borderColor:col,backgroundColor:bg,borderWidth:2,pointRadius:0,fill:true,tension:.25,spanGaps:false};}
@@ -402,33 +419,21 @@ function bOv(){
     {l:'Net revenue — 2026',v:EU(nt26),s:'after fees & VAT',c:Y26},
   ].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
 
-  // ── MASTER TABLE ──────────────────────────
   const DAYS=[
     {l:'Saturday',k:'Saturday',k25:'Saturday',c:'#6b9ef5'},
     {l:'Sunday',k:'Sunday',k25:'Sunday',c:'#3db870'},
     {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
   ];
-  // Friday 2025 only row (no 2026 sales)
+  const CERA_ROWS=[
+    {l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
+    {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
+    {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
+  ];
+  const combiKey='Combi (Saturday, Sunday, Monday)';
+  const combi25Key='Combi (Friday, Saturday, Sunday, Monday)';
   const FRI25_TOTAL=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday')s+=r.tickets;});return s;})();
-  const FRI25_SAME=(()=>{const minD=minDTF(D26);let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.dtf>=minD)s+=r.tickets;});return s;})();
+  const FRI25_SAME=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.dtf>=minD)s+=r.tickets;});return s;})();
 
-  function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
-  function pastSoldTotal(k){
-    const cur=CW(k);const allW=Object.keys(WAVE_CFG[k]||{});
-    const idx=allW.indexOf(cur);
-    return allW.slice(0,idx).reduce((s,w)=>s+wSold(k,w),0);
-  }
-
-  // Section header row builder
-  function secHdr(label,cols,cls){
-    return `<tr class="sec-row ${cls}"><td colspan="${cols}" style="color:${
-      cls==='blk-tickets-h'?'#1d4ed8':cls==='blk-cap-h'?'#15803d':cls==='blk-wave-h'?'#b45309':'#6d28d9'
-    }">${label}</td></tr>`;
-  }
-
-  const colCount = 13;
-
-  // TICKET SALES block header
   let rows = `<thead><tr>
     <th>Day</th>
     <th class="t26">2026 now</th><th class="t25">2025 @D-${minD}</th><th>Δ</th><th class="t25">2025 Final</th><th>vs Final</th>
@@ -437,25 +442,21 @@ function bOv(){
     <th>Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Δ 2026 vs 2025 Final</th>
   </tr></thead><tbody>`;
 
-  let totT26=0,totT25w=0,totF25=0,totCap=0,totAtt26=0,totAtt25=0;
+  let totCap=0,totAtt26=0,totAtt25=0;
+  const combi=(T26[combiKey]||{t:0}).t;
 
   DAYS.forEach(d=>{
-    // Day tickets = day + CERA for that day (combi excluded - has own row)
-    const t26day=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t;
-    const t25wv=(t25w[d.k25]||0)+(t25w[d.k25+' - CERA']||0);
-    const f25=(F25[d.k25]||0)+(F25[d.k25+' - CERA']||0);
+    const t26day=(T26[d.k]||{t:0}).t;
+    const t25wv=(t25w[d.k25]||0);
+    const f25=(F25[d.k25]||0);
     const cap=DCAP[d.l]||4240;
-    const g26=GUESTS[d.k]||500;
-    const g25=DGUESTS25[d.l]||500;
-    // Attendance = day tickets + combi (combi holders attend all days) + guests
-    const combi=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
-    const att=Math.round((t26day+combi+g26)*(1-NO_SHOW));
-    const a25=ATT25[d.k];
+    const cera=(T26[d.k+' - CERA']||{t:0}).t;
+    const att=Math.round((t26day+cera+combi)*(1-NO_SHOW));
+    const a25=ATT25[d.k]||0;
     const wave=CW(d.k);
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
-    const ws=wave?wSold(d.k,wave):0;
-    totT26+=t26day;totT25w+=t25wv;totF25+=f25;totCap+=cap;totAtt26+=att;totAtt25+=a25;
-
+    const ws=wave?waveSoldFor(d.k,wave):0;
+    totCap+=cap;totAtt26+=att;totAtt25+=a25;
     rows+=`<tr class="blk-tickets">
       <td><span class="dot" style="background:${d.c}"></span><strong>${d.l}</strong></td>
       <td class="t26">${N(t26day)}</td>
@@ -463,33 +464,27 @@ function bOv(){
       <td class="${dCl(t26day,t25wv)}">${dStr(t26day,t25wv)}</td>
       <td class="t25">${N(f25)}</td>
       <td>${pO(t26day,f25)}</td>
-      <td class="blk-cap" style="background:var(--c-cap)">${N(cap)}</td>
-      <td class="blk-cap" style="background:var(--c-cap)">${bar(t26day/cap*100,'#15803d')}</td>
-      <td class="blk-cap" style="background:var(--c-cap)">${N(cap-t26day)}</td>
-      <td class="blk-wave" style="background:var(--c-wave)">${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
-      <td class="blk-wave t26" style="background:var(--c-wave)">${ws?N(ws):'—'}</td>
-      <td class="blk-wave" style="background:var(--c-wave)">${wq?N(wq):'—'}</td>
-      <td class="blk-wave" style="background:var(--c-wave)">${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
-      <td class="blk-att t26" style="background:var(--c-att)">${N(att)}</td>
-      <td class="blk-att t25" style="background:var(--c-att)">${N(a25)}</td>
-      <td class="blk-att" style="background:var(--c-att)">${bar(att/a25*100,'#6d28d9')}</td>
+      <td style="background:var(--c-cap)">${N(cap)}</td>
+      <td style="background:var(--c-cap)">${bar(t26day/cap*100,'#15803d')}</td>
+      <td style="background:var(--c-cap)">${N(cap-t26day)}</td>
+      <td style="background:var(--c-wave)">${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
+      <td class="t26" style="background:var(--c-wave)">${ws?N(ws):'—'}</td>
+      <td style="background:var(--c-wave)">${wq?N(wq):'—'}</td>
+      <td style="background:var(--c-wave)">${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
+      <td class="t26" style="background:var(--c-att)">${N(att)}</td>
+      <td class="t25" style="background:var(--c-att)">${N(a25)}</td>
+      <td style="background:var(--c-att)">${a25?bar(att/a25*100,'#6d28d9'):'—'}</td>
     </tr>`;
   });
 
-  // CERA rows
-  const CERA_ROWS=[
-    {l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
-    {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
-    {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
-  ];
   CERA_ROWS.forEach(d=>{
     const t26c=(T26[d.k]||{t:0}).t;
     const t25wc=t25w[d.k]||0;
     const f25c=F25[d.k]||0;
-    const capC=CAP[d.k]||0;
+    const capC=capFor(d.k);
     const wavC=CW(d.k);
     const wqC=wavC&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wavC]||0:0;
-    const wsC=wavC?wSold(d.k,wavC):0;
+    const wsC=wavC?waveSoldFor(d.k,wavC):0;
     rows+=`<tr class="blk-tickets" style="opacity:.8;font-size:11px">
       <td><span class="dot" style="background:${d.c}"></span><em>${d.l}</em></td>
       <td class="t26">${N(t26c)}</td>
@@ -504,11 +499,10 @@ function bOv(){
       <td class="t26" style="background:var(--c-wave)">${wsC?N(wsC):'—'}</td>
       <td style="background:var(--c-wave)">${wqC?N(wqC):'—'}</td>
       <td style="background:var(--c-wave)">${wsC&&wqC?bar(wsC/wqC*100,Y26):'—'}</td>
-      <td style="background:var(--c-att)" colspan="3" class="mu" style="font-size:10px">—</td>
+      <td style="background:var(--c-att)" colspan="3">—</td>
     </tr>`;
   });
 
-  // Friday 2025-only row
   rows+=`<tr class="blk-tickets" style="opacity:.75;font-style:italic">
     <td><span class="dot" style="background:#a78bfa"></span>Friday (2025 only)</td>
     <td class="t26" style="color:var(--mu)">—</td>
@@ -516,19 +510,18 @@ function bOv(){
     <td style="color:var(--mu)">—</td>
     <td class="t25">${N(FRI25_TOTAL)}</td>
     <td style="color:var(--mu)">—</td>
-    <td style="background:var(--c-cap)" colspan="3" style="color:var(--mu);text-align:center">—</td>
-    <td style="background:var(--c-wave)" colspan="4" style="color:var(--mu);text-align:center">—</td>
-    <td style="background:var(--c-att)" colspan="3" style="color:var(--mu);text-align:center">—</td>
+    <td style="background:var(--c-cap)" colspan="3">—</td>
+    <td style="background:var(--c-wave)" colspan="4">—</td>
+    <td style="background:var(--c-att)" colspan="3">—</td>
   </tr>`;
 
-  // Combi row (span across blocks where N/A)
-  const combiT=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
-  const combiT25=t25w['Combi (Friday, Saturday, Sunday, Monday)']||0;
-  const combiF25=F25['Combi (Friday, Saturday, Sunday, Monday)']||0;
-  const combiCap=CAP['Combi (Saturday, Sunday, Monday)']||800;
-  const combiWave=CW('Combi (Saturday, Sunday, Monday)');
-  const combiWq=combiWave&&WAVE_CFG['Combi (Saturday, Sunday, Monday)']?WAVE_CFG['Combi (Saturday, Sunday, Monday)'][combiWave]||0:0;
-  const combiWs=combiWave?D26.filter(x=>tKey(x)==='Combi (Saturday, Sunday, Monday)'&&x.subtitle===combiWave).reduce((s,x)=>s+x.tickets,0):0;
+  const combiT=(T26[combiKey]||{t:0}).t;
+  const combiT25=t25w[combi25Key]||0;
+  const combiF25=F25[combi25Key]||0;
+  const combiCap=capFor(combiKey)||690;
+  const combiWave=CW(combiKey);
+  const combiWq=combiWave&&WAVE_CFG[combiKey]?WAVE_CFG[combiKey][combiWave]||0:0;
+  const combiWs=combiWave?waveSoldFor(combiKey,combiWave):0;
   rows+=`<tr class="blk-tickets" style="opacity:.85">
     <td><span class="dot" style="background:#f5c842"></span><em>Combi (all days)</em></td>
     <td class="t26">${N(combiT)}</td><td class="t25">${N(combiT25)}</td>
@@ -541,98 +534,54 @@ function bOv(){
     <td class="t26" style="background:var(--c-wave)">${combiWs?N(combiWs):'—'}</td>
     <td style="background:var(--c-wave)">${combiWq?N(combiWq):'—'}</td>
     <td style="background:var(--c-wave)">${combiWs&&combiWq?bar(combiWs/combiWq*100,Y26):'—'}</td>
-    <td style="background:var(--c-att)" colspan="3" style="text-align:center;color:var(--mu);font-size:10px">included in day totals above</td>
+    <td style="background:var(--c-att)" colspan="3">included in day totals above</td>
   </tr>`;
 
-  // Total row
-  // Grand total includes combi to match banner KPI
-  const grandT26=totT26+combiT;
-  const grandT25w=totT25w+(t25w['Combi (Friday, Saturday, Sunday, Monday)']||0);
-  const grandF25=totF25+(F25['Combi (Friday, Saturday, Sunday, Monday)']||0);
   rows+=`<tr class="tot-row">
     <td>Total (all incl. combi)</td>
-    <td class="t26">${N(grandT26)}</td><td class="t25">${N(grandT25w)}</td>
-    <td class="${dCl(grandT26,grandT25w)}">${dStr(grandT26,grandT25w)}</td>
-    <td class="t25">${N(grandF25)}</td><td>${pO(grandT26,grandF25)}</td>
-    <td>${N(totCap)}</td><td>${bar(grandT26/totCap*100,'#15803d')}</td><td>${N(totCap-grandT26)}</td>
-    <td colspan="4"></td>
-    <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${bar(totAtt26/totAtt25*100,'#6d28d9')}</td>
-  </tr></tbody>`;
+    <td class="t26">${N(tt26)}</td><td class="t25">${N(tt25w)}</td>
+    <td class="${dCl(tt26,tt25w)}">${dStr(tt26,tt25w)}</td>
+    <td class="t25">${N(tt25f)}</td><td>${pO(tt26,tt25f)}</td>
+    <td>${N(totCap)}</td><td>${bar(tt26/totCap*100,'#15803d')}</td><td>${N(totCap-tt26)}</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td>
+    <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${totAtt25?bar(totAtt26/totAtt25*100,'#6d28d9'):'—'}</td>
+  </tr>`;
 
+  rows+='</tbody>';
   document.getElementById('tbl-master').innerHTML=rows;
 
-  // Past 10 days bar
   const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10).reverse();
-  const dtfDateMap={};D26.forEach(r=>{if(!dtfDateMap[r.dtf])dtfDateMap[r.dtf]=r.date;});
-  function fmtD10(raw,dtf){
-    if(!raw)return'D-'+dtf;
-    let dd,mm;
-    if(raw.includes('-')){dd=raw.substring(8,10);mm=raw.substring(5,7);}
-    else{dd=raw.substring(0,2);mm=raw.substring(3,5);}
-    return dd+'/'+mm+' (D-'+dtf+')';
-  }
-  const l10=d10.map(d=>fmtD10(dtfDateMap[d],d));
-  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0);
-  const tK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)'];
-  const tL=['Saturday','Sunday','Monday','Combi'];
-  const tC=['#6b9ef5','#3db870','#e06b42','#f5c842'];
-  const d10plugin={id:'d10tot',afterDraw(chart){
-    const{ctx}=chart;ctx.save();
-    ctx.font='bold 10px Sora,sans-serif';ctx.fillStyle='#1c1917';
-    ctx.textAlign='center';ctx.textBaseline='bottom';
-    const lm=chart.getDatasetMeta(chart.data.datasets.length-1);
-    lm.data.forEach((bar,i)=>{if(d10totals[i])ctx.fillText(d10totals[i],bar.x,bar.y-3);});
-    ctx.restore();
-  }};
-  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),
-    {scales:{x:{stacked:true},y:{stacked:true,grace:'15%'}},plugins:{legend:{position:'top'}},extraPlugins:[d10plugin]});
+  const latestDateByDtf={};
+  D26.forEach(r=>{if(!latestDateByDtf[r.dtf])latestDateByDtf[r.dtf]=r.date;});
+  const l10=d10.map(d=>{let dt=latestDateByDtf[d]||'';if(/^\d{4}-\d{2}-\d{2}/.test(dt)){const[y,m,dd]=dt.slice(0,10).split('-');dt=`${dd}/${m}/${y.slice(2)}`;}else if(/^\d{2}\/\d{2}\/\d{4}$/.test(dt)){dt=dt.slice(0,6)+dt.slice(8);}return`${dt} (D-${d})`;}).reverse();
+  const tK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)','Saturday - CERA','Sunday - CERA','Monday (Public holiday) - CERA'];
+  const tL=['Saturday','Sunday','Monday','Combi','Sat CERA','Sun CERA','Mon CERA'];
+  const tC=['#6b9ef5','#3db870','#e06b42','#f5c842','#93c5fd','#86efac','#fbb26a'];
+  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0).reverse();
+  const d10plugin={id:'d10totals',afterDatasetsDraw(chart){const{ctx}=chart;ctx.save();ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.fillStyle='#44403c';const meta=chart.getDatasetMeta(chart.data.datasets.length-1);meta.data.forEach((bar,i)=>{const v=d10totals[i];if(v>0)ctx.fillText(N(v),bar.x,bar.y-8);});ctx.restore();}};
+  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.slice().reverse().map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),{scales:{x:{stacked:true},y:{stacked:true}},plugins:{legend:{position:'top',labels:{boxWidth:10}}},extraPlugins:[d10plugin]});
 
-  // Past 10 days table
-  const d10thead=`<thead><tr><th>Date</th>${tK.map((k,i)=>`<th style="color:${tC[i]}">${tL[i]}</th>`).join('')}<th style="font-weight:700">Total</th></tr></thead>`;
-  const d10tbody=d10.map(d=>{
+  const d10rows=d10.slice().reverse().map((d,idx)=>{
     const vals=tK.map(k=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0);
     const tot=vals.reduce((s,v)=>s+v,0);
-    const lbl=fmtD10(dtfDateMap[d],d);
-    return `<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">${lbl}</td>${vals.map((v,i)=>`<td style="color:${tC[i]};font-weight:${v?'600':'400'}">${v||'—'}</td>`).join('')}<td style="font-weight:700">${tot}</td></tr>`;
+    return `<tr><td>${l10[idx]}</td>${vals.map(v=>`<td>${v?N(v):'—'}</td>`).join('')}<td class="t26">${tot?N(tot):'—'}</td></tr>`;
   }).join('');
-  // Totals row
   const d10totsByType=tK.map(k=>d10.reduce((s,d)=>s+(DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),0));
-  const d10grandTot=d10totsByType.reduce((s,v)=>s+v,0);
-  const d10tfoot=`<tr style="background:rgba(217,119,6,.06);font-weight:700"><td>10-day total</td>${d10totsByType.map((v,i)=>`<td style="color:${tC[i]}">${v||'—'}</td>`).join('')}<td>${d10grandTot}</td></tr>`;
-  document.getElementById('tbl-d10').innerHTML=d10thead+'<tbody>'+d10tbody+d10tfoot+'</tbody>';
+  document.getElementById('tbl-d10').innerHTML=`<thead><tr><th>Date</th>${tL.map(x=>`<th>${x}</th>`).join('')}<th class="t26">Total</th></tr></thead><tbody>${d10rows}<tr class="tot-row"><td>10-day total</td>${d10totsByType.map(v=>`<td>${v?N(v):'—'}</td>`).join('')}<td class="t26">${N(d10totsByType.reduce((s,v)=>s+v,0))}</td></tr></tbody>`;
 
-  // Pie
   const k26=Object.keys(T26).filter(k=>T26[k].t>0);
   const ptot=k26.reduce((s,k)=>s+T26[k].t,0);
-  mk('c-pie','doughnut',k26.map(k=>k.replace(' (Public holiday)','').replace(' (Saturday, Sunday, Monday)','')),
-    [{data:k26.map(k=>T26[k].t),backgroundColor:k26.map(k=>DC[k]||'#888'),borderWidth:1,borderColor:'#f7f7f5'}],
-    {plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+N(ctx.raw)+' ('+pO(ctx.raw,ptot)+')'}}},cutout:'60%'});
+  const pk=k26.sort((a,b)=>T26[b].t-T26[a].t);
+  mk('c-pie','doughnut',pk.map(k=>k.replace(' (Saturday, Sunday, Monday)','').replace(' (Public holiday)','').replace(' - CERA',' CERA')),[{data:pk.map(k=>T26[k].t),backgroundColor:pk.map(k=>DC[k]||'#aaa')}],{plugins:{legend:{position:'right',labels:{boxWidth:10,padding:8}},tooltip:{callbacks:{label:c=>' '+c.label+': '+N(c.raw)+' ('+pO(c.raw,ptot)+')'}}}});
 
-  // Rolling averages — 7 / 30 / 60 day
-  {
-    // Build daily totals map (DTF -> tickets) for all existing DTFs
-    const allDTFs=DTFS(185);
-    const dailyTots=allDTFs.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0);
-    // Rolling avg helper: for each position, average the N days ending at that position (left=oldest)
-    function rollAvg(arr, n){
-      return arr.map((v,i)=>{
-        const slice=arr.slice(Math.max(0,i-n+1),i+1).filter(x=>x>0);
-        return slice.length>0?+(slice.reduce((s,v)=>s+v,0)/slice.length).toFixed(1):null;
-      });
-    }
-    const lbl185=allDTFs.map(d=>'D-'+d);
-    const ra7 =rollAvg(dailyTots,7);
-    const ra30=rollAvg(dailyTots,30);
-    const ra60=rollAvg(dailyTots,60);
-    // Null out future (no data)
-    const hasDTF=new Set(Object.keys(DTF26).map(Number));
-    function maskFuture(arr){return arr.map((v,i)=>hasDTF.has(allDTFs[i])?v:null);}
-    mk('c-roll','line',lbl185,[
-      {label:'7-day avg', data:maskFuture(ra7), borderColor:'#6b9ef5',backgroundColor:'rgba(107,158,245,.08)',borderWidth:2,pointRadius:0,fill:true,tension:.3,spanGaps:false},
-      {label:'30-day avg',data:maskFuture(ra30),borderColor:'#3db870',backgroundColor:'rgba(61,184,112,.08)',borderWidth:2,pointRadius:0,fill:true,tension:.3,spanGaps:false},
-      {label:'60-day avg',data:maskFuture(ra60),borderColor:'#e06b42',backgroundColor:'rgba(224,107,66,.08)',borderWidth:2,pointRadius:0,fill:true,tension:.3,spanGaps:false},
-    ],{plugins:{legend:{position:'top'}},scales:{x:{ticks:{maxTicksLimit:16,font:{size:9}}},y:{beginAtZero:true}}});
-  }
+  const byDate={};
+  D26.forEach(r=>{const dt=r.date;if(!byDate[dt])byDate[dt]=0;byDate[dt]+=r.tickets;});
+  const orderedDates=Object.keys(byDate).sort((a,b)=>{const pa=a.includes('/')?a.split('/').reverse().join('-'):a;const pb=b.includes('/')?b.split('/').reverse().join('-'):b;return pa.localeCompare(pb);});
+  const vals=orderedDates.map(d=>byDate[d]);
+  function roll(n){return vals.map((_,i)=>{const s=Math.max(0,i-n+1);const a=vals.slice(s,i+1);return a.reduce((x,y)=>x+y,0)/a.length;});}
+  const r7=roll(7),r30=roll(30),r60=roll(60);
+  const labR=orderedDates.map(d=>/^\d{2}\/\d{2}\/\d{4}$/.test(d)?d.slice(0,6)+d.slice(8):d.slice(5));
+  mk('c-roll','line',labR,[lDS('7-day',r7,'#6b9ef5','rgba(107,158,245,.10)'),lDS('30-day',r30,'#3db870','rgba(61,184,112,.10)'),lDS('60-day',r60,'#e06b42','rgba(224,107,66,.10)')],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true}});
 }
 
 // ── SALES TRENDS ─────────────────────────────
@@ -732,21 +681,21 @@ function bRev(){
 // ── WAVES & CAPACITY ─────────────────────────
 function bWav(){
   const ROWS=[
-    {l:'Saturday',k:'Saturday',c:'#6b9ef5'},{l:'Sunday',k:'Sunday',c:'#3db870'},
-    {l:'Monday',k:'Monday (Public holiday)',c:'#e06b42'},
     {l:'Combi',k:'Combi (Saturday, Sunday, Monday)',c:'#f5c842'},
+    {l:'Saturday',k:'Saturday',c:'#6b9ef5'},
+    {l:'Sunday',k:'Sunday',c:'#3db870'},
+    {l:'Monday',k:'Monday (Public holiday)',c:'#e06b42'},
     {l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
     {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
     {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'}
   ];
-  function wS(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
-  function pSold(k){const cur=CW(k);const allW=Object.keys(WAVE_CFG[k]||{});const idx=allW.indexOf(cur);return allW.slice(0,idx).reduce((s,w)=>s+wS(k,w),0);}
+  function pSold(k){const cur=CW(k);const allW=WAVE_ORDER_MAP[k]||[];const idx=allW.indexOf(cur);return allW.slice(0,idx).reduce((s,w)=>s+waveSoldFor(k,w),0);}
 
   const th=`<thead><tr><th>Ticket type</th><th>Current wave</th><th class="t26">Sold (wave)</th><th>Quota</th><th>% quota</th><th>Past waves sold</th><th class="t26">Total sold</th><th>Capacity</th><th>% cap</th><th>Left</th></tr></thead>`;
   const body=ROWS.map(r=>{
-    const t=(T26[r.k]||{t:0}).t;const cap=CAP[r.k]||0;
+    const t=(T26[r.k]||{t:0}).t;const cap=capFor(r.k)||0;
     const wave=CW(r.k);const wq=wave&&WAVE_CFG[r.k]?WAVE_CFG[r.k][wave]||0:0;
-    const ws=wave?wS(r.k,wave):0;const ps=pSold(r.k);
+    const ws=wave?waveSoldFor(r.k,wave):0;const ps=pSold(r.k);
     return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
       <td>${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
       <td class="t26">${ws?N(ws):'—'}</td><td>${wq?N(wq):'—'}</td>
@@ -757,68 +706,48 @@ function bWav(){
   }).join('');
   document.getElementById('tbl-wav').innerHTML=th+'<tbody>'+body+'</tbody>';
 
-  const caps=ROWS.map(r=>CAP[r.k]||0);
-  const pastSolds=ROWS.map(r=>pSold(r.k));
-  const curSolds=ROWS.map(r=>CW(r.k)?wS(r.k,CW(r.k)):0);
+  const caps=ROWS.map(r=>capFor(r.k)||0);
+  const curSolds=ROWS.map(r=>CW(r.k)?waveSoldFor(r.k,CW(r.k)):0);
   const totalSolds=ROWS.map(r=>(T26[r.k]||{t:0}).t);
   const unsolds=ROWS.map((r,i)=>Math.max(0,caps[i]-totalSolds[i]));
   const labels=ROWS.map(r=>r.l);
 
-  // Build per-wave sold arrays for each ticket type
-  const waveColors={'Presale':'#bfdbfe','Early Bird':'#bbf7d0','Regular':'#fed7aa','Final Wave':'#fecaca',
-    'Cera - Early Bird':'#e0f2fe','Cera - Regular':'#dcfce7'};
-  const allWaveNames=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular'];
-  // For each wave, build sold array across ticket types
+  const waveColors={'Presale':'#bfdbfe','Early Bird':'#bbf7d0','Regular':'#fed7aa','Final Wave':'#fecaca','Cera - Early Bird':'#e0f2fe','Cera - Regular':'#dcfce7','Cera - Final Wave':'#fde68a'};
+  const allWaveNames=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular','Cera - Final Wave'];
   const waveDatasets=allWaveNames.map(wn=>({
     label:wn,
     data:ROWS.map(r=>{
-      const waves=WAVE_ORDER_MAP[r.k]||[];const curWave=CW(r.k);
-      const curIdx=waves.indexOf(curWave);const wIdx=waves.indexOf(wn);
-      if(wIdx<0)return 0; // this wave doesn't apply to this ticket type
-      if(wIdx<curIdx)return wS(r.k,wn); // past wave — show actual sold
-      if(wIdx===curIdx)return 0; // current wave handled separately
+      const waves=WAVE_ORDER_MAP[r.k]||[];const curWave=CW(r.k);const curIdx=waves.indexOf(curWave);const wIdx=waves.indexOf(wn);
+      if(wIdx<0)return 0;
+      if(wIdx<curIdx)return waveSoldFor(r.k,wn);
       return 0;
     }),
-    backgroundColor:waveColors[wn]||'#e5e7eb',
-    stack:'s'
-  })).filter(ds=>ds.data.some(v=>v>0)); // only include waves with data
+    backgroundColor:waveColors[wn]||'#e5e7eb',stack:'s'
+  })).filter(ds=>ds.data.some(v=>v>0));
 
   const wbPct={id:'wbPct',afterDraw(chart){
-    const{ctx}=chart;ctx.save();
-    ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    chart.data.datasets.forEach((ds,di)=>{
-      const meta=chart.getDatasetMeta(di);
-      meta.data.forEach((bar,i)=>{
-        const val=ds.data[i];if(!val||val<1)return;
-        const cap=caps[i]||1;const pct=Math.round(val/cap*100);if(pct<4)return;
-        const y=bar.y+(bar.base-bar.y)/2;
-        ctx.fillStyle='#374151';
-        ctx.fillText(pct+'%',bar.x,y);
-      });
-    });
+    const{ctx}=chart;ctx.save();ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    chart.data.datasets.forEach((ds,di)=>{const meta=chart.getDatasetMeta(di);meta.data.forEach((bar,i)=>{const val=ds.data[i];if(!val||val<1)return;const cap=caps[i]||1;const pct=Math.round(val/cap*100);if(pct<4)return;const y=bar.y+(bar.base-bar.y)/2;ctx.fillStyle='#374151';ctx.fillText(pct+'%',bar.x,y);});});
     ctx.restore();
   }};
-  const allDatasets=[
-    ...waveDatasets,
-    {label:'Current wave',data:curSolds,backgroundColor:'#fed7aa',stack:'s'},
-    {label:'Unsold',data:unsolds,backgroundColor:'#e2ddd8',stack:'s'}
-  ];
+  const allDatasets=[...waveDatasets,{label:'Current wave',data:curSolds,backgroundColor:'#fed7aa',stack:'s'},{label:'Unsold',data:unsolds,backgroundColor:'#e2ddd8',stack:'s'}];
   mk('c-wb','bar',labels,allDatasets,{scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:500}}},plugins:{legend:{position:'top',labels:{boxWidth:10,padding:10}}},extraPlugins:[wbPct]});
 
   const fillPcts=ROWS.map((r,i)=>caps[i]?Math.round(totalSolds[i]/caps[i]*100):0);
-  mk('c-wf','bar',labels,[{label:'% of capacity sold',data:fillPcts,backgroundColor:ROWS.map(r=>r.c)}],
-    {plugins:{legend:{display:false}},yS:{max:100,ticks:{callback:v=>v+'%'}}});
+  mk('c-wf','bar',labels,[{label:'% of capacity sold',data:fillPcts,backgroundColor:ROWS.map(r=>r.c)}],{plugins:{legend:{display:false}},yS:{max:100,ticks:{callback:v=>v+'%'}}});
 }
 
 // ── LIVE REFRESH ─────────────────────────────
 async function liveRefresh(){
-  if(!API){alert('No live API URL set.');return;}
-  const btn=document.querySelector('.rbtn');btn.textContent='↻ Loading…';btn.disabled=true;
+  const btn=document.querySelector('.rbtn');
+  btn.textContent='Updating…';btn.disabled=true;
   try{
     const resp=await fetch(API+'?t='+Date.now(),{method:'GET',mode:'cors'});
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
-    const j=await resp.json();if(j.error)throw new Error(j.error);
-    const fresh=j.data.map(r=>({
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const j=await resp.json();
+    if(j.error) throw new Error(j.error);
+    applyApiConfig(j);
+    const fresh=(j.data||[]).map(r=>({
       date:r['Date of order']||r.date||'',
       dtf:parseInt(r['Days to festival']||r.dtf)||0,
       pos:r['Point of Sale Title']||r.pos||'',
@@ -828,22 +757,8 @@ async function liveRefresh(){
       price:parseFloat(String(r['Total price']||r.price||0).replace(',','.'))||0,
       country:r['Country']||r.country||''
     })).filter(r=>r.tickets>0&&r.dtf>=0);
-    if(j.capacity){DCAP={Saturday:j.capacity.Saturday||4240,Sunday:j.capacity.Sunday||4240,Monday:j.capacity.Monday||4240};}
-    if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||407,Sunday:j.guests25.Sunday||503,Monday:j.guests25.Monday||645};}
-    if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};}
-    if(j.waveQuotas){
-      // JM26 Capacities tab: keys are "Saturday","Sunday","Monday","Combi" with exact wave names
-      const wq=j.waveQuotas;
-      function wv(day,wave,fb){return(wq[day]&&wq[day][wave])||fb;}
-      WAVE_CFG['Saturday']={Presale:wv('Saturday','Presale',242),'Early Bird':wv('Saturday','Early Bird',491),Regular:wv('Saturday','Regular',1150),'Final Wave':wv('Saturday','Final Wave',817)};
-      WAVE_CFG['Sunday']={Presale:wv('Sunday','Presale',106),'Early Bird':wv('Sunday','Early Bird',529),Regular:wv('Sunday','Regular',1115),'Final Wave':wv('Sunday','Final Wave',700)};
-      WAVE_CFG['Monday (Public holiday)']={Presale:wv('Monday','Presale',92),'Early Bird':wv('Monday','Early Bird',791),Regular:wv('Monday','Regular',867),'Final Wave':wv('Monday','Final Wave',700)};
-      WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wv('Combi','Presale',193),'Early Bird':wv('Combi','Early Bird',247),Regular:wv('Combi','Regular',150),'Final Wave':wv('Combi','Final Wave',100)};
-      WAVE_CFG['Saturday - CERA']={'Cera - Early Bird':wv('Saturday - CERA','Cera - Early Bird',0),'Cera - Regular':wv('Saturday - CERA','Cera - Regular',100)};
-      WAVE_CFG['Sunday - CERA']={'Cera - Early Bird':wv('Sunday - CERA','Cera - Early Bird',100),'Cera - Regular':wv('Sunday - CERA','Cera - Regular',0)};
-      WAVE_CFG['Monday (Public holiday) - CERA']={'Cera - Early Bird':wv('Monday - CERA','Cera - Early Bird',100),'Cera - Regular':wv('Monday - CERA','Cera - Regular',0)};
-    }
-    loadData(fresh,D25);setFresh();buildAll();
+    if(fresh.length) loadData(fresh,D25);
+    setFresh();buildAll();
     btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Refresh';btn.disabled=false;},2500);
   }catch(e){
     alert('Refresh failed: '+e.message);btn.textContent='↻ Refresh';btn.disabled=false;
@@ -870,9 +785,7 @@ function bDetail(){
     {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
     {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
   ];
-  function wSold(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
 
-  // TICKETS table
   const thT=`<thead><tr><th>Ticket type</th><th class="t26">2026 now</th><th class="t25">2025 @D-${minD}</th><th>Δ</th><th class="t25">2025 Final</th><th>vs Final</th></tr></thead>`;
   const bdT=ALL_ROWS.map(r=>{
     const t26=(T26[r.k]||{t:0}).t;const t25wv=t25w[r.k]||0;const f25=F25[r.k]||0;
@@ -883,24 +796,22 @@ function bDetail(){
   }).join('');
   document.getElementById('tbl-det-tickets').innerHTML=thT+'<tbody>'+bdT+'</tbody>';
 
-  // CAPACITY table
   const thC=`<thead><tr><th>Ticket type</th><th>Capacity</th><th class="t26">Sold</th><th>% filled</th><th>Left</th></tr></thead>`;
   const bdC=ALL_ROWS.map(r=>{
-    const t26=(T26[r.k]||{t:0}).t;const cap=CAP[r.k]||0;
+    const t26=(T26[r.k]||{t:0}).t;const cap=capFor(r.k)||0;
     return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
       <td>${cap?N(cap):'—'}</td><td class="t26">${N(t26)}</td>
       <td>${cap?bar(t26/cap*100,'#15803d'):'—'}</td><td>${cap?N(cap-t26):'—'}</td></tr>`;
   }).join('');
   document.getElementById('tbl-det-cap').innerHTML=thC+'<tbody>'+bdC+'</tbody>';
 
-  // WAVE table
   const thW=`<thead><tr><th>Ticket type</th><th>Current wave</th><th class="t26">Sold (wave)</th><th>Quota</th><th>% quota</th><th>Past waves</th><th class="t26">Total sold</th></tr></thead>`;
   const bdW=ALL_ROWS.map(r=>{
     const t26=(T26[r.k]||{t:0}).t;const wave=CW(r.k);
     const wq=wave&&WAVE_CFG[r.k]?WAVE_CFG[r.k][wave]||0:0;
-    const ws=wave?wSold(r.k,wave):0;
+    const ws=wave?waveSoldFor(r.k,wave):0;
     const wOrder=WAVE_ORDER_MAP[r.k]||[];const wIdx=wOrder.indexOf(wave);
-    const past=wOrder.slice(0,wIdx).reduce((s,w)=>s+wSold(r.k,w),0);
+    const past=wOrder.slice(0,wIdx).reduce((s,w)=>s+waveSoldFor(r.k,w),0);
     return `<tr><td><span class="dot" style="background:${r.c}"></span>${r.l}</td>
       <td>${wave?`<span class="badge" style="color:${Y26};border-color:${Y26}">${wave}</span>`:'—'}</td>
       <td class="t26">${ws?N(ws):'—'}</td><td>${wq?N(wq):'—'}</td>
@@ -909,22 +820,19 @@ function bDetail(){
   }).join('');
   document.getElementById('tbl-det-wave').innerHTML=thW+'<tbody>'+bdW+'</tbody>';
 
-  // ATTENDANCE table
   const attRows=[
-    {l:'Saturday',k:'Saturday',k25:'Saturday',c:'#6b9ef5'},
-    {l:'Sunday',k:'Sunday',k25:'Sunday',c:'#3db870'},
-    {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
+    {l:'Saturday',k:'Saturday',c:'#6b9ef5'},
+    {l:'Sunday',k:'Sunday',c:'#3db870'},
+    {l:'Monday',k:'Monday (Public holiday)',c:'#e06b42'},
   ];
-  const thA=`<thead><tr><th>Day</th><th>Guests 2026</th><th>Guests 2025</th><th class="t26">Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Δ 2026 vs 2025 Final</th></tr></thead>`;
+  const thA=`<thead><tr><th>Day</th><th class="t26">Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Δ 2026 vs 2025 Final</th></tr></thead>`;
   const combiA=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
   const bdA=attRows.map(d=>{
     const t26=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t+combiA;
-    const g26=GUESTS[d.k]||500;const g25=DGUESTS25[d.l]||500;
-    const att=Math.round((t26+g26)*(1-NO_SHOW));const a25=ATT25[d.k];
+    const att=Math.round(t26*(1-NO_SHOW));const a25=ATT25[d.k]||0;
     return `<tr><td><span class="dot" style="background:${d.c}"></span>${d.l}</td>
-      <td>${N(g26)}</td><td class="t25">${N(g25)}</td>
       <td class="t26">${N(att)}</td><td class="t25">${N(a25)}</td>
-      <td>${bar(att/a25*100,'#6d28d9')}</td></tr>`;
+      <td>${a25?bar(att/a25*100,'#6d28d9'):'—'}</td></tr>`;
   }).join('');
   document.getElementById('tbl-det-att').innerHTML=thA+'<tbody>'+bdA+'</tbody>';
 }
@@ -932,7 +840,7 @@ function bDetail(){
 // On load: fetch live quotas/capacity from API first, then build
 // Falls back to embedded data immediately if API is unavailable
 async function init(){
-  loadData(E26,E25); // load embedded data immediately so page isn't blank
+  loadData(E26,E25);
   setFresh();
   if(API){
     try{
@@ -940,23 +848,7 @@ async function init(){
       if(resp.ok){
         const j=await resp.json();
         if(!j.error){
-          // Update capacity & guests from pricing sheet
-          if(j.capacity){DCAP={Saturday:j.capacity.Saturday||4240,Sunday:j.capacity.Sunday||4240,Monday:j.capacity.Monday||4240};}
-          if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||407,Sunday:j.guests25.Sunday||503,Monday:j.guests25.Monday||645};}
-          if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||500,'Sunday':j.guests26.Sunday||500,'Monday (Public holiday)':j.guests26.Monday||500};}
-          // Update wave quotas from JM Pricing col O (rows 4-28)
-          if(j.waveQuotas){
-            const wq=j.waveQuotas;
-            function wv2(day,wave,fb){return(wq[day]&&wq[day][wave])||fb;}
-            WAVE_CFG['Saturday']={Presale:wv2('Saturday','Presale',242),'Early Bird':wv2('Saturday','Early Bird',491),Regular:wv2('Saturday','Regular',1150),'Final Wave':wv2('Saturday','Final Wave',817)};
-            WAVE_CFG['Sunday']={Presale:wv2('Sunday','Presale',106),'Early Bird':wv2('Sunday','Early Bird',529),Regular:wv2('Sunday','Regular',1115),'Final Wave':wv2('Sunday','Final Wave',700)};
-            WAVE_CFG['Monday (Public holiday)']={Presale:wv2('Monday','Presale',92),'Early Bird':wv2('Monday','Early Bird',791),Regular:wv2('Monday','Regular',867),'Final Wave':wv2('Monday','Final Wave',700)};
-            WAVE_CFG['Combi (Saturday, Sunday, Monday)']={Presale:wv2('Combi','Presale',193),'Early Bird':wv2('Combi','Early Bird',247),Regular:wv2('Combi','Regular',150),'Final Wave':wv2('Combi','Final Wave',100)};
-            WAVE_CFG['Saturday - CERA']={'Cera - EB':wv2('Saturday','CERA - EB',0),'Cera - Regular':wv2('Saturday','CERA - Regular',100),'Cera - Final Wave':wv2('Saturday','CERA - Final Wave',150)};
-            WAVE_CFG['Sunday - CERA']={'Cera - EB':wv2('Sunday','CERA - EB',100),'Cera - Regular':wv2('Sunday','CERA - Regular',200),'Cera - Final Wave':wv2('Sunday','CERA - Final Wave',200)};
-            WAVE_CFG['Monday (Public holiday) - CERA']={'Cera - EB':wv2('Monday','CERA - EB',100),'Cera - Regular':wv2('Monday','CERA - Regular',200),'Cera - Final Wave':wv2('Monday','CERA - Final Wave',200)};
-          }
-          // Also update ticket data if available
+          applyApiConfig(j);
           if(j.data&&j.data.length){
             const fresh=j.data.map(r=>({
               date:r['Date of order']||r.date||'',
