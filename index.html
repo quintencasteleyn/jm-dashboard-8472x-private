@@ -375,6 +375,9 @@ function netRev(g,t,yr){return g-g*0.02-(yr===2025?t*0.45:0)-g*0.06;}
 function capFor(k){if(TYPE_CAP[k]!=null)return TYPE_CAP[k];const cfg=WAVE_CFG[k]||{};return Object.values(cfg).reduce((s,v)=>s+(+v||0),0);}
 function waveSoldFor(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
 function applyApiConfig(j){
+  // Debug: log what the API returned for wave quotas
+  if(j.waveQuotas) console.log('[Dashboard] waveQuotas from API:', JSON.stringify(j.waveQuotas));
+  if(j.quotaDebug) console.log('[Dashboard] quotaDebug:', j.quotaDebug);
   if(j.capacity){DCAP={Saturday:j.capacity.Saturday||DCAP.Saturday,Sunday:j.capacity.Sunday||DCAP.Sunday,Monday:j.capacity.Monday||DCAP.Monday};}
   if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||DGUESTS25.Saturday,Sunday:j.guests25.Sunday||DGUESTS25.Sunday,Monday:j.guests25.Monday||DGUESTS25.Monday,Combi:j.guests25.Combi||DGUESTS25.Combi};}
   if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||GUESTS['Saturday'],'Sunday':j.guests26.Sunday||GUESTS['Sunday'],'Monday (Public holiday)':j.guests26.Monday||GUESTS['Monday (Public holiday)'],'Combi (Saturday, Sunday, Monday)':j.guests26.Combi||GUESTS['Combi (Saturday, Sunday, Monday)']};}
@@ -468,8 +471,10 @@ function bOv(){
     const f25=(F25[d.k25]||0);
     const cap=DCAP[d.l]||4240;
     const cera=(T26[d.k+' - CERA']||{t:0}).t;
-    // ATT EST = day + CERA + combi tickets (raw count, same as 2026 NOW column sum)
-    const att=t26day+cera+combi;
+    // ATT EST = (day tickets + CERA + combi + day guests) × (1 − 6% no-show)
+    // Guests sourced from JM Pricing N61-N63 (2026) and G61-G63 (2025)
+    const g26=GUESTS[d.k]||500;
+    const att=Math.round((t26day+cera+combi+g26)*(1-NO_SHOW));
     const a25=ATT25[d.k]||0;
     const wave=CW(d.k);
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
@@ -699,12 +704,17 @@ function bRev(){
       return s;
     });
   }
-  [['sat','Saturday'],['sun','Sunday'],['mon','Monday (Public holiday)'],['combi','Combi (Saturday, Sunday, Monday)']].forEach(([s,k])=>{
+  [['sat','Saturday'],['sun','Sunday'],['mon','Monday (Public holiday)']].forEach(([s,k])=>{
     mk('c-rev-'+s,'line',lbl,[
       lDS('2026 Net',nE26(netCumKey(DTF26,k,2026),dtfs),Y26,Y26b),
       lDS('2025 Net',nE(netCumKey(DTF25,k,2025)),Y25,Y25b)
     ],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
   });
+  // Combi revenue — 2026 key differs from 2025 key
+  mk('c-rev-combi','line',lbl,[
+    lDS('2026 Net',nE26(netCumKey(DTF26,'Combi (Saturday, Sunday, Monday)',2026),dtfs),Y26,Y26b),
+    lDS('2025 Net',nE(netCumKey(DTF25,'Combi (Friday, Saturday, Sunday, Monday)',2025)),Y25,Y25b)
+  ],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
 }
 
 // ── WAVES & CAPACITY ─────────────────────────
@@ -858,7 +868,8 @@ function bDetail(){
   const combiA=(T26['Combi (Saturday, Sunday, Monday)']||{t:0}).t;
   const bdA=attRows.map(d=>{
     const t26=(T26[d.k]||{t:0}).t+(T26[d.k+' - CERA']||{t:0}).t+combiA;
-    const att=t26; // raw ticket count (day+CERA+combi)
+    const g26=GUESTS[d.k]||500;
+    const att=Math.round((t26+g26)*(1-NO_SHOW));
     const a25=ATT25[d.k]||0;
     return `<tr><td><span class="dot" style="background:${d.c}"></span>${d.l}</td>
       <td class="t26">${N(att)}</td><td class="t25">${N(a25)}</td>
