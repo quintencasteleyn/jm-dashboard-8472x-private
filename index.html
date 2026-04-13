@@ -313,13 +313,22 @@ const WAVE_ORDER_MAP={
   'Monday (Public holiday) - CERA':['Cera - Early Bird','Cera - Regular','Cera - Final Wave']
 };
 function CW(k){
-  const valid=new Set(Object.keys(WAVE_CFG[k]||{}));
-  if(!valid.size) return null;
-  const recs=D26.filter(x=>tKey(x)===k&&x.tickets>0&&valid.has(x.subtitle));
-  if(!recs.length) return Object.keys(WAVE_CFG[k])[0]||null;
+  // Current wave = subtitle of the most recently purchased ticket for this type.
+  // "Most recent" = lowest DTF value in the data.
+  // No filtering by WAVE_CFG — the data subtitle IS the answer.
+  const recs=D26.filter(x=>tKey(x)===k&&x.tickets>0&&x.subtitle);
+  if(!recs.length) return null;
   const minDTF=Math.min(...recs.map(x=>x.dtf));
-  const mostRecent=recs.filter(x=>x.dtf===minDTF);
-  return mostRecent[mostRecent.length-1]?.subtitle||Object.keys(WAVE_CFG[k])[0]||null;
+  const atMinDTF=recs.filter(x=>x.dtf===minDTF);
+  // If multiple waves appear on the same day, pick the most advanced one
+  const order=WAVE_ORDER_MAP[k]||[];
+  let best=atMinDTF[0].subtitle;
+  let bestIdx=order.indexOf(best);
+  atMinDTF.forEach(x=>{
+    const idx=order.indexOf(x.subtitle);
+    if(idx>bestIdx){best=x.subtitle;bestIdx=idx;}
+  });
+  return best;
 }
 const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bird','Cera - Regular','Cera - Final Wave'];
 const NO_SHOW=0.06;
