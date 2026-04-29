@@ -114,6 +114,17 @@ tbody tr:hover td{filter:brightness(.97);}
 .tab-footer .a-item{font-size:11px;color:#57534e;line-height:1.6;padding:5px 0;border-bottom:1px solid #f0efeb;}
 .tab-footer .a-item:last-child{border-bottom:none;}
 .tab-footer .a-label{font-weight:700;color:#292524;font-family:'JetBrains Mono',monospace;font-size:10px;margin-right:4px;}
+
+/* GUEST ENTRY TABLE */
+.guest-entry{background:#fafaf9;border:1px solid #e2ddd8;border-radius:8px;margin-top:10px;padding:14px 18px;}
+.guest-entry h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#78716c;margin-bottom:10px;}
+.guest-row{display:flex;align-items:center;gap:12px;margin-bottom:7px;flex-wrap:wrap;}
+.guest-row label{font-size:11px;font-family:'JetBrains Mono',monospace;color:#44403c;width:180px;}
+.guest-row input{width:90px;padding:5px 8px;border:1px solid #e2ddd8;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;background:#fff;color:#1c1917;text-align:right;}
+.guest-row input:focus{outline:none;border-color:#d97706;}
+.guest-save-btn{padding:5px 14px;background:#d97706;color:#fff;border:none;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;cursor:pointer;margin-top:4px;}
+.guest-save-btn:hover{background:#b45309;}
+.guest-save-ok{font-size:10px;color:#15803d;margin-left:8px;font-family:'JetBrains Mono',monospace;}
 </style>
 </head>
 <body>
@@ -195,7 +206,18 @@ tbody tr:hover td{filter:brightness(.97);}
   <div class="tw">
     <div class="th">Status at a glance — all ticket types vs 2025, capacity &amp; attendance</div>
     <table id="tbl-master"></table>
-    <div class="note">* Day capacity from JM Pricing H68–H70. Wave quotas and ticket-type capacities from JM26 capacities. Attendance excludes guests and applies a 6% no-show.</div>
+    <div class="note">* Capacity from JM26 capacities sheet. Paid tickets = day + CERA + Combi. No-show: 6%.</div>
+    <div class="guest-entry">
+      <h4>✏️ Guest ticket counts — edit &amp; save (auto-applied to attendance)</h4>
+      <div class="guest-row"><label>Saturday guests</label><input type="number" id="g-sat" min="0" value="500"></div>
+      <div class="guest-row"><label>Sunday guests</label><input type="number" id="g-sun" min="0" value="500"></div>
+      <div class="guest-row"><label>Monday guests</label><input type="number" id="g-mon" min="0" value="500"></div>
+      <div class="guest-row"><label>Combi guests</label><input type="number" id="g-combi" min="0" value="200"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+        <button class="guest-save-btn" onclick="saveGuests()">Save guests</button>
+        <span class="guest-save-ok" id="guest-ok"></span>
+      </div>
+    </div>
   </div>
 
   <div class="g2">
@@ -477,7 +499,7 @@ function bOv(){
     <th class="t26">2026 now</th><th class="t25">2025 @D-${minD}</th><th>Δ</th><th class="t25">2025 Final</th><th>vs Final</th>
     <th>Capacity</th><th>% filled</th><th>Left</th>
     <th>Wave</th><th class="t26">Sold</th><th>Quota</th><th>% quota</th>
-    <th>Att. est. 2026</th><th class="t25">Att. 2025 Final</th><th>Δ 2026 vs 2025 Final</th>
+    <th style="background:var(--c-att)">Paid tickets</th><th style="background:var(--c-att)">Guest tickets</th><th style="background:var(--c-att)">No-show (6%)</th><th style="background:var(--c-att)">Att. est. 2026</th><th class="t25" style="background:var(--c-att)">Att. 2025 Final</th><th style="background:var(--c-att)">Δ 2026 vs 2025 Final</th>
   </tr></thead><tbody>`;
 
   // Subtotal accumulators
@@ -495,7 +517,9 @@ function bOv(){
     // ATT EST = (day tickets + CERA + combi + day guests) × (1 − 6% no-show)
     // Guests sourced from JM Pricing N61-N63 (2026) and G61-G63 (2025)
     const g26=GUESTS[d.k]||500;
-    const att=Math.round((t26day+cera+combi+g26)*(1-NO_SHOW));
+    const paidTix=t26day+cera+combi; // paid tickets only (excl guests)
+    const noshow=Math.round((paidTix+g26)*NO_SHOW);
+    const att=(paidTix+g26)-noshow;
     const a25=ATT25[d.k]||0;
     const wave=CW(d.k);
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
@@ -516,7 +540,10 @@ function bOv(){
       <td class="t26" style="background:var(--c-wave)">${ws?N(ws):'—'}</td>
       <td style="background:var(--c-wave)">${wq?N(wq):'—'}</td>
       <td style="background:var(--c-wave)">${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
-      <td class="t26" style="background:var(--c-att)">${N(att)}</td>
+      <td class="t26" style="background:var(--c-att)">${N(paidTix)}</td>
+      <td style="background:var(--c-att)">${N(g26)}</td>
+      <td style="background:var(--c-att);color:var(--neg)">−${N(noshow)}</td>
+      <td class="t26" style="background:var(--c-att);font-weight:700">${N(att)}</td>
       <td class="t25" style="background:var(--c-att)">${N(a25)}</td>
       <td style="background:var(--c-att)">${a25?attBar(att,a25):'—'}</td>
     </tr>`;
@@ -541,7 +568,7 @@ function bOv(){
     <td class="t26" style="background:var(--c-wave)">${combiWs?N(combiWs):'—'}</td>
     <td style="background:var(--c-wave)">${combiWq?N(combiWq):'—'}</td>
     <td style="background:var(--c-wave)">${combiWs&&combiWq?bar(combiWs/combiWq*100,Y26):'—'}</td>
-    <td style="background:var(--c-att)" colspan="3">included in day totals above</td>
+    <td style="background:var(--c-att)" colspan="4">included in day totals above</td>
   </tr>`;
   rows+=`<tr class="blk-tickets" style="opacity:.75;font-style:italic">
     <td><span class="dot" style="background:#a78bfa"></span>Friday (2025 only)</td>
@@ -552,7 +579,7 @@ function bOv(){
     <td style="color:var(--mu)">—</td>
     <td style="background:var(--c-cap)" colspan="3">—</td>
     <td style="background:var(--c-wave)" colspan="4">—</td>
-    <td style="background:var(--c-att)" colspan="3">—</td>
+    <td style="background:var(--c-att)" colspan="4">—</td>
   </tr>`;
 
   // Add combi + friday to subtotal 1
@@ -572,7 +599,7 @@ function bOv(){
     <td style="background:var(--c-cap-h)">${bar(subT26/subCap*100,'#15803d')}</td>
     <td style="background:var(--c-cap-h)">${N(subCap-subT26)}</td>
     <td colspan="4" style="background:var(--c-wave-h)">—</td>
-    <td class="t26" style="background:var(--c-att-h)">${N(subAtt26)}</td>
+    <td style="background:var(--c-att-h)" colspan="4">—</td>
     <td class="t25" style="background:var(--c-att-h)">${N(subAtt25)}</td>
     <td style="background:var(--c-att-h)">${sub1AttPct}</td>
   </tr>`;
@@ -599,7 +626,7 @@ function bOv(){
       <td class="t26" style="background:var(--c-wave)">${wsC?N(wsC):'—'}</td>
       <td style="background:var(--c-wave)">${wqC?N(wqC):'—'}</td>
       <td style="background:var(--c-wave)">${wsC&&wqC?bar(wsC/wqC*100,Y26):'—'}</td>
-      <td style="background:var(--c-att)" colspan="3" style="color:var(--mu);font-size:10px;font-style:italic">included in day totals above</td>
+      <td style="background:var(--c-att)" colspan="4" style="color:var(--mu);font-size:10px;font-style:italic">included in day totals above</td>
     </tr>`;
     ceraT26+=t26c; ceraT25w+=t25wc; ceraF25+=f25c; ceraCap+=capC;
   });
@@ -616,7 +643,7 @@ function bOv(){
     <td style="background:var(--c-cap-h)">${ceraCap?bar(ceraT26/ceraCap*100,'#15803d'):'—'}</td>
     <td style="background:var(--c-cap-h)">${ceraCap?N(ceraCap-ceraT26):'—'}</td>
     <td colspan="4" style="background:var(--c-wave-h)">—</td>
-    <td colspan="3" style="background:var(--c-att-h)">—</td>
+    <td colspan="4" style="background:var(--c-att-h)">—</td>
   </tr>`;
 
   rows+=`<tr class="tot-row">
@@ -626,7 +653,7 @@ function bOv(){
     <td class="t25">${N(tt25f)}</td><td>${pO(tt26,tt25f)}</td>
     <td>${N(totCap)}</td><td>${bar(tt26/totCap*100,'#15803d')}</td><td>${N(totCap-tt26)}</td>
     <td>—</td><td>—</td><td>—</td><td>—</td>
-    <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${totAtt25?attBar(totAtt26,totAtt25):'—'}</td>
+    <td colspan="2" style="background:var(--c-att)">—</td><td style="background:var(--c-att)">—</td><td class="t26" style="background:var(--c-att)">${N(totAtt26)}</td><td class="t25" style="background:var(--c-att)">${N(totAtt25)}</td><td style="background:var(--c-att)">${totAtt25?attBar(totAtt26,totAtt25):'—'}</td>
   </tr>`;
 
   rows+='</tbody>';
@@ -939,7 +966,43 @@ function bDetail(){
 
 // On load: fetch live quotas/capacity from API first, then build
 // Falls back to embedded data immediately if API is unavailable
+
+// ── GUEST MANAGEMENT ─────────────────────────────────────
+function loadGuests(){
+  const saved=localStorage.getItem('jm_guests');
+  if(saved){
+    try{
+      const g=JSON.parse(saved);
+      GUESTS['Saturday']=g.sat||500;
+      GUESTS['Sunday']=g.sun||500;
+      GUESTS['Monday (Public holiday)']=g.mon||500;
+      GUESTS['Combi (Saturday, Sunday, Monday)']=g.combi||200;
+    }catch(e){}
+  }
+  // Sync to inputs
+  const fields={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
+  Object.entries(fields).forEach(([id,k])=>{
+    const el=document.getElementById('g-'+id);
+    if(el)el.value=GUESTS[k];
+  });
+}
+function saveGuests(){
+  const sat=parseInt(document.getElementById('g-sat')?.value)||0;
+  const sun=parseInt(document.getElementById('g-sun')?.value)||0;
+  const mon=parseInt(document.getElementById('g-mon')?.value)||0;
+  const combi=parseInt(document.getElementById('g-combi')?.value)||0;
+  GUESTS['Saturday']=sat;
+  GUESTS['Sunday']=sun;
+  GUESTS['Monday (Public holiday)']=mon;
+  GUESTS['Combi (Saturday, Sunday, Monday)']=combi;
+  localStorage.setItem('jm_guests',JSON.stringify({sat,sun,mon,combi}));
+  const ok=document.getElementById('guest-ok');
+  if(ok){ok.textContent='Saved ✓';setTimeout(()=>ok.textContent='',3000);}
+  bOv(); // rebuild overview with new guest values
+}
+
 async function init(){
+  loadGuests();
   loadData(E26,E25);
   setFresh();
   if(API){
