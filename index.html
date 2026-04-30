@@ -664,15 +664,43 @@ function bOv(){
   rows+='</tbody>';
   document.getElementById('tbl-master').innerHTML=rows;
 
+  // d10: 10 most-recent DTFs, sorted highest→lowest (oldest left, newest right)
   const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10).reverse();
+  // d10[0]=highest DTF (oldest), d10[9]=lowest DTF (most recent) — correct L→R order
   const latestDateByDtf={};
   D26.forEach(r=>{if(!latestDateByDtf[r.dtf])latestDateByDtf[r.dtf]=r.date;});
-  const l10=d10.map(d=>{let dt=latestDateByDtf[d]||'';if(/^\d{4}-\d{2}-\d{2}/.test(dt)){const[y,m,dd]=dt.slice(0,10).split('-');dt=`${dd}/${m}/${y.slice(2)}`;}else if(/^\d{2}\/\d{2}\/\d{4}$/.test(dt)){dt=dt.slice(0,6)+dt.slice(8);}return`${dt} (D-${d})`;}).reverse();
+  const l10=d10.map(d=>{let dt=latestDateByDtf[d]||'';if(/^\d{4}-\d{2}-\d{2}/.test(dt)){const[y,m,dd]=dt.slice(0,10).split('-');dt=`${dd}/${m}/${y.slice(2)}`;}else if(/^\d{2}\/\d{2}\/\d{4}$/.test(dt)){dt=dt.slice(0,6)+dt.slice(8);}return`${dt}\n(D-${d})`;});
   const tK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)','Saturday - CERA','Sunday - CERA','Monday (Public holiday) - CERA'];
   const tL=['Saturday','Sunday','Monday','Combi','Sat CERA','Sun CERA','Mon CERA'];
   const tC=['#6b9ef5','#3db870','#e06b42','#f5c842','#93c5fd','#86efac','#fbb26a'];
-  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0).reverse();
-  const d10plugin={id:'d10totals',afterDatasetsDraw(chart){const{ctx}=chart;ctx.save();ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.fillStyle='#44403c';const meta=chart.getDatasetMeta(chart.data.datasets.length-1);meta.data.forEach((bar,i)=>{const v=d10totals[i];if(v>0)ctx.fillText(N(v),bar.x,bar.y-8);});ctx.restore();}};
+  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+(v.t||0),0):0);
+  const d10plugin={id:'d10labels',afterDatasetsDraw(chart){
+    const{ctx,data}=chart;ctx.save();
+    // Bar totals (2026) — on top of stacked bars
+    const barMeta=chart.getDatasetMeta(chart.data.datasets.findIndex(ds=>ds.stack==='s'&&ds.order===2||ds.type!=='line'&&ds.stack));
+    // Find last stacked bar dataset index
+    let lastBarIdx=-1;
+    data.datasets.forEach((ds,i)=>{if(ds.stack==='s')lastBarIdx=i;});
+    if(lastBarIdx>=0){
+      const meta=chart.getDatasetMeta(lastBarIdx);
+      ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.fillStyle='#44403c';
+      meta.data.forEach((bar,i)=>{
+        const v=d10totals[i];
+        if(v>0)ctx.fillText(N(v),bar.x,bar.y-8);
+      });
+    }
+    // Trend line labels (2025) — value next to each point
+    const lineIdx=data.datasets.findIndex(ds=>ds.type==='line');
+    if(lineIdx>=0){
+      const lineMeta=chart.getDatasetMeta(lineIdx);
+      ctx.font='10px JetBrains Mono,monospace';ctx.fillStyle='#2563eb';ctx.textAlign='center';
+      lineMeta.data.forEach((pt,i)=>{
+        const v=trend25[i];
+        if(v!=null&&v>0)ctx.fillText(N(v),pt.x,pt.y-10);
+      });
+    }
+    ctx.restore();
+  }};
   // 2025 same-DTF daily totals as trend line
   const trend25=d10.map(d=>DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null);
   mk('c-d10','bar',l10,[
