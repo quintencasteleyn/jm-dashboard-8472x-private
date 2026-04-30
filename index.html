@@ -323,6 +323,7 @@ let WAVE_CFG={
   'Sunday':{Presale:106,'Early Bird':529,Regular:1115,'Final Wave':700},
   'Monday (Public holiday)':{Presale:92,'Early Bird':791,Regular:867,'Final Wave':700},
   'Combi (Saturday, Sunday, Monday)':{Presale:193,'Early Bird':247,Regular:2345,'Final Wave':100},
+  'Friday - CERA':{'Cera - Early Bird':0,'Cera - Regular':0},
   'Saturday - CERA':{'Cera - Early Bird':0,'Cera - Regular':100,'Cera - Final Wave':150},
   'Sunday - CERA':{'Cera - Early Bird':999,'Cera - Regular':200,'Cera - Final Wave':200},
   'Monday (Public holiday) - CERA':{'Cera - Early Bird':100,'Cera - Regular':200,'Cera - Final Wave':200},
@@ -332,6 +333,7 @@ const WAVE_ORDER_MAP={
   'Sunday':['Presale','Early Bird','Regular','Final Wave'],
   'Monday (Public holiday)':['Presale','Early Bird','Regular','Final Wave'],
   'Combi (Saturday, Sunday, Monday)':['Presale','Early Bird','Regular','Final Wave'],
+  'Friday - CERA':['Cera - Early Bird','Cera - Regular'],
   'Saturday - CERA':['Cera - Early Bird','Cera - Regular','Cera - Final Wave'],
   'Sunday - CERA':['Cera - Early Bird','Cera - Regular','Cera - Final Wave'],
   'Monday (Public holiday) - CERA':['Cera - Early Bird','Cera - Regular','Cera - Final Wave']
@@ -485,6 +487,7 @@ function bOv(){
     {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
   ];
   const CERA_ROWS=[
+    {l:'Fri – CERA',k:'Friday - CERA',c:'#c4b5fd'},
     {l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
     {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
     {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
@@ -670,9 +673,14 @@ function bOv(){
   const tC=['#6b9ef5','#3db870','#e06b42','#f5c842','#93c5fd','#86efac','#fbb26a'];
   const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0).reverse();
   const d10plugin={id:'d10totals',afterDatasetsDraw(chart){const{ctx}=chart;ctx.save();ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.fillStyle='#44403c';const meta=chart.getDatasetMeta(chart.data.datasets.length-1);meta.data.forEach((bar,i)=>{const v=d10totals[i];if(v>0)ctx.fillText(N(v),bar.x,bar.y-8);});ctx.restore();}};
-  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.slice().reverse().map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),{scales:{x:{stacked:true},y:{stacked:true}},plugins:{legend:{position:'top',labels:{boxWidth:10}}},extraPlugins:[d10plugin]});
+  // 2025 same-DTF daily totals as trend line
+  const trend25=d10.map(d=>DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null);
+  mk('c-d10','bar',l10,[
+    ...tK.map((k,i)=>({label:tL[i],data:d10.map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s',order:2})),
+    {label:'2025 same DTF',data:trend25,type:'line',borderColor:'#2563eb',backgroundColor:'transparent',borderWidth:2,pointRadius:4,pointBackgroundColor:'#2563eb',fill:false,order:1}
+  ],{scales:{x:{stacked:true},y:{stacked:true}},plugins:{legend:{position:'top',labels:{boxWidth:10}}},extraPlugins:[d10plugin]});
 
-  const d10rows=d10.slice().reverse().map((d,idx)=>{
+  const d10rows=d10.map((d,idx)=>{
     const vals=tK.map(k=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0);
     const tot=vals.reduce((s,v)=>s+v,0);
     return `<tr><td>${l10[idx]}</td>${vals.map(v=>`<td>${v?N(v):'—'}</td>`).join('')}<td class="t26">${tot?N(tot):'—'}</td></tr>`;
