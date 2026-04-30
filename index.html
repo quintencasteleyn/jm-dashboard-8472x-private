@@ -378,7 +378,24 @@ const DC={'Saturday':'#6b9ef5','Sunday':'#3db870','Monday (Public holiday)':'#e0
   'Combi (Saturday, Sunday, Monday)':'#f5c842','Saturday - CERA':'#93c5fd',
   'Sunday - CERA':'#86efac','Monday (Public holiday) - CERA':'#fbb26a'};
 
-Chart.defaults.color='#78716c';Chart.defaults.borderColor='#e2ddd8';
+Chart.defaults.color='#78716c';
+// Register today-line plugin once globally — draws red dashed line at index 30 on c-daily-60
+Chart.register({
+  id:'todayLine60',
+  afterDraw(chart){
+    if(chart.canvas.id!=='c-daily-60')return;
+    const{ctx,chartArea:{top,bottom},scales:{x}}=chart;
+    if(!x)return;
+    const xp=x.getPixelForIndex(30);
+    ctx.save();
+    ctx.beginPath();ctx.moveTo(xp,top);ctx.lineTo(xp,bottom);
+    ctx.strokeStyle='rgba(220,38,38,.55)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+    ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#dc2626';ctx.font='bold 9px Sora,sans-serif';
+    ctx.textAlign='center';ctx.fillText('TODAY',xp,top-2);
+    ctx.restore();
+  }
+});Chart.defaults.borderColor='#e2ddd8';
 Chart.defaults.font.family="'JetBrains Mono',monospace";Chart.defaults.font.size=10;
 
 // ── STATE ───────────────────────────────────
@@ -951,22 +968,11 @@ function bDaily60(){
   const lbl60=dwin.map(d=>'D-'+d);
   const dat26=dwin.map(d=>d<tdtf?null:(DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+(v.t||0),0):0));
   const dat25=dwin.map(d=>DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null);
-  const tplug={id:'todayLine60',afterDraw(chart){
-    const{ctx,chartArea:{top,bottom},scales:{x}}=chart;
-    const xp=x.getPixelForIndex(30);
-    ctx.save();ctx.beginPath();ctx.moveTo(xp,top);ctx.lineTo(xp,bottom);
-    ctx.strokeStyle='rgba(220,38,38,.55)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
-    ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#dc2626';ctx.font='bold 9px Sora,sans-serif';
-    ctx.textAlign='center';ctx.fillText('TODAY',xp,top-2);
-    ctx.restore();
-  }};
   mk('c-daily-60','line',lbl60,[
     lDS('2026',dat26,Y26,Y26b),
     lDS('2025 (same DTF)',dat25,Y25,Y25b)
-  ],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true},extraPlugins:[tplug]});
+  ],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true}});
 }
-
 function buildAll(){bOv();bDaily60();bDetail();bTrends();bRev();bWav();}
 
 // ── DETAIL TAB ───────────────────────────────
