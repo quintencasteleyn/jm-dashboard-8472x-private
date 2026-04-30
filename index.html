@@ -228,6 +228,17 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="th">Past 10 days — tickets by type (detail)</div>
     <table id="tbl-d10"></table>
   </div>
+    <canvas id="c-daily-60" height="130"></canvas>
+  </div>
+  <div class="card g1" style="margin-top:13px">
+    <div class="ct">Daily ticket sales — D-(today+30) to D-(today-30)
+      <span class="yl">
+        <span class="yl-l" style="background:var(--y26)"></span>2026
+        <span class="yl-l" style="background:var(--y25)"></span>2025 (same DTF)
+      </span>
+    </div>
+    <canvas id="c-daily-60" height="130"></canvas>
+  </div>
   <div class="card g1" style="margin-top:13px">
     <div class="ct">Rolling average — all tickets sold per day
       <span class="yl"><span class="yl-l" style="background:#6b9ef5"></span>7-day
@@ -729,6 +740,35 @@ function bOv(){
   const r7=roll(7),r30=roll(30),r60=roll(60);
   const labR=orderedDates.map(d=>/^\d{2}\/\d{2}\/\d{4}$/.test(d)?d.slice(0,6)+d.slice(8):d.slice(5));
   mk('c-roll','line',labR,[lDS('7-day',r7,'#6b9ef5','rgba(107,158,245,.10)'),lDS('30-day',r30,'#3db870','rgba(61,184,112,.10)'),lDS('60-day',r60,'#e06b42','rgba(224,107,66,.10)')],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true}});
+  // ── DAILY SALES ±30 DTF around today ────────────────────
+  (function(){
+    const todayDTF=minDTF(D26);
+    const dtfWin=[];
+    for(let d=todayDTF+30;d>=todayDTF-30;d--) dtfWin.push(d);
+    const labels=dtfWin.map(d=>'D-'+d);
+    const data26=dtfWin.map(d=>{
+      if(d<todayDTF) return null;
+      return DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+(v.t||0),0):0;
+    });
+    const data25=dtfWin.map(d=>{
+      return DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null;
+    });
+    const todayPlugin={id:'todayLine',afterDraw(chart){
+      const{ctx,chartArea:{top,bottom},scales:{x}}=chart;
+      const xPos=x.getPixelForIndex(30);
+      ctx.save();
+      ctx.beginPath();ctx.moveTo(xPos,top);ctx.lineTo(xPos,bottom);
+      ctx.strokeStyle='rgba(220,38,38,.55)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+      ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle='#dc2626';ctx.font='bold 9px Sora,sans-serif';
+      ctx.textAlign='center';ctx.fillText('TODAY',xPos,top-2);
+      ctx.restore();
+    }};
+    mk('c-daily-60','line',labels,[
+      lDS('2026',data26,Y26,Y26b),
+      lDS('2025 (same DTF)',data25,Y25,Y25b)
+    ],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true},extraPlugins:[todayPlugin]});
+  })();
 }
 
 // ── SALES TRENDS ─────────────────────────────
