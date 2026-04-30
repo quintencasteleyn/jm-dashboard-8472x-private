@@ -741,34 +741,32 @@ function bOv(){
   const labR=orderedDates.map(d=>/^\d{2}\/\d{2}\/\d{4}$/.test(d)?d.slice(0,6)+d.slice(8):d.slice(5));
   mk('c-roll','line',labR,[lDS('7-day',r7,'#6b9ef5','rgba(107,158,245,.10)'),lDS('30-day',r30,'#3db870','rgba(61,184,112,.10)'),lDS('60-day',r60,'#e06b42','rgba(224,107,66,.10)')],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true}});
   // ── DAILY SALES ±30 DTF around today ────────────────────
-  (function(){
-    const todayDTF=minDTF(D26);
-    const dtfWin=[];
-    for(let d=todayDTF+30;d>=todayDTF-30;d--) dtfWin.push(d);
-    const labels=dtfWin.map(d=>'D-'+d);
-    const data26=dtfWin.map(d=>{
-      if(d<todayDTF) return null;
-      return DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+(v.t||0),0):0;
-    });
-    const data25=dtfWin.map(d=>{
-      return DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null;
-    });
-    const todayPlugin={id:'todayLine',afterDraw(chart){
-      const{ctx,chartArea:{top,bottom},scales:{x}}=chart;
-      const xPos=x.getPixelForIndex(30);
-      ctx.save();
-      ctx.beginPath();ctx.moveTo(xPos,top);ctx.lineTo(xPos,bottom);
-      ctx.strokeStyle='rgba(220,38,38,.55)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
-      ctx.stroke();ctx.setLineDash([]);
-      ctx.fillStyle='#dc2626';ctx.font='bold 9px Sora,sans-serif';
-      ctx.textAlign='center';ctx.fillText('TODAY',xPos,top-2);
-      ctx.restore();
-    }};
-    mk('c-daily-60','line',labels,[
-      lDS('2026',data26,Y26,Y26b),
-      lDS('2025 (same DTF)',data25,Y25,Y25b)
-    ],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true},extraPlugins:[todayPlugin]});
-  })();
+  const _todayDTF=minDTF(D26);
+  const _dtfWin=[];
+  for(let _d=_todayDTF+30;_d>=_todayDTF-30;_d--) _dtfWin.push(_d);
+  const _lbl60=_dtfWin.map(_d=>'D-'+_d);
+  const _data26_60=_dtfWin.map(_d=>{
+    if(_d<_todayDTF) return null;
+    return DTF26[_d]?Object.values(DTF26[_d]).reduce((s,v)=>s+(v.t||0),0):0;
+  });
+  const _data25_60=_dtfWin.map(_d=>{
+    return DTF25[_d]?Object.values(DTF25[_d]).reduce((s,v)=>s+(v.t||0),0):null;
+  });
+  const _todayPlugin={id:'todayLine60',afterDraw(chart){
+    const{ctx,chartArea:{top,bottom},scales:{x}}=chart;
+    const xPos=x.getPixelForIndex(30);
+    ctx.save();
+    ctx.beginPath();ctx.moveTo(xPos,top);ctx.lineTo(xPos,bottom);
+    ctx.strokeStyle='rgba(220,38,38,.55)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+    ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#dc2626';ctx.font='bold 9px Sora,sans-serif';
+    ctx.textAlign='center';ctx.fillText('TODAY',xPos,top-2);
+    ctx.restore();
+  }};
+  mk('c-daily-60','line',_lbl60,[
+    lDS('2026',_data26_60,Y26,Y26b),
+    lDS('2025 (same DTF)',_data25_60,Y25,Y25b)
+  ],{plugins:{legend:{position:'top'}},yS:{beginAtZero:true},extraPlugins:[_todayPlugin]});
 }
 
 // ── SALES TRENDS ─────────────────────────────
