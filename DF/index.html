@@ -420,11 +420,66 @@ function bDaily60(){
               y:{grid:{color:'rgba(0,0,0,.04)'},beginAtZero:true}}}});
   }
 }
+function bTrends(){
+  const dtfs=DTFS(210),lbl=dtfs.map(d=>'D-'+d);
+  const ALL25=['Doel - Presale','Doel - Early Bird','Doel - Regular','Doel - Final Wave','Doel - Wave 1','Doel - Wave 2','Doel - Wave 3'];
+  mk('c-cum-big','line',lbl,[
+    lDS('2026',nE26(cs(tA(DTF26,dtfs,ENTRY_WAVES)),dtfs),Y26,Y26b),
+    lDS('2025',nE(cs(tA(DTF25,dtfs,ALL25))),Y25,Y25b),
+    lDS('2024',nE(cs(tA(DTF24,dtfs,ENTRY_WAVES))),Y24,Y24b),
+    lDS('2023',nE(cs(tA(DTF23,dtfs,ENTRY_WAVES))),Y23,Y23b),
+  ],{plugins:{legend:{position:'top'}}});
+  const ctrMap={};D26.forEach(r=>{if(r.country&&ENTRY_WAVES.includes(r.title)){if(!ctrMap[r.country])ctrMap[r.country]=0;ctrMap[r.country]+=r.tickets;}});
+  const ctrE=Object.entries(ctrMap).sort((a,b)=>b[1]-a[1]).slice(0,10);const tot=Object.values(ctrMap).reduce((s,v)=>s+v,0);
+  if(ctrE.length) mk('c-country','bar',ctrE.map(e=>e[0]+' '+((e[1]/tot*100).toFixed(1))+'%'),[{data:ctrE.map(e=>e[1]),backgroundColor:['#6b9ef5','#3db870','#e06b42','#f5c842','#c4b5fd','#93c5fd','#86efac','#fbb26a','#0891b2','#d97706']}],{indexAxis:'y',plugins:{legend:{display:false}}});
+  mk('c-by-wave','bar',lbl,ENTRY_WAVES.map(k=>({label:k.replace('Doel - ',''),data:nE26(cs(dA(DTF26,k,dtfs)),dtfs),backgroundColor:WAVE_COLORS[k]+'cc',stack:'s'})),{scales:{x:{stacked:true},y:{stacked:true}},plugins:{legend:{position:'top'}}});
+}
+
+function bRev(){
+  const tt26=ENTRY_WAVES.reduce((s,k)=>s+(T26[k]?.t||0),0);
+  const gr26=ENTRY_WAVES.reduce((s,k)=>s+(T26[k]?.r||0),0);const nt26=netRev(gr26,tt26);
+  const ALL25=['Doel - Presale','Doel - Early Bird','Doel - Regular','Doel - Final Wave','Doel - Wave 1','Doel - Wave 2','Doel - Wave 3'];
+  const tt25f=ALL25.reduce((s,k)=>s+(T25[k]?.t||0),0);const gr25f=ALL25.reduce((s,k)=>s+(T25[k]?.r||0),0);const nt25f=netRev25(gr25f,tt25f);
+  const minD=minDTF(D26);let gr25w=0,tt25w=0;D25.forEach(r=>{if(r.dtf>=minD&&ALL25.includes(r.title)){gr25w+=(r.price||0);tt25w+=(r.tickets||0);}});const nt25w=netRev25(gr25w,tt25w);
+  document.getElementById('krow-rev').innerHTML=[{l:'Net revenue 2026',v:'€'+N(Math.round(nt26)),s:'gross €'+N(Math.round(gr26)),c:Y26},{l:'Net 2025 @same',v:'€'+N(Math.round(nt25w)),s:dStr(nt26,nt25w),c:Y25},{l:'Net 2025 full',v:'€'+N(Math.round(nt25f)),s:pO(nt26,nt25f)+' reached',c:Y25}].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
+  const dtfs=DTFS(210),lbl=dtfs.map(d=>'D-'+d);
+  function nc(dtfO,types,isOld){let s=0;return dtfs.map(d=>{if(!dtfO[d])return s;const g=types.reduce((a,k)=>a+(dtfO[d][k]?.r||0),0);const t=types.reduce((a,k)=>a+(dtfO[d][k]?.t||0),0);s+=isOld?netRev25(g,t):netRev(g,t);return s;});}
+  mk('c-rev-all','line',lbl,[lDS('2026',nE26(nc(DTF26,ENTRY_WAVES,false),dtfs),Y26,Y26b),lDS('2025',nE(nc(DTF25,ALL25,true)),Y25,Y25b)],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
+  const rd26=dtfs.map(d=>DTF26[d]?ENTRY_WAVES.reduce((s,k)=>s+(DTF26[d][k]?.r||0),0):0);
+  const rd25=dtfs.map(d=>DTF25[d]?ALL25.reduce((s,k)=>s+(DTF25[d][k]?.r||0),0):0);
+  mk('c-rev-day','bar',lbl,[{label:'2026',data:nE26(rd26,dtfs),backgroundColor:'rgba(217,119,6,.65)',stack:'a'},{label:'2025',data:nE(rd25),backgroundColor:'rgba(37,99,235,.4)',stack:'b'}],{plugins:{legend:{position:'top'}},yS:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'}}});
+  const tblR=ENTRY_WAVES.map(k=>{const{t:t2=0,r:g2=0}=T26[k]||{};const n2=netRev(g2,t2);return`<tr><td><span class="dot" style="background:${WAVE_COLORS[k]||'#888'}"></span>${k}</td><td class="t26">€${N(Math.round(g2))}</td><td>€${N(Math.round(g2*0.02))}</td><td>€${N(Math.round(g2*0.06))}</td><td class="t26">€${N(Math.round(n2))}</td></tr>`;}).join('');
+  document.getElementById('tbl-rev').innerHTML=`<thead><tr><th>Wave</th><th>Gross</th><th>Fees</th><th>VAT</th><th>Net 2026</th></tr></thead><tbody>${tblR}</tbody>`;
+}
+
+function bWav(){
+  const totals=ENTRY_WAVES.map(k=>T26[k]?.t||0);
+  const caps=ENTRY_WAVES.map(k=>WAVE_CFG[k]||0);
+  const waveTbl=ENTRY_WAVES.map((k,i)=>`<tr><td><span class="dot" style="background:${WAVE_COLORS[k]||'#888'}"></span>${k}</td><td class="t26">${N(totals[i])}</td><td>${caps[i]?N(caps[i]):'—'}</td><td>${caps[i]?bar(totals[i]/caps[i]*100,Y26):'—'}</td><td>${bar(totals[i]/CAPACITY*100,'#15803d')}</td></tr>`).join('');
+  document.getElementById('tbl-wav').innerHTML=`<thead><tr><th>Wave</th><th class="t26">Sold</th><th>Quota</th><th>% quota</th><th>Cap. share</th></tr></thead><tbody>${waveTbl}<tr class="tot-row"><td>Total</td><td class="t26">${N(totals.reduce((s,v)=>s+v,0))}</td><td>${N(CAPACITY)}</td><td>${bar(totals.reduce((s,v)=>s+v,0)/CAPACITY*100,Y26)}</td><td>—</td></tr></tbody>`;
+  const labels=ENTRY_WAVES.map(k=>k.replace('Doel - ',''));
+  const unsolds=ENTRY_WAVES.map((k,i)=>Math.max(0,(caps[i]||0)-totals[i]));
+  mk('c-wb','bar',labels,[{label:'Sold',data:totals,backgroundColor:ENTRY_WAVES.map(k=>WAVE_COLORS[k]),stack:'s'},{label:'Unsold',data:unsolds,backgroundColor:'#e2ddd8',stack:'s'}],{scales:{x:{stacked:true},y:{stacked:true}},plugins:{legend:{position:'top'}}});
+  mk('c-wf','bar',labels,[{label:'% of cap',data:ENTRY_WAVES.map((k,i)=>caps[i]?Math.round(totals[i]/caps[i]*100):0),backgroundColor:ENTRY_WAVES.map(k=>WAVE_COLORS[k])}],{plugins:{legend:{display:false}},yS:{max:100,ticks:{callback:v=>v+'%'}}});
+}
+
+function bParking(){
+  const ITEMS=['Parking','Shuttle Antwerp','Shuttle Brussels','Shuttle Ghent','Shuttle Leuven','Shuttle Mechelen'];
+  const booked26=ITEMS.reduce((o,k)=>{o[k]=D26.filter(r=>r.title===k).reduce((s,r)=>s+r.tickets,0);return o;},{});
+  const totBooked=Object.values(booked26).reduce((s,v)=>s+v,0);
+  const totQuota=ITEMS.reduce((s,k)=>s+(PS_QUOTAS[k]||0),0);
+  document.getElementById('krow-parking').innerHTML=[{l:'Total booked 2026',v:N(totBooked),s:'all options',c:Y26},{l:'Total capacity',v:N(totQuota),s:'parking + shuttles',c:'#555'},{l:'% booked',v:pO(totBooked,totQuota),s:'across all options',c:Y26}].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
+  document.getElementById('tbl-parking').innerHTML=`<thead><tr><th>Type</th><th class="t26">Booked 2026</th><th>Quota</th><th>% Booked</th><th>Remaining</th></tr></thead><tbody>`+ITEMS.map(k=>{const b=booked26[k]||0;const q=PS_QUOTAS[k]||0;return`<tr><td><strong>${k}</strong></td><td class="t26">${N(b)}</td><td>${N(q)}</td><td>${b&&q?bar(b/q*100,'#dc2626'):'—'}</td><td>${q?N(q-b):'—'}</td></tr>`;}).join('')+`<tr class="tot-row"><td>Total</td><td class="t26">${N(totBooked)}</td><td>${N(totQuota)}</td><td>${bar(totBooked/totQuota*100,'#dc2626')}</td><td>${N(totQuota-totBooked)}</td></tr></tbody>`;
+  const PS_HIST={'2023':{Parking:359,'Shuttle Antwerp':995,'Shuttle Brussels':240,'Shuttle Ghent':80,'Shuttle Leuven':19,'Shuttle Mechelen':31},'2024':{Parking:449,'Shuttle Antwerp':1167,'Shuttle Brussels':226,'Shuttle Ghent':176,'Shuttle Leuven':31,'Shuttle Mechelen':23},'2025':{Parking:683,'Shuttle Antwerp':1548,'Shuttle Brussels':294,'Shuttle Ghent':209,'Shuttle Leuven':48,'Shuttle Mechelen':42}};
+  document.getElementById('tbl-parking-hist').innerHTML=`<thead><tr><th>Type</th><th>2023</th><th>2024</th><th>2025</th><th>Quota</th></tr></thead><tbody>`+ITEMS.map(k=>`<tr><td>${k}</td><td>${N(PS_HIST['2023'][k]||0)}</td><td>${N(PS_HIST['2024'][k]||0)}</td><td>${N(PS_HIST['2025'][k]||0)}</td><td>${N(PS_QUOTAS[k]||0)}</td></tr>`).join('')+'</tbody>';
+}
+
 function buildAll(){bOv();bDaily60();bTrends();bRev();bWav();bParking();}
 async function init(){
   loadData(E26,E25,E24,E23);setFresh();
-  if(API){try{const resp=await fetch(API+'?t='+Date.now(),{method:'GET',mode:'cors'});if(resp.ok){const j=await resp.json();if(!j.error&&j.data){await liveRefresh();return;}}}catch(e){console.log('Init failed:',e.message);}}
   buildAll();
+  buildAll(); // always build with embedded data first
+  if(API){try{const resp=await fetch(API+'?t='+Date.now(),{method:'GET',mode:'cors'});if(resp.ok){const j=await resp.json();if(!j.error&&j.data){await liveRefresh();}}}catch(e){console.log('Init failed:',e.message);}}
 }
 init();
 </script>
