@@ -596,11 +596,12 @@ function bTrends(){
 
   // Per type — 4 years for Friday, 2 years for rest
   [['fri','Friday'],['sat','Saturday'],['sun','Sunday'],['3d','3 Days'],['3dc','3 Days + Camping']].forEach(([s,k])=>{
-    const datasets=[lDS('2026',nE26(cs(dA(DTF26,k,dtfs)),dtfs),Y26,Y26b),lDS('2025',nE(cs(dA(DTF25,k,dtfs))),Y25,Y25b)];
-    if(s==='fri'){
-      datasets.push(lDS('2024',nE(cs(dA(DTF24,k,dtfs))),Y24,Y24b));
-      datasets.push(lDS('2023',nE(cs(dA(DTF23,k,dtfs))),Y23,Y23b));
-    }
+    const datasets=[
+      lDS('2026',nE26(cs(dA(DTF26,k,dtfs)),dtfs),Y26,Y26b),
+      lDS('2025',nE(cs(dA(DTF25,k,dtfs))),Y25,Y25b),
+      lDS('2024',nE(cs(dA(DTF24,k,dtfs))),Y24,Y24b),
+      lDS('2023',nE(cs(dA(DTF23,k,dtfs))),Y23,Y23b),
+    ];
     mk('c-cum-'+s,'line',lbl,datasets,{plugins:{legend:{position:'top'}}});
   });
 
