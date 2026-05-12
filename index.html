@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -200,7 +201,11 @@ tbody tr:hover td{filter:brightness(.97);}
       <div class="guest-row"><label>Sunday guests</label><input type="number" id="g-sun" min="0" value="500"></div>
       <div class="guest-row"><label>Monday guests</label><input type="number" id="g-mon" min="0" value="500"></div>
       <div class="guest-row"><label>Combi guests</label><input type="number" id="g-combi" min="0" value="200"></div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:6px"><button class="guest-save-btn" onclick="saveGuests()">Save guests</button><span class="guest-save-ok" id="guest-ok"></span></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+        <button class="guest-save-btn" onclick="saveGuests()">Save guests</button>
+        <button class="guest-save-btn" style="background:#4b5563" onclick="copyShareLink()" title="Colleagues can open this URL to load your guest counts">🔗 Copy share link</button>
+        <span class="guest-save-ok" id="guest-ok"></span>
+      </div>
     </div>
   </div>
 
@@ -442,6 +447,7 @@ function bOv(){
     {l:'2025 same period',v:N(tt25w),s:dStr(tt26,tt25w)+' vs 2026',c:Y25},
     {l:'2025 full season',v:N(tt25f),s:pO(tt26,tt25f)+' reached',c:Y25},
     {l:'Net revenue — 2026',v:EU(nt26),s:'after fees & VAT',c:Y26},
+    {l:'Guest tickets total',v:N((GUESTS['Saturday']||0)+(GUESTS['Sunday']||0)+(GUESTS['Monday (Public holiday)']||0)+(GUESTS['Combi (Saturday, Sunday, Monday)']||0)),s:`${GUESTS['Saturday']||0} day + ${GUESTS['Combi (Saturday, Sunday, Monday)']||0} combi guests`,c:'#6d28d9'},
   ].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
 
   const DAYS=[
@@ -591,7 +597,7 @@ function bOv(){
   const tK=DAYS.map(d=>d.k).concat(CERA_ROWS.map(r=>r.k));
   const tC=DAYS.map(d=>d.c).concat(CERA_ROWS.map(r=>r.c));
   const tL=DAYS.map(d=>d.l).concat(CERA_ROWS.map(r=>r.l));
-  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+(v.t||0),0):0);
+  const d10totals=d10.map(d=>tK.reduce((s,k)=>s+(DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),0));
   const trend25d10=d10.map(d=>DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null);
   const d10plugin={id:'d10labels',afterDatasetsDraw(chart){
     const{ctx,data}=chart;ctx.save();
@@ -643,8 +649,8 @@ function bTrends(){
     lDS('2026',nE26(cs(tA(DTF26,dtfs)),dtfs),Y26,Y26b),
     lDS('2025',nE(cs(tA(DTF25,dtfs))),Y25,Y25b)
   ],{plugins:{legend:{position:'top'}}});
-  ['sat','sun'].forEach((s,i)=>{
-    const k=['Saturday','Sunday'][i];
+  ['sat','sun','mon'].forEach((s,i)=>{
+    const k=['Saturday','Sunday','Monday (Public holiday)'][i];
     mk('c-cum-'+s,'line',lbl,[
       lDS('2026 (incl.CERA)',nE26(cs(combArr(DTF26,k,dtfs)),dtfs),Y26,Y26b),
       lDS('2025 (incl.CERA)',nE(cs(combArr(DTF25,k,dtfs))),Y25,Y25b)
@@ -928,6 +934,19 @@ function bDetail(){
 // Falls back to embedded data immediately if API is unavailable
 
 function loadGuests(){
+  // URL params override localStorage (allows sharing guest config via link)
+  const urlP=new URLSearchParams(window.location.search);
+  const urlGuests={sat:urlP.get('gsat'),sun:urlP.get('gsun'),mon:urlP.get('gmon'),combi:urlP.get('gcombi')};
+  const hasUrl=Object.values(urlGuests).some(v=>v!=null);
+  if(hasUrl){
+    GUESTS['Saturday']=parseInt(urlGuests.sat)||500;
+    GUESTS['Sunday']=parseInt(urlGuests.sun)||500;
+    GUESTS['Monday (Public holiday)']=parseInt(urlGuests.mon)||500;
+    GUESTS['Combi (Saturday, Sunday, Monday)']=parseInt(urlGuests.combi)||200;
+    const map2={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
+    Object.entries(map2).forEach(([id,k])=>{const el=document.getElementById('g-'+id);if(el)el.value=GUESTS[k];});
+    return;
+  }
   const saved=localStorage.getItem('jm_guests');
   if(saved){try{const g=JSON.parse(saved);
     GUESTS['Saturday']=g.sat||500;GUESTS['Sunday']=g.sun||500;
@@ -935,6 +954,22 @@ function loadGuests(){
   }catch(e){}}
   const map={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
   Object.entries(map).forEach(([id,k])=>{const el=document.getElementById('g-'+id);if(el)el.value=GUESTS[k];});
+}
+function copyShareLink(){
+  const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
+  const url=new URL(window.location.href);
+  url.searchParams.set('gsat',get('sat'));
+  url.searchParams.set('gsun',get('sun'));
+  url.searchParams.set('gmon',get('mon'));
+  url.searchParams.set('gcombi',get('combi'));
+  navigator.clipboard.writeText(url.toString()).then(()=>{
+    const ok=document.getElementById('guest-ok');
+    if(ok){ok.textContent='Link copied! ✓';setTimeout(()=>ok.textContent='',3000);}
+  }).catch(()=>{
+    const ok=document.getElementById('guest-ok');
+    if(ok){ok.textContent='Copy failed — see console';setTimeout(()=>ok.textContent='',3000);}
+    console.log('Share URL:',url.toString());
+  });
 }
 function saveGuests(){
   const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
