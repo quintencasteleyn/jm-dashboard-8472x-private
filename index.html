@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,15 +105,6 @@ tbody tr:hover td{filter:brightness(.97);}
 #pwd-box button{width:100%;padding:10px;border-radius:7px;background:#d97706;color:#fff;border:none;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
 #pwd-box button:hover{background:#b45309;}
 #pwd-err{color:#ef4444;font-size:11px;margin-top:6px;height:16px;}
-
-.guest-entry{background:#fafaf9;border:1px solid #e2ddd8;border-radius:8px;margin-top:10px;padding:14px 18px;}
-.guest-entry h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#78716c;margin-bottom:10px;}
-.guest-row{display:flex;align-items:center;gap:12px;margin-bottom:7px;}
-.guest-row label{font-size:11px;font-family:'JetBrains Mono',monospace;color:#44403c;width:180px;}
-.guest-row input{width:90px;padding:5px 8px;border:1px solid #e2ddd8;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;background:#fff;color:#1c1917;text-align:right;}
-.guest-row input:focus{outline:none;border-color:#d97706;}
-.guest-save-btn{padding:5px 14px;background:#d97706;color:#fff;border:none;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;cursor:pointer;}
-.guest-save-ok{font-size:10px;color:#15803d;margin-left:8px;}
 </style>
 </head>
 <body>
@@ -141,7 +131,6 @@ tbody tr:hover td{filter:brightness(.97);}
     if(v==='paradise26!'){
       sessionStorage.setItem('jm_auth','1');
       document.getElementById('pwd-overlay').style.display='none';
-      liveRefresh();
     } else {
       document.getElementById('pwd-err').textContent='Incorrect password. Please try again.';
       document.getElementById('pwd-input').value='';
@@ -195,16 +184,24 @@ tbody tr:hover td{filter:brightness(.97);}
   <div class="tw">
     <div class="th">Status at a glance — all ticket types vs 2025, capacity &amp; attendance</div>
     <table id="tbl-master"></table>
-    <div class="note">* Capacity from JM26 capacities. Paid = day+CERA+Combi. No-show 6%.</div>
-    <div class="guest-entry"><h4>✏️ Guest counts — edit &amp; save</h4>
-      <div class="guest-row"><label>Saturday guests</label><input type="number" id="g-sat" min="0" value="500"></div>
-      <div class="guest-row"><label>Sunday guests</label><input type="number" id="g-sun" min="0" value="500"></div>
-      <div class="guest-row"><label>Monday guests</label><input type="number" id="g-mon" min="0" value="500"></div>
-      <div class="guest-row"><label>Combi guests</label><input type="number" id="g-combi" min="0" value="200"></div>
+    <div class="note">* Day capacity from JM Pricing H68–H70. Wave quotas and ticket-type capacities from JM26 capacities. Attendance excludes guests and applies a 6% no-show.</div>
+  </div>
+
+  <div class="tw" style="margin-top:13px">
+    <div class="th" style="background:rgba(109,40,217,.08);color:#5b21b6">Attendance estimate 2026 — per day</div>
+    <table id="tbl-att"></table>
+    <div class="note" style="font-size:10px;color:var(--mu);padding:5px 13px">* Att. est = (Paid tickets + Guests) × (1 − 6% no-show). Paid = day tickets + CERA + Combi. Guests = day guests + Combi guests.</div>
+  </div>
+    <div class="guest-entry" style="background:#fafaf9;border:1px solid #e2ddd8;border-radius:8px;margin-top:10px;padding:14px 18px">
+      <h4 style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#78716c;margin-bottom:10px">✏️ Guest counts — edit &amp; save <span style="font-weight:400;font-size:9px;font-family:'JetBrains Mono',monospace">(saved per browser)</span></h4>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:7px"><label style="font-size:11px;font-family:'JetBrains Mono',monospace;width:180px">Saturday guests</label><input type="number" id="g-sat" min="0" value="500" style="width:90px;padding:5px 8px;border:1px solid #e2ddd8;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:7px"><label style="font-size:11px;font-family:'JetBrains Mono',monospace;width:180px">Sunday guests</label><input type="number" id="g-sun" min="0" value="500" style="width:90px;padding:5px 8px;border:1px solid #e2ddd8;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:7px"><label style="font-size:11px;font-family:'JetBrains Mono',monospace;width:180px">Monday guests</label><input type="number" id="g-mon" min="0" value="500" style="width:90px;padding:5px 8px;border:1px solid #e2ddd8;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:7px"><label style="font-size:11px;font-family:'JetBrains Mono',monospace;width:180px">Combi guests</label><input type="number" id="g-combi" min="0" value="200" style="width:90px;padding:5px 8px;border:1px solid #e2ddd8;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
-        <button class="guest-save-btn" onclick="saveGuests()">Save guests</button>
-        <button class="guest-save-btn" style="background:#4b5563" onclick="copyShareLink()" title="Colleagues can open this URL to load your guest counts">🔗 Copy share link</button>
-        <span class="guest-save-ok" id="guest-ok"></span>
+        <button onclick="saveGuests()" style="padding:5px 14px;background:#d97706;color:#fff;border:none;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;cursor:pointer">Save (this browser)</button>
+        <button onclick="showSharedSnippet()" style="padding:5px 14px;background:#78716c;color:#fff;border:none;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;cursor:pointer">Share defaults ↗</button>
+        <span id="guest-ok" style="font-size:10px;color:#15803d;font-family:'JetBrains Mono',monospace"></span>
       </div>
     </div>
   </div>
@@ -219,8 +216,7 @@ tbody tr:hover td{filter:brightness(.97);}
   </div>
   <div class="card g1" style="margin-top:13px">
     <div class="ct">Daily ticket sales — D-(today+30) to D-(today-30)
-      <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026
-      <span class="yl-l" style="background:var(--y25)"></span>2025 (same DTF)</span>
+      <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>2026 <span class="yl-l" style="background:var(--y25)"></span>2025 (same DTF)</span>
     </div>
     <canvas id="c-daily-60" height="130"></canvas>
   </div>
@@ -241,6 +237,8 @@ tbody tr:hover td{filter:brightness(.97);}
     <div class="card"><div class="ct">Cumul. tickets — Saturday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sat" height="170"></canvas></div>
     <div class="card"><div class="ct">Cumul. tickets — Sunday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-sun" height="170"></canvas></div>
     <div class="card"><div class="ct">Cumul. tickets — Monday <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-mon" height="170"></canvas></div>
+  </div>
+  <div class="card g1"><div class="ct">Cumulative — Combi (all days) <span class="yl"><span class="yl-l" style="background:var(--y26)"></span>26 <span class="yl-l" style="background:var(--y25)"></span>25</span></div><canvas id="c-cum-combi" height="170"></canvas></div>
   </div>
   <div class="card g1"><div class="ct">Tickets by country — top 10 (2026, % of total)</div><canvas id="c-country" height="120"></canvas></div>
 </div>
@@ -375,7 +373,6 @@ function dStr(a,b){if(!b||!a)return'—';const d=(a/b-1)*100;return(d>=0?'+':'')
 function dCl(a,b){return(+a)>=(+b)?'pos':'neg';}
 function pO(a,b){if(!b)return'—';return((a/b)*100).toFixed(1)+'%';}
 function bar(p,col='#d97706'){const w=Math.min(100,Math.max(0,p||0));return`<span class="bw"><span class="bbg"><span class="bf" style="width:${w.toFixed(0)}%;background:${col}"></span></span>${w.toFixed(0)}%</span>`;}
-function attBar(att,ref){if(!ref)return'—';const p=(att/ref*100);const cl=p>=100?'#15803d':'#1d4ed8';return`<span style="color:${cl};font-weight:600">${p.toFixed(1)}%</span>`;}
 function cs(arr){let s=0;return arr.map(v=>{s+=v;return s;});}
 function minDTF(data){return Math.min(...data.map(r=>r.dtf));}
 function DTFS(max=185){const a=[];for(let d=max;d>=0;d--)a.push(d);return a;}
@@ -409,7 +406,6 @@ function lDS(lbl,data,col,bg){return{label:lbl,data,borderColor:col,backgroundCo
 function fmtDate(raw){if(!raw)return'?';if(raw.includes('-')&&raw.length>=10)return raw.substring(8,10)+'/'+raw.substring(5,7)+'/'+raw.substring(2,4);return raw.substring(0,8);}
 
 let CI={};
-let CHART_DAILY60=null;
 function mk(id,type,labels,datasets,opts={}){
   const el=document.getElementById(id);if(!el)return;
   if(CI[id])CI[id].destroy();
@@ -447,7 +443,7 @@ function bOv(){
     {l:'2025 same period',v:N(tt25w),s:dStr(tt26,tt25w)+' vs 2026',c:Y25},
     {l:'2025 full season',v:N(tt25f),s:pO(tt26,tt25f)+' reached',c:Y25},
     {l:'Net revenue — 2026',v:EU(nt26),s:'after fees & VAT',c:Y26},
-    {l:'Guest tickets total',v:N((GUESTS['Saturday']||0)+(GUESTS['Sunday']||0)+(GUESTS['Monday (Public holiday)']||0)+(GUESTS['Combi (Saturday, Sunday, Monday)']||0)),s:`${GUESTS['Saturday']||0} day + ${GUESTS['Combi (Saturday, Sunday, Monday)']||0} combi guests`,c:'#6d28d9'},
+    {l:'Guest Combi',v:N(GUESTS['Combi (Saturday, Sunday, Monday)']),s:'added to each day att.',c:'#a78bfa'},
   ].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
 
   const DAYS=[
@@ -456,7 +452,6 @@ function bOv(){
     {l:'Monday',k:'Monday (Public holiday)',k25:'Monday (Public holiday)',c:'#e06b42'},
   ];
   const CERA_ROWS=[
-    {l:'Fri – CERA',k:'Friday - CERA',c:'#c4b5fd'},
     {l:'Sat – CERA',k:'Saturday - CERA',c:'#93c5fd'},
     {l:'Sun – CERA',k:'Sunday - CERA',c:'#86efac'},
     {l:'Mon – CERA',k:'Monday (Public holiday) - CERA',c:'#fbb26a'},
@@ -471,7 +466,7 @@ function bOv(){
     <th class="t26">2026 now</th><th class="t25">2025 @D-${minD}</th><th>Δ</th><th class="t25">2025 Final</th><th>vs Final</th>
     <th>Capacity</th><th>% filled</th><th>Left</th>
     <th>Wave</th><th class="t26">Sold</th><th>Quota</th><th>% quota</th>
-    <th style="background:var(--c-att);white-space:normal;min-width:52px">Paid<br>tickets</th><th style="background:var(--c-att);white-space:normal;min-width:52px">Guest<br>tickets</th><th style="background:var(--c-att);white-space:normal;min-width:56px">No-show<br>(6%)</th><th style="background:var(--c-att);white-space:normal;min-width:56px">Att. est.<br>2026</th><th class="t25" style="background:var(--c-att);white-space:normal;min-width:56px">Att. 2025<br>Final</th><th style="background:var(--c-att);white-space:normal;min-width:52px">Δ 2026 vs<br>2025 Final</th>
+    
   </tr></thead><tbody>`;
 
   let totCap=0,totAtt26=0,totAtt25=0;
@@ -483,12 +478,7 @@ function bOv(){
     const f25=(F25[d.k25]||0);
     const cap=DCAP[d.l]||4240;
     const cera=(T26[d.k+' - CERA']||{t:0}).t;
-    const g26day=GUESTS[d.k]||500;
-    const g26combi=GUESTS['Combi (Saturday, Sunday, Monday)']||200;
-    const g26=g26day+g26combi;
-    const paidTix=t26day+cera+combi;
-    const noshow=Math.round((paidTix+g26)*NO_SHOW);
-    const att=(paidTix+g26)-noshow;
+    const att=Math.round((t26day+cera+combi)*(1-NO_SHOW));
     const a25=ATT25[d.k]||0;
     const wave=CW(d.k);
     const wq=wave&&WAVE_CFG[d.k]?WAVE_CFG[d.k][wave]||0:0;
@@ -508,14 +498,7 @@ function bOv(){
       <td class="t26" style="background:var(--c-wave)">${ws?N(ws):'—'}</td>
       <td style="background:var(--c-wave)">${wq?N(wq):'—'}</td>
       <td style="background:var(--c-wave)">${ws&&wq?bar(ws/wq*100,Y26):'—'}</td>
-      <td class="t26" style="background:var(--c-att)">${N(paidTix)}</td>
-      <td style="background:var(--c-att)">${N(g26)}</td>
-      <td style="background:var(--c-att);color:var(--neg)">−${N(noshow)}</td>
-      <td class="t26" style="background:var(--c-att);font-weight:700">${N(att)}</td>
-      <td class="t25" style="background:var(--c-att)">${N(a25)}</td>
-      <td style="background:var(--c-att)">${a25?attBar(att,a25):'—'}</td>
-    </tr>`;
-  });
+      <td class="t26" style="background:var(--c-att)">  });
 
   CERA_ROWS.forEach(d=>{
     const t26c=(T26[d.k]||{t:0}).t;
@@ -539,7 +522,7 @@ function bOv(){
       <td class="t26" style="background:var(--c-wave)">${wsC?N(wsC):'—'}</td>
       <td style="background:var(--c-wave)">${wqC?N(wqC):'—'}</td>
       <td style="background:var(--c-wave)">${wsC&&wqC?bar(wsC/wqC*100,Y26):'—'}</td>
-      <td style="background:var(--c-att)" colspan="4">—</td>
+  
     </tr>`;
   });
 
@@ -552,7 +535,7 @@ function bOv(){
     <td style="color:var(--mu)">—</td>
     <td style="background:var(--c-cap)" colspan="3">—</td>
     <td style="background:var(--c-wave)" colspan="4">—</td>
-    <td style="background:var(--c-att)" colspan="4">—</td>
+
   </tr>`;
 
   const combiT=(T26[combiKey]||{t:0}).t;
@@ -574,7 +557,6 @@ function bOv(){
     <td class="t26" style="background:var(--c-wave)">${combiWs?N(combiWs):'—'}</td>
     <td style="background:var(--c-wave)">${combiWq?N(combiWq):'—'}</td>
     <td style="background:var(--c-wave)">${combiWs&&combiWq?bar(combiWs/combiWq*100,Y26):'—'}</td>
-    <td style="background:var(--c-att)" colspan="3">included in day totals above</td>
   </tr>`;
 
   rows+=`<tr class="tot-row">
@@ -584,41 +566,55 @@ function bOv(){
     <td class="t25">${N(tt25f)}</td><td>${pO(tt26,tt25f)}</td>
     <td>${N(totCap)}</td><td>${bar(tt26/totCap*100,'#15803d')}</td><td>${N(totCap-tt26)}</td>
     <td>—</td><td>—</td><td>—</td><td>—</td>
-    <td class="t26">${N(totAtt26)}</td><td class="t25">${N(totAtt25)}</td><td>${totAtt25?bar(totAtt26/totAtt25*100,'#6d28d9'):'—'}</td>
+    
   </tr>`;
 
   rows+='</tbody>';
   document.getElementById('tbl-master').innerHTML=rows;
 
-  const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10).reverse(); // oldest left, newest right
+  // Standalone attendance table
+  const attRows=DAYS.map(d=>{
+    const t26d=(T26[d.k]||{t:0}).t;
+    const ceraD=(T26[d.k+' - CERA']||{t:0}).t;
+    const combiD=(T26[combiKey]||{t:0}).t;
+    const gDay=GUESTS[d.k]||500;
+    const gCombi=GUESTS[combiKey]||200;
+    const paid=t26d+ceraD+combiD;
+    const guests=gDay+gCombi;
+    const ns=Math.round((paid+guests)*NO_SHOW);
+    const attEst=(paid+guests)-ns;
+    const a25=ATT25[d.k]||0;
+    return`<tr>
+      <td><span class="dot" style="background:${d.c}"></span><strong>${d.l}</strong></td>
+      <td class="t26">${N(paid)}</td>
+      <td>${N(guests)}</td>
+      <td style="color:var(--neg)">−${N(ns)}</td>
+      <td class="t26" style="font-weight:700">${N(attEst)}</td>
+      <td class="t25">${a25?N(a25):'—'}</td>
+      <td>${a25?attBar(attEst,a25):'—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tbl-att').innerHTML=`<thead><tr style="background:rgba(109,40,217,.06)">
+    <th>Day</th>
+    <th style="background:rgba(109,40,217,.08)">Paid tickets</th>
+    <th style="background:rgba(109,40,217,.08)">Guest tickets</th>
+    <th style="background:rgba(109,40,217,.08)">No-show (6%)</th>
+    <th style="background:rgba(109,40,217,.12);font-weight:700">Att. est. 2026</th>
+    <th style="background:rgba(109,40,217,.06)">Att. 2025 Final</th>
+    <th style="background:rgba(109,40,217,.06)">Δ vs 2025</th>
+  </tr></thead><tbody>${attRows}</tbody>`;
+
+  const d10=Object.keys(DTF26).map(Number).sort((a,b)=>a-b).slice(0,10).reverse();
   const latestDateByDtf={};
   D26.forEach(r=>{if(!latestDateByDtf[r.dtf])latestDateByDtf[r.dtf]=r.date;});
-  const l10=d10.map(d=>{let dt=latestDateByDtf[d]||'';if(/^\d{4}-\d{2}-\d{2}/.test(dt)){const[y,m,dd]=dt.slice(0,10).split('-');dt=`${dd}/${m}/${y.slice(2)}`;}else if(/^\d{2}\/\d{2}\/\d{4}$/.test(dt)){dt=dt.slice(0,6)+dt.slice(8);}return`${dt}\n(D-${d})`;});
-  const tK=DAYS.map(d=>d.k).concat(CERA_ROWS.map(r=>r.k));
-  const tC=DAYS.map(d=>d.c).concat(CERA_ROWS.map(r=>r.c));
-  const tL=DAYS.map(d=>d.l).concat(CERA_ROWS.map(r=>r.l));
-  const d10totals=d10.map(d=>tK.reduce((s,k)=>s+(DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),0));
-  const trend25d10=d10.map(d=>DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null);
-  const d10plugin={id:'d10labels',afterDatasetsDraw(chart){
-    const{ctx,data}=chart;ctx.save();
-    let lastBarIdx=-1;data.datasets.forEach((ds,i)=>{if(ds.stack==='s')lastBarIdx=i;});
-    if(lastBarIdx>=0){
-      const meta=chart.getDatasetMeta(lastBarIdx);
-      ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.fillStyle='#44403c';
-      meta.data.forEach((bar,i)=>{const v=d10totals[i];if(v>0)ctx.fillText(N(v),bar.x,bar.y-8);});
-    }
-    const li=data.datasets.findIndex(ds=>ds.type==='line');
-    if(li>=0){
-      const lm=chart.getDatasetMeta(li);
-      ctx.font='10px JetBrains Mono,monospace';ctx.fillStyle='#2563eb';ctx.textAlign='center';
-      lm.data.forEach((pt,i)=>{const v=trend25d10[i];if(v!=null&&v>0)ctx.fillText(N(v),pt.x,pt.y-10);});
-    }
-    ctx.restore();
-  }};
-  mk('c-d10','bar',l10,[
-    ...tK.map((k,i)=>({label:tL[i],data:d10.map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s',order:2})),
-    {label:'2025 same DTF',data:trend25d10,type:'line',borderColor:'#2563eb',backgroundColor:'transparent',borderWidth:2,pointRadius:4,pointBackgroundColor:'#2563eb',fill:false,order:1}
-  ],{scales:{x:{stacked:true},y:{stacked:true,grace:'15%'}},plugins:{legend:{position:'top',labels:{boxWidth:10}}},extraPlugins:[d10plugin]});
+  const l10=d10.map(d=>{let dt=latestDateByDtf[d]||'';if(/^\d{4}-\d{2}-\d{2}/.test(dt)){const[y,m,dd]=dt.slice(0,10).split('-');dt=`${dd}/${m}/${y.slice(2)}`;}else if(/^\d{2}\/\d{2}\/\d{4}$/.test(dt)){dt=dt.slice(0,6)+dt.slice(8);}return`${dt} (D-${d})`;}).reverse();
+  const tK=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)','Saturday - CERA','Sunday - CERA','Monday (Public holiday) - CERA'];
+  const tL=['Saturday','Sunday','Monday','Combi','Sat CERA','Sun CERA','Mon CERA'];
+  const tC=['#6b9ef5','#3db870','#e06b42','#f5c842','#93c5fd','#86efac','#fbb26a'];
+  const d10totals=d10.map(d=>DTF26[d]?Object.values(DTF26[d]).reduce((s,v)=>s+v.t,0):0).reverse();
+  const d10plugin={id:'d10totals',afterDatasetsDraw(chart){const{ctx}=chart;ctx.save();ctx.font='bold 10px Sora,sans-serif';ctx.textAlign='center';ctx.fillStyle='#44403c';const meta=chart.getDatasetMeta(chart.data.datasets.length-1);meta.data.forEach((bar,i)=>{const v=d10totals[i];if(v>0)ctx.fillText(N(v),bar.x,bar.y-8);});ctx.restore();}};
+  mk('c-d10','bar',l10,tK.map((k,i)=>({label:tL[i],data:d10.slice().reverse().map(d=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),backgroundColor:tC[i],stack:'s'})),{scales:{x:{stacked:true},y:{stacked:true}},plugins:{legend:{position:'top',labels:{boxWidth:10}}},extraPlugins:[d10plugin]});
+
   const d10rows=d10.slice().reverse().map((d,idx)=>{
     const vals=tK.map(k=>DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0);
     const tot=vals.reduce((s,v)=>s+v,0);
@@ -649,8 +645,7 @@ function bTrends(){
     lDS('2026',nE26(cs(tA(DTF26,dtfs)),dtfs),Y26,Y26b),
     lDS('2025',nE(cs(tA(DTF25,dtfs))),Y25,Y25b)
   ],{plugins:{legend:{position:'top'}}});
-  ['sat','sun','mon'].forEach((s,i)=>{
-    const k=['Saturday','Sunday','Monday (Public holiday)'][i];
+  [['sat','Saturday'],['sun','Sunday'],['mon','Monday (Public holiday)'],['combi','Combi (Saturday, Sunday, Monday)']].forEach(([s,k])=>{
     mk('c-cum-'+s,'line',lbl,[
       lDS('2026 (incl.CERA)',nE26(cs(combArr(DTF26,k,dtfs)),dtfs),Y26,Y26b),
       lDS('2025 (incl.CERA)',nE(cs(combArr(DTF25,k,dtfs))),Y25,Y25b)
@@ -829,6 +824,15 @@ function ST(n,el){
   document.getElementById('s-'+n).classList.add('on');el.classList.add('on');
 }
 
+let CHART_DAILY60=null;
+
+function attBar(att,ref){
+  if(!ref)return'—';
+  const p=(att/ref*100);
+  const cl=p>=100?'#15803d':'#1d4ed8';
+  return`<span style="color:${cl};font-weight:600">${p.toFixed(1)}%</span>`;
+}
+
 Chart.register({id:'todayLine60',afterDraw(chart){
   if(chart.canvas.id!=='c-daily-60')return;
   const{ctx,chartArea:{top,bottom},scales:{x}}=chart;if(!x)return;
@@ -841,6 +845,7 @@ Chart.register({id:'todayLine60',afterDraw(chart){
   ctx.font='bold 9px Sora,sans-serif';ctx.textAlign='center';ctx.fillText('TODAY',xp,top-2);
   ctx.restore();
 }});
+
 function bDaily60(){
   const tdtf=minDTF(D26);const dwin=[];
   for(let d=tdtf+30;d>=tdtf-30;d--)dwin.push(d);
@@ -862,6 +867,34 @@ function bDaily60(){
       scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{maxTicksLimit:12,font:{size:9}}},
               y:{grid:{color:'rgba(0,0,0,.04)'},beginAtZero:true}}}});
   }
+}
+
+
+function loadGuests(){
+  const saved=localStorage.getItem('jm_guests');
+  if(saved){try{const g=JSON.parse(saved);
+    GUESTS['Saturday']=g.sat||500;GUESTS['Sunday']=g.sun||500;
+    GUESTS['Monday (Public holiday)']=g.mon||500;
+    GUESTS['Combi (Saturday, Sunday, Monday)']=g.combi||200;
+  }catch(e){}}
+  const map={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
+  Object.entries(map).forEach(([id,k])=>{const el=document.getElementById('g-'+id);if(el)el.value=GUESTS[k];});
+}
+function saveGuests(){
+  const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
+  GUESTS['Saturday']=get('sat');GUESTS['Sunday']=get('sun');
+  GUESTS['Monday (Public holiday)']=get('mon');
+  GUESTS['Combi (Saturday, Sunday, Monday)']=get('combi');
+  localStorage.setItem('jm_guests',JSON.stringify({sat:get('sat'),sun:get('sun'),mon:get('mon'),combi:get('combi')}));
+  const ok=document.getElementById('guest-ok');
+  if(ok){ok.textContent='Saved ✓';setTimeout(()=>ok.textContent='',3000);}
+  bOv();
+}
+function showSharedSnippet(){
+  const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
+  const sat=get('sat'),sun=get('sun'),mon=get('mon'),combi=get('combi');
+  const s="let GUESTS={'Saturday':"+sat+",'Sunday':"+sun+",'Monday (Public holiday)':"+mon+",'Combi (Saturday, Sunday, Monday)':"+combi+"};";
+  prompt('Copy & ask Claude to update the GUESTS variable in the HTML so all users share these defaults:',s);
 }
 function buildAll(){bOv();bDaily60();bDetail();bTrends();bRev();bWav();}
 
@@ -932,55 +965,6 @@ function bDetail(){
 
 // On load: fetch live quotas/capacity from API first, then build
 // Falls back to embedded data immediately if API is unavailable
-
-function loadGuests(){
-  // URL params override localStorage (allows sharing guest config via link)
-  const urlP=new URLSearchParams(window.location.search);
-  const urlGuests={sat:urlP.get('gsat'),sun:urlP.get('gsun'),mon:urlP.get('gmon'),combi:urlP.get('gcombi')};
-  const hasUrl=Object.values(urlGuests).some(v=>v!=null);
-  if(hasUrl){
-    GUESTS['Saturday']=parseInt(urlGuests.sat)||500;
-    GUESTS['Sunday']=parseInt(urlGuests.sun)||500;
-    GUESTS['Monday (Public holiday)']=parseInt(urlGuests.mon)||500;
-    GUESTS['Combi (Saturday, Sunday, Monday)']=parseInt(urlGuests.combi)||200;
-    const map2={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
-    Object.entries(map2).forEach(([id,k])=>{const el=document.getElementById('g-'+id);if(el)el.value=GUESTS[k];});
-    return;
-  }
-  const saved=localStorage.getItem('jm_guests');
-  if(saved){try{const g=JSON.parse(saved);
-    GUESTS['Saturday']=g.sat||500;GUESTS['Sunday']=g.sun||500;
-    GUESTS['Monday (Public holiday)']=g.mon||500;GUESTS['Combi (Saturday, Sunday, Monday)']=g.combi||200;
-  }catch(e){}}
-  const map={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
-  Object.entries(map).forEach(([id,k])=>{const el=document.getElementById('g-'+id);if(el)el.value=GUESTS[k];});
-}
-function copyShareLink(){
-  const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
-  const url=new URL(window.location.href);
-  url.searchParams.set('gsat',get('sat'));
-  url.searchParams.set('gsun',get('sun'));
-  url.searchParams.set('gmon',get('mon'));
-  url.searchParams.set('gcombi',get('combi'));
-  navigator.clipboard.writeText(url.toString()).then(()=>{
-    const ok=document.getElementById('guest-ok');
-    if(ok){ok.textContent='Link copied! ✓';setTimeout(()=>ok.textContent='',3000);}
-  }).catch(()=>{
-    const ok=document.getElementById('guest-ok');
-    if(ok){ok.textContent='Copy failed — see console';setTimeout(()=>ok.textContent='',3000);}
-    console.log('Share URL:',url.toString());
-  });
-}
-function saveGuests(){
-  const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
-  GUESTS['Saturday']=get('sat');GUESTS['Sunday']=get('sun');
-  GUESTS['Monday (Public holiday)']=get('mon');GUESTS['Combi (Saturday, Sunday, Monday)']=get('combi');
-  localStorage.setItem('jm_guests',JSON.stringify({sat:get('sat'),sun:get('sun'),mon:get('mon'),combi:get('combi')}));
-  const ok=document.getElementById('guest-ok');
-  if(ok){ok.textContent='Saved ✓';setTimeout(()=>ok.textContent='',3000);}
-  bOv();
-}
-
 async function init(){
   loadGuests();
   loadData(E26,E25);
