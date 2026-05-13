@@ -350,6 +350,7 @@ const WAVE_ORDER=['Presale','Early Bird','Regular','Final Wave','Cera - Early Bi
 const NO_SHOW=0.06;
 const ATT25={'Saturday':2550,'Sunday':2510,'Monday (Public holiday)':2755};
 const F25={'Saturday':1272,'Sunday':1164,'Monday (Public holiday)':1270,
+  'Friday':476,'Friday - CERA':79,
   'Combi (Friday, Saturday, Sunday, Monday)':440,'Saturday - CERA':356,
   'Sunday - CERA':253,'Monday (Public holiday) - CERA':200};
 
@@ -473,18 +474,20 @@ function updateGuestActuals(){
 }
 
 function bOv(){
-  const tt26=Object.values(T26).reduce((s,v)=>s+v.t,0);
+  const SHOWN_KEYS=['Saturday','Sunday','Monday (Public holiday)','Combi (Saturday, Sunday, Monday)',
+    'Friday','Saturday - CERA','Sunday - CERA','Monday (Public holiday) - CERA','Friday - CERA'];
+  const tt26=SHOWN_KEYS.reduce((s,k)=>s+(T26[k]?.t||0),0);
   const gr26=Object.values(T26).reduce((s,v)=>s+v.r,0);
   const nt26=netRev(gr26,tt26,2026);
   const minD=minDTF(D26);
-  let t25w={};D25.forEach(r=>{if(r.dtf>=minD){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});
-  const tt25w=Object.values(t25w).reduce((s,v)=>s+v,0);
-  const tt25f=Object.values(F25).reduce((s,v)=>s+v,0);
+  let t25w={};D25.forEach(r=>{if(r.dtf>=minD&&r.pos!=='Guestlist'){const k=tKey(r);if(!t25w[k])t25w[k]=0;t25w[k]+=r.tickets;}});
+  const tt25w=SHOWN_KEYS.reduce((s,k)=>s+(t25w[k]||0),0);
+  const tt25f=SHOWN_KEYS.reduce((s,k)=>s+(F25[k]||0),0);
 
   document.getElementById('krow-ov').innerHTML=[
-    {l:'Total tickets — 2026',v:N(tt26),s:'all types combined',c:Y26},
-    {l:'2025 same period',v:N(tt25w),s:dStr(tt26,tt25w)+' vs 2026',c:Y25},
-    {l:'2025 full season',v:N(tt25f),s:pO(tt26,tt25f)+' reached',c:Y25},
+    {l:'Total tickets — 2026',v:N(tt26),s:'excl. guestlist tickets',c:Y26},
+    {l:'2025 same period',v:N(tt25w),s:dStr(tt26,tt25w)+' vs 2026 · excl. guestlist',c:Y25},
+    {l:'2025 full season',v:N(tt25f),s:pO(tt26,tt25f)+' reached · excl. guestlist',c:Y25},
     {l:'Net revenue — 2026',v:EU(nt26),s:'after fees & VAT',c:Y26},
     {l:'Guest tickets total',v:N((GUESTS['Saturday']||0)+(GUESTS['Sunday']||0)+(GUESTS['Monday (Public holiday)']||0)+(GUESTS['Combi (Saturday, Sunday, Monday)']||0)),s:`${GUESTS['Saturday']||0} day + ${GUESTS['Combi (Saturday, Sunday, Monday)']||0} combi guests`,c:'#6d28d9'},
   ].map(k=>`<div class="kpi" style="--kc:${k.c}"><div class="klbl">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
@@ -502,8 +505,10 @@ function bOv(){
   ];
   const combiKey='Combi (Saturday, Sunday, Monday)';
   const combi25Key='Combi (Friday, Saturday, Sunday, Monday)';
-  const FRI25_TOTAL=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday')s+=r.tickets;});return s;})();
-  const FRI25_SAME=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.dtf>=minD)s+=r.tickets;});return s;})();
+  const FRI25_TOTAL=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.pos!=='CERA SHOP')s+=r.tickets;});return s;})();
+  const FRI25_SAME=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.pos!=='CERA SHOP'&&r.dtf>=minD)s+=r.tickets;});return s;})();
+  const FRICERA25_TOTAL=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.pos==='CERA SHOP')s+=r.tickets;});return s;})();
+  const FRICERA25_SAME=(()=>{let s=0;D25.forEach(r=>{if(r.title==='Friday'&&r.pos==='CERA SHOP'&&r.dtf>=minD)s+=r.tickets;});return s;})();
 
   let rows = `<thead><tr>
     <th>Day</th>
