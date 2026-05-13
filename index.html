@@ -222,6 +222,29 @@ tbody tr:hover td{filter:brightness(.97);}
       </div>
     </div>
   </div>
+    <div class="guest-entry" style="margin-top:8px">
+      <h4>🎟 Capacities — edit &amp; save</h4>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:10px">
+        <thead><tr>
+          <th style="text-align:left;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Day</th>
+          <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Capacity</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#6b9ef5"></span>Saturday</td>
+              <td style="padding:5px 8px;text-align:right"><input type="number" id="cap-sat" min="0" value="2800" style="width:90px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td></tr>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#3db870"></span>Sunday</td>
+              <td style="padding:5px 8px;text-align:right"><input type="number" id="cap-sun" min="0" value="2500" style="width:90px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td></tr>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#e06b42"></span>Monday</td>
+              <td style="padding:5px 8px;text-align:right"><input type="number" id="cap-mon" min="0" value="2550" style="width:90px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td></tr>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#f5c842"></span>Combi</td>
+              <td style="padding:5px 8px;text-align:right"><input type="number" id="cap-combi" min="0" value="690" style="width:90px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="guest-save-btn" onclick="saveCaps()">Save capacities</button>
+        <span class="guest-save-ok" id="cap-ok"></span>
+      </div>
+    </div>
 
   <div class="g2">
     <div class="card"><div class="ct">Past 10 days — tickets by type (2026)</div><canvas id="c-d10" height="170"></canvas></div>
@@ -454,6 +477,33 @@ function setFresh(){
 }
 
 // ── OVERVIEW ─────────────────────────────────
+function loadCaps(){
+  const saved=localStorage.getItem('jm_caps');
+  if(saved){try{const g=JSON.parse(saved);
+    if(g.sat) TYPE_CAP['Saturday']=g.sat;
+    if(g.sun) TYPE_CAP['Sunday']=g.sun;
+    if(g.mon) TYPE_CAP['Monday (Public holiday)']=g.mon;
+    if(g.combi) TYPE_CAP['Combi (Saturday, Sunday, Monday)']=g.combi;
+    // Also update DCAP
+    if(g.sat) DCAP.Saturday=g.sat;
+    if(g.sun) DCAP.Sunday=g.sun;
+    if(g.mon) DCAP.Monday=g.mon;
+  }catch(e){}}
+  const map={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
+  const dcapMap={sat:'Saturday',sun:'Sunday',mon:'Monday',combi:null};
+  Object.entries(map).forEach(([id,k])=>{const el=document.getElementById('cap-'+id);if(el)el.value=TYPE_CAP[k]||'';});
+}
+function saveCaps(){
+  const get=id=>parseInt(document.getElementById('cap-'+id)?.value)||0;
+  const sat=get('sat'),sun=get('sun'),mon=get('mon'),combi=get('combi');
+  TYPE_CAP['Saturday']=sat;TYPE_CAP['Sunday']=sun;
+  TYPE_CAP['Monday (Public holiday)']=mon;TYPE_CAP['Combi (Saturday, Sunday, Monday)']=combi;
+  DCAP.Saturday=sat;DCAP.Sunday=sun;DCAP.Monday=mon;
+  localStorage.setItem('jm_caps',JSON.stringify({sat,sun,mon,combi}));
+  const ok=document.getElementById('cap-ok');
+  if(ok){ok.textContent='Saved ✓';setTimeout(()=>ok.textContent='',3000);}
+  bOv();
+}
 function updateGuestActuals(){
   const glKeys={
     sat:'Guest - Saturday',
@@ -1071,6 +1121,7 @@ function saveGuests(){
 
 async function init(){
   loadGuests();
+  loadCaps();
   loadData(E26,E25);
   setFresh();
   if(API){
