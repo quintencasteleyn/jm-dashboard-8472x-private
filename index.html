@@ -402,7 +402,13 @@ function netRev(g,t,yr){return g-g*0.02-(yr===2025?t*0.45:0)-g*0.06;}
 function capFor(k){if(TYPE_CAP[k]!=null)return TYPE_CAP[k];const cfg=WAVE_CFG[k]||{};return Object.values(cfg).reduce((s,v)=>s+(+v||0),0);}
 function waveSoldFor(k,wave){return D26.filter(x=>tKey(x)===k&&x.subtitle===wave).reduce((s,x)=>s+x.tickets,0);}
 function applyApiConfig(j){
-  if(j.capacity){DCAP={Saturday:j.capacity.Saturday||DCAP.Saturday,Sunday:j.capacity.Sunday||DCAP.Sunday,Monday:j.capacity.Monday||DCAP.Monday};}
+  if(j.capacity){
+    DCAP={Saturday:j.capacity.Saturday||DCAP.Saturday,Sunday:j.capacity.Sunday||DCAP.Sunday,Monday:j.capacity.Monday||DCAP.Monday};
+    // Also update TYPE_CAP so capFor() and the capacity column both reflect live values
+    if(j.capacity.Saturday) TYPE_CAP['Saturday']=j.capacity.Saturday;
+    if(j.capacity.Sunday)   TYPE_CAP['Sunday']=j.capacity.Sunday;
+    if(j.capacity.Monday)   TYPE_CAP['Monday (Public holiday)']=j.capacity.Monday;
+  }
   if(j.guests25){DGUESTS25={Saturday:j.guests25.Saturday||DGUESTS25.Saturday,Sunday:j.guests25.Sunday||DGUESTS25.Sunday,Monday:j.guests25.Monday||DGUESTS25.Monday,Combi:j.guests25.Combi||DGUESTS25.Combi};}
   if(j.guests26){GUESTS={'Saturday':j.guests26.Saturday||GUESTS['Saturday'],'Sunday':j.guests26.Sunday||GUESTS['Sunday'],'Monday (Public holiday)':j.guests26.Monday||GUESTS['Monday (Public holiday)'],'Combi (Saturday, Sunday, Monday)':j.guests26.Combi||GUESTS['Combi (Saturday, Sunday, Monday)']};}
   if(j.typeCaps){TYPE_CAP={...TYPE_CAP,...j.typeCaps};}
