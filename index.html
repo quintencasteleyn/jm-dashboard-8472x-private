@@ -676,9 +676,28 @@ function bOv(){
   const latestDateByDtf={};
   D26.forEach(r=>{if(!latestDateByDtf[r.dtf])latestDateByDtf[r.dtf]=r.date;});
   const l10=d10.map(d=>{let dt=latestDateByDtf[d]||'';if(/^\d{4}-\d{2}-\d{2}/.test(dt)){const[y,m,dd]=dt.slice(0,10).split('-');dt=`${dd}/${m}/${y.slice(2)}`;}else if(/^\d{2}\/\d{2}\/\d{4}$/.test(dt)){dt=dt.slice(0,6)+dt.slice(8);}return`${dt}\n(D-${d})`;});
-  const tK=DAYS.map(d=>d.k).concat(CERA_ROWS.map(r=>r.k));
-  const tC=DAYS.map(d=>d.c).concat(CERA_ROWS.map(r=>r.c));
-  const tL=DAYS.map(d=>d.l).concat(CERA_ROWS.map(r=>r.l));
+  // D10 chart ticket types — includes kids splits and combi
+  const tK=[
+    'Saturday','Saturday (Kids)',
+    'Sunday','Sunday (Kids)',
+    'Monday (Public holiday)','Monday (Public holiday) (Kids)',
+    'Combi (Saturday, Sunday, Monday)',
+    'Saturday - CERA','Sunday - CERA','Monday (Public holiday) - CERA','Friday - CERA'
+  ];
+  const tC=[
+    '#6b9ef5','#bfdbfe',
+    '#3db870','#86efac',
+    '#e06b42','#fbb26a',
+    '#f5c842',
+    '#93c5fd','#a7f3d0','#fbb26a','#c4b5fd'
+  ];
+  const tL=[
+    'Saturday','Sat (Kids)',
+    'Sunday','Sun (Kids)',
+    'Monday','Mon (Kids)',
+    'Combi',
+    'Sat–CERA','Sun–CERA','Mon–CERA','Fri–CERA'
+  ];
   const d10totals=d10.map(d=>tK.reduce((s,k)=>s+(DTF26[d]&&DTF26[d][k]?DTF26[d][k].t:0),0));
   const trend25d10=d10.map(d=>DTF25[d]?Object.values(DTF25[d]).reduce((s,v)=>s+(v.t||0),0):null);
   const d10plugin={id:'d10labels',afterDatasetsDraw(chart){
