@@ -204,17 +204,35 @@ tbody tr:hover td{filter:brightness(.97);}
       <table style="width:100%;border-collapse:collapse">
         <thead><tr>
           <th style="text-align:left;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Day</th>
-          <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Actual guestlist</th>
+          <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Target</th>
+          <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Actual</th>
+          <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Δ</th>
         </tr></thead>
         <tbody>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#6b9ef5"></span>Saturday</td>
-              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-sat">—</td></tr>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#3db870"></span>Sunday</td>
-              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-sun">—</td></tr>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#e06b42"></span>Monday</td>
-              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-mon">—</td></tr>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#f5c842"></span>Combi</td>
-              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-combi">—</td></tr>
+          <tr>
+            <td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#6b9ef5"></span>Saturday</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu)">350</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-sat">—</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600" id="gl-dlt-sat">—</td>
+          </tr>
+          <tr>
+            <td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#3db870"></span>Sunday</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu)">400</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-sun">—</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600" id="gl-dlt-sun">—</td>
+          </tr>
+          <tr>
+            <td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#e06b42"></span>Monday</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu)">400</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-mon">—</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600" id="gl-dlt-mon">—</td>
+          </tr>
+          <tr>
+            <td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#f5c842"></span>Combi</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu)">150</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-combi">—</td>
+            <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600" id="gl-dlt-combi">—</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -453,10 +471,18 @@ function updateGuestActuals(){
     mon:'Guest - Monday (Public holiday)',
     combi:'Guest - Combi (Saturday, Sunday, Monday)'
   };
+  const targets={sat:350,sun:400,mon:400,combi:150};
   ['sat','sun','mon','combi'].forEach(id=>{
     const act=(T26[glKeys[id]]?.t)||0;
-    const el=document.getElementById('gl-act-'+id);
-    if(el)el.textContent=N(act);
+    const tgt=targets[id];
+    const delta=act-tgt;
+    const actEl=document.getElementById('gl-act-'+id);
+    const dltEl=document.getElementById('gl-dlt-'+id);
+    if(actEl)actEl.textContent=N(act);
+    if(dltEl){
+      const col=delta>=0?'var(--pos)':'var(--neg)';
+      dltEl.innerHTML='<span style="color:'+col+'">'+(delta>=0?'+':'')+N(delta)+'</span>';
+    }
   });
 }
 
@@ -517,8 +543,9 @@ function bOv(){
     const f25=(F25[d.k25]||0);
     const cap=DCAP[d.l]||3050;
     const cera=(T26[d.k+' - CERA']||{t:0}).t;
-    const g26day=(T26['Guest - '+d.k]?.t||0);
-    const g26combi=(T26['Guest - Combi (Saturday, Sunday, Monday)']?.t||0);
+    const _glTgt={'Saturday':350,'Sunday':400,'Monday (Public holiday)':400};
+    const g26day=_glTgt[d.k]||0;
+    const g26combi=150;
     const g26=g26day+g26combi;
     const paidTix=t26day+cera+combi;
     const noshow=Math.round((paidTix+g26)*NO_SHOW);
@@ -637,8 +664,9 @@ function bOv(){
       const _t26d=(T26[d.k]||{t:0}).t;
       const _cera=(T26[d.k+' - CERA']||{t:0}).t;
       const _combi=(T26[combiKey]||{t:0}).t;
-      const _gDay=(T26['Guest - '+d.k]?.t||0);
-      const _gCombi=(T26['Guest - '+combiKey]?.t||0);
+      const _glTargets={'Saturday':350,'Sunday':400,'Monday (Public holiday)':400};
+      const _gDay=_glTargets[d.k]||0;
+      const _gCombi=150;
       const _paid=_t26d+_cera+_combi;
       const _guests=_gDay+_gCombi;
       const _ns=Math.round((_paid+_guests)*NO_SHOW);
