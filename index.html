@@ -200,26 +200,23 @@ tbody tr:hover td{filter:brightness(.97);}
       <table id="tbl-att-standalone" style="width:100%;border-collapse:collapse"></table>
     </div>
     <div class="guest-entry">
-      <h4>✏️ Guest counts</h4>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:10px">
+      <h4>🎟 Actual guestlist tickets — from live data</h4>
+      <table style="width:100%;border-collapse:collapse">
         <thead><tr>
           <th style="text-align:left;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Day</th>
-          <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Estimate</th>
           <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">Actual guestlist</th>
-          <th style="text-align:right;padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--sf2)">% of estimate</th>
         </tr></thead>
         <tbody>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#6b9ef5"></span>Saturday</td><td style="padding:5px 8px;text-align:right"><input type="number" id="g-sat" min="0" value="500" style="width:80px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" class="t26" id="gl-act-sat">—</td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" id="gl-pct-sat">—</td></tr>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#3db870"></span>Sunday</td><td style="padding:5px 8px;text-align:right"><input type="number" id="g-sun" min="0" value="500" style="width:80px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" class="t26" id="gl-act-sun">—</td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" id="gl-pct-sun">—</td></tr>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#e06b42"></span>Monday</td><td style="padding:5px 8px;text-align:right"><input type="number" id="g-mon" min="0" value="500" style="width:80px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" class="t26" id="gl-act-mon">—</td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" id="gl-pct-mon">—</td></tr>
-          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#f5c842"></span>Combi</td><td style="padding:5px 8px;text-align:right"><input type="number" id="g-combi" min="0" value="200" style="width:80px;padding:4px 6px;border:1px solid var(--bd);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right"></td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" class="t26" id="gl-act-combi">—</td><td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px" id="gl-pct-combi">—</td></tr>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#6b9ef5"></span>Saturday</td>
+              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-sat">—</td></tr>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#3db870"></span>Sunday</td>
+              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-sun">—</td></tr>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#e06b42"></span>Monday</td>
+              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-mon">—</td></tr>
+          <tr><td style="padding:5px 8px;font-size:11px"><span class="dot" style="background:#f5c842"></span>Combi</td>
+              <td style="padding:5px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--y26)" id="gl-act-combi">—</td></tr>
         </tbody>
       </table>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-        <button class="guest-save-btn" onclick="saveGuests()">Save guests</button>
-        <button class="guest-save-btn" style="background:#4b5563" onclick="copyShareLink()" title="Colleagues can open this URL to load your guest counts">🔗 Copy share link</button>
-        <span class="guest-save-ok" id="guest-ok"></span>
-      </div>
     </div>
   </div>
   <div class="g2">
@@ -456,21 +453,10 @@ function updateGuestActuals(){
     mon:'Guest - Monday (Public holiday)',
     combi:'Guest - Combi (Saturday, Sunday, Monday)'
   };
-  const actuals={};
-  D26.forEach(r=>{const k=r.title;if(k&&k.startsWith('Guest - '))actuals[k]=(actuals[k]||0)+r.tickets;});
   ['sat','sun','mon','combi'].forEach(id=>{
-    const act=actuals[glKeys[id]]||0;
-    const est=parseInt(document.getElementById('g-'+id)?.value)||0;
-    const actEl=document.getElementById('gl-act-'+id);
-    const pctEl=document.getElementById('gl-pct-'+id);
-    if(actEl)actEl.textContent=N(act);
-    if(pctEl){
-      if(est>0){
-        const pct=(act/est*100).toFixed(1);
-        const col=act>=est?'#15803d':'#b45309';
-        pctEl.innerHTML='<span style="color:'+col+';font-weight:600">'+pct+'%</span>';
-      }else{pctEl.textContent='—';}
-    }
+    const act=(T26[glKeys[id]]?.t)||0;
+    const el=document.getElementById('gl-act-'+id);
+    if(el)el.textContent=N(act);
   });
 }
 
@@ -531,8 +517,8 @@ function bOv(){
     const f25=(F25[d.k25]||0);
     const cap=DCAP[d.l]||3050;
     const cera=(T26[d.k+' - CERA']||{t:0}).t;
-    const g26day=GUESTS[d.k]||500;
-    const g26combi=GUESTS['Combi (Saturday, Sunday, Monday)']||200;
+    const g26day=(T26['Guest - '+d.k]?.t||0);
+    const g26combi=(T26['Guest - Combi (Saturday, Sunday, Monday)']?.t||0);
     const g26=g26day+g26combi;
     const paidTix=t26day+cera+combi;
     const noshow=Math.round((paidTix+g26)*NO_SHOW);
@@ -651,8 +637,8 @@ function bOv(){
       const _t26d=(T26[d.k]||{t:0}).t;
       const _cera=(T26[d.k+' - CERA']||{t:0}).t;
       const _combi=(T26[combiKey]||{t:0}).t;
-      const _gDay=GUESTS[d.k]||500;
-      const _gCombi=GUESTS[combiKey]||200;
+      const _gDay=(T26['Guest - '+d.k]?.t||0);
+      const _gCombi=(T26['Guest - '+combiKey]?.t||0);
       const _paid=_t26d+_cera+_combi;
       const _guests=_gDay+_gCombi;
       const _ns=Math.round((_paid+_guests)*NO_SHOW);
@@ -1034,57 +1020,11 @@ function bDetail(){
 // On load: fetch live quotas/capacity from API first, then build
 // Falls back to embedded data immediately if API is unavailable
 
-function loadGuests(){
-  // URL params override localStorage (allows sharing guest config via link)
-  const urlP=new URLSearchParams(window.location.search);
-  const urlGuests={sat:urlP.get('gsat'),sun:urlP.get('gsun'),mon:urlP.get('gmon'),combi:urlP.get('gcombi')};
-  const hasUrl=Object.values(urlGuests).some(v=>v!=null);
-  if(hasUrl){
-    GUESTS['Saturday']=parseInt(urlGuests.sat)||500;
-    GUESTS['Sunday']=parseInt(urlGuests.sun)||500;
-    GUESTS['Monday (Public holiday)']=parseInt(urlGuests.mon)||500;
-    GUESTS['Combi (Saturday, Sunday, Monday)']=parseInt(urlGuests.combi)||200;
-    const map2={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
-    Object.entries(map2).forEach(([id,k])=>{const el=document.getElementById('g-'+id);if(el)el.value=GUESTS[k];});
-    return;
-  }
-  const saved=localStorage.getItem('jm_guests');
-  if(saved){try{const g=JSON.parse(saved);
-    GUESTS['Saturday']=g.sat||500;GUESTS['Sunday']=g.sun||500;
-    GUESTS['Monday (Public holiday)']=g.mon||500;GUESTS['Combi (Saturday, Sunday, Monday)']=g.combi||200;
-  }catch(e){}}
-  const map={sat:'Saturday',sun:'Sunday',mon:'Monday (Public holiday)',combi:'Combi (Saturday, Sunday, Monday)'};
-  Object.entries(map).forEach(([id,k])=>{const el=document.getElementById('g-'+id);if(el)el.value=GUESTS[k];});
-}
-function copyShareLink(){
-  const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
-  const url=new URL(window.location.href);
-  url.searchParams.set('gsat',get('sat'));
-  url.searchParams.set('gsun',get('sun'));
-  url.searchParams.set('gmon',get('mon'));
-  url.searchParams.set('gcombi',get('combi'));
-  navigator.clipboard.writeText(url.toString()).then(()=>{
-    const ok=document.getElementById('guest-ok');
-    if(ok){ok.textContent='Link copied! ✓';setTimeout(()=>ok.textContent='',3000);}
-  }).catch(()=>{
-    const ok=document.getElementById('guest-ok');
-    if(ok){ok.textContent='Copy failed — see console';setTimeout(()=>ok.textContent='',3000);}
-    console.log('Share URL:',url.toString());
-  });
-}
-function saveGuests(){
-  const get=id=>parseInt(document.getElementById('g-'+id)?.value)||0;
-  GUESTS['Saturday']=get('sat');GUESTS['Sunday']=get('sun');
-  GUESTS['Monday (Public holiday)']=get('mon');GUESTS['Combi (Saturday, Sunday, Monday)']=get('combi');
-  localStorage.setItem('jm_guests',JSON.stringify({sat:get('sat'),sun:get('sun'),mon:get('mon'),combi:get('combi')}));
-  const ok=document.getElementById('guest-ok');
-  if(ok){ok.textContent='Saved ✓';setTimeout(()=>ok.textContent='',3000);}
-  bOv();
-  updateGuestActuals();
-}
+
+
+
 
 async function init(){
-  loadGuests();
     loadData(E26,E25);
   setFresh();
   if(API){
