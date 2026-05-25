@@ -672,17 +672,23 @@ function bOv(){
       const _ns=Math.round((_paid+_guests)*NO_SHOW);
       const _att=(_paid+_guests)-_ns;
       const _a25=ATT25[d.k]||0;
+      const _weez={'Saturday':3520,'Sunday':2180};
+      const _weezAct=_weez[d.k]||null;
+      const _weezPct=_weezAct?(((_att-_weezAct)/_weezAct)*100):null;
+      const _weezCol=_weezPct!==null?(_weezPct>=0?'var(--pos)':'var(--neg)'):'var(--mu)';
       return`<tr>
         <td style='padding:5px 10px;font-size:12px;font-weight:500'><span class='dot' style='background:${d.c}'></span>${d.l}</td>
         <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;background:var(--c-att)'>${N(_paid)}</td>
         <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;background:var(--c-att)'>${N(_guests)}</td>
         <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;background:var(--c-att);color:var(--neg)'>−${N(_ns)}</td>
         <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;background:var(--c-att);color:#5b21b6'>${N(_att)}</td>
+        <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;font-weight:600;background:var(--c-att)'>${_weezAct!==null?N(_weezAct):'—'}</td>
+        <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;font-weight:600;background:var(--c-att);color:${_weezCol}'>${_weezPct!==null?(_weezPct>=0?'+':'')+_weezPct.toFixed(1)+'%':'—'}</td>
         <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;background:var(--c-att);color:var(--y25)'>${_a25?N(_a25):'—'}</td>
         <td style='padding:5px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-size:11px;background:var(--c-att)'>${_a25?attBar(_att,_a25):'—'}</td>
       </tr>`;
     }).join('');
-    _attEl.innerHTML=`<thead><tr style='background:rgba(109,40,217,.07)'><th style='padding:5px 10px;text-align:left;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6'>Day</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att)'>Paid tickets</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att)'>Guest tickets</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att)'>No-show (6%)</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;font-weight:700;background:var(--c-att)'>Att. est. 2026</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:var(--y25);background:var(--c-att)'>Att. 2025 Final</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:var(--mu);background:var(--c-att)'>Δ</th></tr></thead><tbody>${_rows}</tbody>`;
+    _attEl.innerHTML=`<thead><tr style='background:rgba(109,40,217,.07)'><th style='padding:5px 10px;text-align:left;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6'>Day</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att)'>Paid tickets</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att)'>Guest tickets</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att)'>No-show (6%)</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;font-weight:700;background:var(--c-att)'>Att. est. 2026</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att);white-space:nowrap'>ATT Weez<br>actual 2026</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:#5b21b6;background:var(--c-att)'>Δ vs Weez</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:var(--y25);background:var(--c-att)'>Att. 2025 Final</th><th style='padding:5px 10px;text-align:right;font-size:10px;font-family:JetBrains Mono,monospace;color:var(--mu);background:var(--c-att)'>Δ</th></tr></thead><tbody>${_rows}</tbody>`;
   }
   updateGuestActuals();
 
