@@ -929,7 +929,7 @@ async function liveRefresh(){
       tickets:parseInt(r['Number of tickets sold']||r.tickets)||0,
       price:parseFloat(String(r['Total price']||r.price||0).replace(',','.'))||0,
       country:r['Country']||r.country||''
-    })).filter(r=>r.tickets>0&&r.dtf>=0);
+    })).filter(r=>r.tickets>0);
     if(fresh.length) loadData(fresh,D25);
     setFresh();buildAll();
     btn.textContent='✓ Updated!';setTimeout(()=>{btn.textContent='↻ Refresh';btn.disabled=false;},2500);
@@ -1072,7 +1072,7 @@ async function init(){
               tickets:parseInt(r['Number of tickets sold']||r.tickets)||0,
               price:parseFloat(String(r['Total price']||r.price||0).replace(',','.'))||0,
               country:r['Country']||r.country||''
-            })).filter(r=>r.tickets>0&&r.dtf>=0);
+            })).filter(r=>r.tickets>0);
             loadData(fresh,D25);
             setFresh();
           }
